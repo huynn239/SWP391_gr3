@@ -231,6 +231,9 @@ a#scrollUp i{
   padding-right: 15px;
   padding-left: 15px;
 }
+.footer__top section{
+    background:  black;
+}
 
 .mainmenu ul li:first-child{
   padding-left: 0px;
@@ -365,7 +368,7 @@ ul.sub-menu {
 }
 
 .companyinfo h2  span{
-  color:#FE980F;
+  color:#000;
 }
 
 .companyinfo p {
@@ -403,7 +406,7 @@ ul.sub-menu {
   top: 0;
   width: 100%;
   height: 61px;
-  background: #FE980F;
+  background: #000;
   border-radius: 3px;
   color: #FFF;
   font-size: 20px;
@@ -499,7 +502,7 @@ ul.sub-menu {
 
 .single-widget ul li a:hover{
 	background:none;
-	color:#FE980F;
+	color:#000;
 }
 
 
@@ -516,7 +519,7 @@ ul.sub-menu {
 
 
 .searchform button {
-  background: #FE980F;
+  background: #000;
   border: medium none;
   border-radius: 0;
   margin-left: -5px;
@@ -531,7 +534,7 @@ ul.sub-menu {
 
 .searchform  button:hover, 
 .searchform  button:focus{
-	background-color:#FE980F;
+	background-color:#000;
 }
 
 .searchform p {

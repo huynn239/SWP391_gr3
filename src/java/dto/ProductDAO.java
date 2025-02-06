@@ -29,7 +29,7 @@ public class ProductDAO extends DBContext {
                     rs.getDouble("Price"),
                     rs.getString("Details"),
                     rs.getInt("Quantity"),
-                    rs.getString("BranchID"),
+                    rs.getString("BrandID"),
                     rs.getInt("TypeID")
             );
             productList.add(product);
