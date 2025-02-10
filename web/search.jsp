@@ -7,7 +7,7 @@
 <jsp:useBean id="categoryDAO" class="dto.CategoryDAO" scope="session"/>
 
 <%
-    List<Product> products = productDAO.getAllProducts();
+    List<Product> products = (List<Product>) request.getAttribute("list");
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
 %>
@@ -187,39 +187,18 @@
         <section>
             <div class="container">
                 <div class="row">
-
-                    <!-- SIDEBAR (CATEGORY + BRAND) -->
-                    <div class="col-sm-3">
-                        <div class="left-sidebar">
-
-                            <!-- CATEGORY PANEL -->
-                            <h2>Categories</h2>
-                            <div class="panel-group category-products">
-                                <% for (Category category : categories) { %>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a href="productlist?category=<%= category.getId() %>">
-                                                <%= category.getName() %>
-                                            </a>
-                                        </h4>
-                                    </div>
-                                </div>
-                                <% } %>
-                            </div>
-                        </div>
-                    </div>
-
-                    \
-                    <!-- FEATURED PRODUCTS -->
-                    <div class="col-sm-9 padding-right">
+                    <div class="col-lg-12 padding-right">
                         <div class="features_items">
-                            <h2 class="title text-center">Featured Products</h2>
+                            <h2 class="title text-center">Result</h2>
                             <div class="row">
                                 <%
-                                    int count = 0; // Đếm số sản phẩm hiển thị
-                                    for (Product product : products) { 
-                                        if (count >= 6) break; // Dừng vòng lặp nếu đã đủ 6 sản phẩm
+                                    List<Product> list = (List<Product>) request.getAttribute("list");
+                                    int currentPage = (int) request.getAttribute("currentPage");
+                                    int totalPages = (int) request.getAttribute("totalPages");
+                                    String searchQuery = (String) request.getAttribute("searchQuery");
+                            
+                                    if (list != null && !list.isEmpty()) {
+                                        for (Product product : list) {
                                 %>
                                 <div class="col-sm-4">
                                     <div class="product-image-wrapper">
@@ -228,15 +207,11 @@
                                                 <img src="<%= product.getImage() %>" alt="<%= product.getName() %>"/>
                                                 <h2>$<%= product.getPrice() %></h2>
                                                 <p><%= product.getName() %></p>
-
-                                                <!-- Nút "Add to cart" -->
                                                 <a href="#" class="btn btn-default add-to-cart" 
                                                    onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;">
                                                     <i class="fa fa-shopping-cart"></i> Add to cart
                                                 </a>
                                             </div>
-
-                                            <!-- Modal -->
                                             <div id="cartModal" class="modal">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
@@ -299,94 +274,38 @@
                                     </div>
                                 </div>
                                 <%
-                                        count++; // Tăng biến đếm
-                                    } 
+                                        } 
+                                    } else {
                                 %>
-                            </div>
-
-                        </div>
-                    </div>
-
-
-                </div>
-
-
-                <!-- SECTION FOR 2 SELECTED BRANDS -->
-
-                <div class="category-tab">
-                    <h2 class="title text-center">Shop By Brands</h2>
-
-                    <div class="col-sm-12">
-                        <ul class="nav nav-tabs">
-                            <% 
-                                int brandCount = 0; // Khai báo biến một lần duy nhất
-                                for (Brand brand : brands) { 
-                                    if (brandCount >= 2) break; // Chỉ lấy 2 thương hiệu đầu tiên
-                            %>
-                            <li class="<%= (brandCount == 0) ? "active" : "" %>">
-                                <a href="#brand<%= brand.getId() %>" data-toggle="tab"><%= brand.getName() %></a>
-                            </li>
-                            <% brandCount++; } %>
-                        </ul>
-                    </div>
-
-                    <div class="tab-content">
-                        <% 
-                            brandCount = 0; // Reset lại biến để dùng tiếp
-                            for (Brand brand : brands) { 
-                                if (brandCount >= 2) break; // Chỉ lấy 2 thương hiệu đầu tiên
-                        %>
-                        <div class="tab-pane fade <%= (brandCount == 0) ? "active in" : "" %>" id="brand<%= brand.getId() %>">
-                            <div class="row">
+                                <p class="text-center">No products found.</p>
                                 <%
-                                    int productCount = 0;
-                                    for (Product product : products) { 
-                                        if (product.getBrandId().trim().equalsIgnoreCase(brand.getId().trim())) { 
-                                            if (productCount >= 4) break; // Chỉ hiển thị 4 sản phẩm của mỗi brand
-                                            productCount++;
+                                    }
                                 %>
-                                <div class="col-sm-3">
-                                    <div class="product-image-wrapper">
-                                        <div class="single-products">
-                                            <div class="productinfo text-center">
-                                                <img src="<%= product.getImage() %>" alt="<%= product.getName() %>" class="img-responsive"/>
-                                                <h2>$<%= product.getPrice() %></h2>
-                                                <p><%= product.getName() %></p>
-                                                <a href="productDetail.jsp?id=<%= product.getId() %>" class="btn btn-default add-to-cart">
-                                                    <i class="fa fa-shopping-cart"></i> Add to cart
-                                                </a>
-
-                                            </div>
-                                        </div>
-                                        <div class="choose">
-                                            <ul class="nav nav-pills nav-justified">
-                                                <li><a href="#"><i class="fa fa-plus-square"></i> Add to wishlist</a></li>
-                                                <li><a href="#"><i class="fa fa-plus-square"></i> Add to compare</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% 
-                                        }
-                                    } 
-                                %>
-
-                                <!-- Nếu không có sản phẩm nào, hiển thị thông báo -->
-                                <% if (productCount == 0) { %>
-                                <div class="col-sm-12">
-                                    <p class="text-center">No products available for <%= brand.getName() %></p>
-                                </div>
-                                <% } %>
                             </div>
+
+                            <!-- Phân trang -->
+                            <nav aria-label="Page navigation" class="text-center">
+                                <ul class="pagination">
+                                    <% if (currentPage > 1) { %>
+                                    <li><a href="productsearch?query=<%= searchQuery %>&page=<%= currentPage - 1 %>">Previous</a></li>
+                                        <% } %>
+
+                                    <% for (int i = 1; i <= totalPages; i++) { %>
+                                    <li class="<%= (i == currentPage) ? "active" : "" %>">
+                                        <a href="productsearch?query=<%= searchQuery %>&page=<%= i %>"><%= i %></a>
+                                    </li>
+                                    <% } %>
+
+                                    <% if (currentPage < totalPages) { %>
+                                    <li><a href="productsearch?query=<%= searchQuery %>&page=<%= currentPage + 1 %>">Next</a></li>
+                                        <% } %>
+                                </ul>
+                            </nav>
+
                         </div>
-                        <% brandCount++; } %>
                     </div>
                 </div>
-
-
-
-
-
+            </div>
         </section>
 
         <footer id="footer"><!--Footer-->

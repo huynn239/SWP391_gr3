@@ -4,16 +4,40 @@
         <servlet-name>NewServlet</servlet-name>
         <servlet-class>controller.NewServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>productlist</servlet-name>
+        <servlet-class>controller.Productlist</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Productfilter</servlet-name>
+        <servlet-class>controller.Productfilter</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>Productsearch</servlet-name>
+        <servlet-class>controller.Productsearch</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>NewServlet</servlet-name>
         <url-pattern>/NewServlet</url-pattern>
     </servlet-mapping>
-     <servlet>
+    <servlet>
         <servlet-name>Homecontroller</servlet-name>
         <servlet-class>controller.Homecontroller</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>Homecontroller</servlet-name>
         <url-pattern>/home/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>productlist</servlet-name>
+        <url-pattern>/productlist</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Productfilter</servlet-name>
+        <url-pattern>/productfilter</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Productsearch</servlet-name>
+        <url-pattern>/productsearch</url-pattern>
     </servlet-mapping>
 </web-app>

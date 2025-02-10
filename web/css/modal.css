@@ -1,0 +1,96 @@
+/* Ẩn modal khi trang tải lên */
+.modal {
+    display: none; /* Đảm bảo modal không xuất hiện ngay khi load */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hộp thoại modal */
+.modal-dialog {
+    width: 400px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Nút đóng X */
+.close {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Nội dung modal */
+.modal-body {
+    padding: 20px;
+}
+
+.modal-body label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.modal-body select,
+.modal-body input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Chân modal (nút bấm) */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.modal-footer button {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Nút */
+.confirm {
+    background-color: #ff9800;
+    color: white;
+}
+
+.cancel {
+    background-color: #ccc;
+}
+
+.confirm:hover {
+    background-color: #e68900;
+}
+
+.cancel:hover {
+    background-color: #b3b3b3;
+}

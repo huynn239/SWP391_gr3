@@ -1,15 +1,22 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
-<%@ page import="model.Product, model.Brand, model.Category" %>
+<%@ page import="java.util.Arrays" %>
+<%@ page import="java.util.ArrayList" %>
+
+<%@ page import="model.Product, model.Brand, model.Category, model.Material" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
 <jsp:useBean id="categoryDAO" class="dto.CategoryDAO" scope="session"/>
+<jsp:useBean id="materialDAO" class="dto.MaterialDAO" scope="session"/>
 
 <%
-    List<Product> products = productDAO.getAllProducts();
+    String category = (String)request.getParameter("category");
+    List<Product> products = productDAO.getAllProductCat(category);
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
+    List<Material> materials = materialDAO.getAllMaterial();
+   
 %>
 
 <!DOCTYPE html>
@@ -25,7 +32,7 @@
         <link href="css/animate.css" rel="stylesheet">
         <link href="css/main.css" rel="stylesheet">
         <link href="css/responsive.css" rel="stylesheet">
-        <link href="css/modal.css" rel="stylesheet">
+
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
@@ -75,28 +82,23 @@
                                     <li class="menu-item">
                                         <a href="#">Product</a>
                                         <div class="sub-menu">
-                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
+                                            <div class="category-container"> 
                                                 <% int count1 = 0; %>
-                                                <% for (Category category : categories) { %>
-                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
+                                                <% for (Category cat : categories) { %>
+                                                <% if (count1 % 6 == 0) { %> 
                                                 <div class="category-column">
                                                     <% } %>
-                                                    <a href="productlist?category=<%= category.getId() %>">
-                                                        <%= category.getName() %>
+                                                    <a href="productlist?category=<%= cat.getId() %>">
+                                                        <%= cat.getName() %>
                                                     </a>
                                                     <% count1++; %>
                                                     <% if (count1 % 6 == 0 || count1 == categories.size()) { %>
-                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
+                                                </div> 
                                                 <% } %>
                                                 <% } %>
-                                            </div> <!-- Kết thúc category-container -->
+                                            </div> 
                                         </div>
                                     </li>
-
-
-
-
-
                                     <li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>
                                         <ul role="menu" class="sub-menu">
                                             <li><a href="blog.html">Blog List</a></li>
@@ -187,201 +189,130 @@
         <section>
             <div class="container">
                 <div class="row">
+                    <%
+    String categoryParam = request.getParameter("category");
+    if (categoryParam == null) {
+        categoryParam = "";
+    }
+                    %>
 
                     <!-- SIDEBAR (CATEGORY + BRAND) -->
                     <div class="col-sm-3">
                         <div class="left-sidebar">
 
-                            <!-- CATEGORY PANEL -->
-                            <h2>Categories</h2>
+                            <h2>Material</h2>
                             <div class="panel-group category-products">
-                                <% for (Category category : categories) { %>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a href="productlist?category=<%= category.getId() %>">
-                                                <%= category.getName() %>
-                                            </a>
-                                        </h4>
+                                <form id="filterForm" action="productfilter" method="GET">
+                                    <input type="hidden" name="category" value="<%= categoryParam %>">
+                                    <ul class="nav nav-pills nav-stacked">
+                                        <% for (Material mat : materials) { %>
+                                        <li>
+                                            <input type="checkbox" name="material" value="<%= mat.getMid() %>" 
+                                                   <%= request.getParameterValues("material") != null && 
+                         Arrays.asList(request.getParameterValues("material")).contains(String.valueOf(mat.getMid())) ? "checked" : "" %> 
+                                                   onchange="submitFilterForm()">
+                                            <%= mat.getMname() %>
+                                        </li>
+                                        <% } %>
+                                    </ul>
+                                    <br>
+                                    <h2>Brands</h2>
+                                    <div class="brands-name">
+                                        <ul class="nav nav-pills nav-stacked">
+                                            <% for (Brand brand : brands) { %>
+                                            <li>
+                                                <input type="checkbox" name="brand" value="<%= brand.getId() %>" 
+                                                       <%= request.getParameterValues("brand") != null && 
+                             Arrays.asList(request.getParameterValues("brand")).contains(brand.getId()) ? "checked" : "" %> 
+                                                       onchange="submitFilterForm()">
+                                                <%= brand.getName() %>
+                                            </li>
+                                            <% } %>
+                                        </ul>
                                     </div>
-                                </div>
-                                <% } %>
+                                </form>
                             </div>
                         </div>
                     </div>
 
-                    \
+                    <script>
+                        function submitFilterForm() {
+                            document.getElementById("filterForm").submit();
+                        }
+                    </script>
+
+
                     <!-- FEATURED PRODUCTS -->
                     <div class="col-sm-9 padding-right">
                         <div class="features_items">
                             <h2 class="title text-center">Featured Products</h2>
+                            <%
+    List<Product> filteredProducts = (List<Product>) request.getAttribute("filteredProducts");
+    if (filteredProducts == null) {
+        if (categoryParam != null) {
+            filteredProducts = productDAO.getAllProductCat(categoryParam);
+        } else {
+            filteredProducts = productDAO.getAllProducts();
+        }
+    }
+    if (filteredProducts == null) {
+        filteredProducts = new ArrayList<>();
+    }
+    int currentPage = (request.getAttribute("currentPage") != null) ? (int) request.getAttribute("currentPage") : 1;
+    int totalPages = (request.getAttribute("totalPages") != null) ? (int) request.getAttribute("totalPages") : 1;
+                            %>
                             <div class="row">
-                                <%
-                                    int count = 0; // Đếm số sản phẩm hiển thị
-                                    for (Product product : products) { 
-                                        if (count >= 6) break; // Dừng vòng lặp nếu đã đủ 6 sản phẩm
-                                %>
-                                <div class="col-sm-4">
-                                    <div class="product-image-wrapper">
-                                        <div class="single-products">
-                                            <div class="productinfo text-center">
-                                                <img src="<%= product.getImage() %>" alt="<%= product.getName() %>"/>
-                                                <h2>$<%= product.getPrice() %></h2>
-                                                <p><%= product.getName() %></p>
-
-                                                <!-- Nút "Add to cart" -->
-                                                <a href="#" class="btn btn-default add-to-cart" 
-                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;">
-                                                    <i class="fa fa-shopping-cart"></i> Add to cart
-                                                </a>
-                                            </div>
-
-                                            <!-- Modal -->
-                                            <div id="cartModal" class="modal">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h2 class="modal-title">Add to Cart</h2>
-                                                            <span class="close" onclick="closeCartModal()">&times;</span>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form action="order" method="post">
-                                                                <input type="hidden" id="productId" name="productId">
-
-                                                                <p><strong>Product:</strong> <span id="productName"></span></p>
-                                                                <p><strong>Price:</strong> $<span id="productPrice"></span></p>
-
-                                                                <!-- Chọn size dựa theo TypeId -->
-                                                                <%
-                                                                    int typeId = product.getTypeId();
-                                                                    if (typeId == 17) { 
-                                                                %>
-                                                                <label for="size">Size:</label>
-                                                                <select name="size" id="size">
-                                                                    <option value="39-42">39-42</option>
-                                                                    <option value="43-46">43-46</option>
-                                                                </select>
-                                                                <%
-                                                                    } else if (typeId >= 14 && typeId <= 16) {
-                                                                        // Không hiển thị size
-                                                                    } else { 
-                                                                %>
-                                                                <label for="size">Size:</label>
-                                                                <select name="size" id="size">
-                                                                    <option value="S">S</option>
-                                                                    <option value="M">M</option>
-                                                                    <option value="L">L</option>
-                                                                    <option value="XL">XL</option>
-                                                                </select>
-                                                                <%
-                                                                    }
-                                                                %>
-
-                                                                <label for="quantity">Quantity:</label>
-                                                                <input type="number" name="quantity" id="quantity" min="1" value="1">
-
-                                                                <div class="modal-footer">
-                                                                    <button type="submit" class="confirm">Confirm</button>
-                                                                    <button type="button" class="cancel" onclick="closeCartModal()">Cancel</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
+                                <div class="product-list">
+                                    <% for (Product p : filteredProducts) { %>
+                                    <div class="col-sm-4">
+                                        <div class="product-image-wrapper">
+                                            <div class="single-products">
+                                                <div class="productinfo text-center">
+                                                    <img src="<%= p.getImage() %>" alt="<%= p.getName() %>"/>
+                                                    <h2>$<%= p.getPrice() %></h2>
+                                                    <p><%= p.getName() %></p>
+                                                    <a href="productDetail?id=<%= p.getId() %>" class="btn btn-default add-to-cart">
+                                                        <i class="fa fa-shopping-cart"></i> Add to cart
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="choose">
-                                            <ul class="nav nav-pills nav-justified">
-                                                <li><a href="#"><i class="fa fa-plus-square"></i> Add to wishlist</a></li>
-                                                <li><a href="#"><i class="fa fa-plus-square"></i> Add to compare</a></li>
-                                            </ul>
-                                        </div>
                                     </div>
+                                    <% } %>
                                 </div>
-                                <%
-                                        count++; // Tăng biến đếm
-                                    } 
-                                %>
                             </div>
 
-                        </div>
-                    </div>
-
-
-                </div>
-
-
-                <!-- SECTION FOR 2 SELECTED BRANDS -->
-
-                <div class="category-tab">
-                    <h2 class="title text-center">Shop By Brands</h2>
-
-                    <div class="col-sm-12">
-                        <ul class="nav nav-tabs">
-                            <% 
-                                int brandCount = 0; // Khai báo biến một lần duy nhất
-                                for (Brand brand : brands) { 
-                                    if (brandCount >= 2) break; // Chỉ lấy 2 thương hiệu đầu tiên
+                            <!-- Phân trang -->
+                            <%
+  
+    String queryString = request.getQueryString(); // Lấy các tham số hiện tại trên URL
+    String baseUrl = "productfilter"; // Servlet xử lý lọc sản phẩm
+    String pageUrl = baseUrl + (queryString != null ? "?" + queryString.replaceAll("&?page=\\d+", "") : "?");
                             %>
-                            <li class="<%= (brandCount == 0) ? "active" : "" %>">
-                                <a href="#brand<%= brand.getId() %>" data-toggle="tab"><%= brand.getName() %></a>
-                            </li>
-                            <% brandCount++; } %>
-                        </ul>
-                    </div>
 
-                    <div class="tab-content">
-                        <% 
-                            brandCount = 0; // Reset lại biến để dùng tiếp
-                            for (Brand brand : brands) { 
-                                if (brandCount >= 2) break; // Chỉ lấy 2 thương hiệu đầu tiên
-                        %>
-                        <div class="tab-pane fade <%= (brandCount == 0) ? "active in" : "" %>" id="brand<%= brand.getId() %>">
-                            <div class="row">
-                                <%
-                                    int productCount = 0;
-                                    for (Product product : products) { 
-                                        if (product.getBrandId().trim().equalsIgnoreCase(brand.getId().trim())) { 
-                                            if (productCount >= 4) break; // Chỉ hiển thị 4 sản phẩm của mỗi brand
-                                            productCount++;
-                                %>
-                                <div class="col-sm-3">
-                                    <div class="product-image-wrapper">
-                                        <div class="single-products">
-                                            <div class="productinfo text-center">
-                                                <img src="<%= product.getImage() %>" alt="<%= product.getName() %>" class="img-responsive"/>
-                                                <h2>$<%= product.getPrice() %></h2>
-                                                <p><%= product.getName() %></p>
-                                                <a href="productDetail.jsp?id=<%= product.getId() %>" class="btn btn-default add-to-cart">
-                                                    <i class="fa fa-shopping-cart"></i> Add to cart
-                                                </a>
+                            <div class="pagination">
+                                <ul class="pagination">
+                                    <% if (currentPage > 1) { %>
+                                    <li><a href="<%= pageUrl %>&page=<%= currentPage - 1 %>">&laquo; Previous</a></li>
+                                        <% } %>
 
-                                            </div>
-                                        </div>
-                                        <div class="choose">
-                                            <ul class="nav nav-pills nav-justified">
-                                                <li><a href="#"><i class="fa fa-plus-square"></i> Add to wishlist</a></li>
-                                                <li><a href="#"><i class="fa fa-plus-square"></i> Add to compare</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <% 
-                                        }
-                                    } 
-                                %>
+                                    <% for (int i = 1; i <= totalPages; i++) { %>
+                                    <li class="<%= (i == currentPage) ? "active" : "" %>">
+                                        <a href="<%= pageUrl %>&page=<%= i %>"><%= i %></a>
+                                    </li>
+                                    <% } %>
 
-                                <!-- Nếu không có sản phẩm nào, hiển thị thông báo -->
-                                <% if (productCount == 0) { %>
-                                <div class="col-sm-12">
-                                    <p class="text-center">No products available for <%= brand.getName() %></p>
-                                </div>
-                                <% } %>
+                                    <% if (currentPage < totalPages) { %>
+                                    <li><a href="<%= pageUrl %>&page=<%= currentPage + 1 %>">Next &raquo;</a></li>
+                                        <% } %>
+                                </ul>
                             </div>
+
                         </div>
-                        <% brandCount++; } %>
                     </div>
-                </div>
+                </div>   
+            </div> 
+
 
 
 
@@ -544,24 +475,7 @@
                     </div>
                 </div>
             </div>
-            <script>
-                function openCartModal(id, name, price) {
-                    document.getElementById("productId").value = id;
-                    document.getElementById("productName").innerText = name;
-                    document.getElementById("productPrice").innerText = price;
 
-                    document.getElementById("cartModal").style.display = "flex";
-                }
-                function closeCartModal() {
-                    document.getElementById("cartModal").style.display = "none";
-                }
-                window.onclick = function (event) {
-                    let modal = document.getElementById("cartModal");
-                    if (event.target === modal) {
-                        closeCartModal();
-                    }
-                };
-            </script>
         </footer><!--/Footer-->
         <script src="js/jquery.js"></script>
         <script src="js/bootstrap.min.js"></script>
