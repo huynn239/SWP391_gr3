@@ -1,6 +1,6 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
-<%@ page import="model.Product, model.Brand, model.Category" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Account" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
@@ -10,6 +10,7 @@
     List<Product> products = productDAO.getAllProducts();
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
+    Account user = (Account) session.getAttribute("u");
 %>
 
 <!DOCTYPE html>
@@ -47,10 +48,10 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                    <li><a href="#"><i class="fa fa-user"></i> Account</a></li>
+                                    <li><a href="#"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getuName() : "Account"}</a></li>
                                     <li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
                                     <li><a href="#"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                                    <li><a href="#"><i class="fa fa-lock"></i> Login</a></li>
+                                    <li><a href="${not empty sessionScope.u? "logout" : "login.jsp"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -230,10 +231,14 @@
                                                 <p><%= product.getName() %></p>
 
                                                 <!-- Nút "Add to cart" -->
-                                                <a href="#" class="btn btn-default add-to-cart" 
-                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;">
+                                                <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
+                                                   class="btn btn-default add-to-cart"
+                                                   <% if (user != null) { %>
+                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;"
+                                                   <% } %>>
                                                     <i class="fa fa-shopping-cart"></i> Add to cart
                                                 </a>
+
                                             </div>
 
                                             <!-- Modal -->
@@ -247,25 +252,12 @@
                                                         <div class="modal-body">
                                                             <form action="order" method="post">
                                                                 <input type="hidden" id="productId" name="productId">
-
+                                                                <input type="hidden" name="price" value="<%= product.getPrice() %>">
                                                                 <p><strong>Product:</strong> <span id="productName"></span></p>
                                                                 <p><strong>Price:</strong> $<span id="productPrice"></span></p>
 
                                                                 <!-- Chọn size dựa theo TypeId -->
-                                                                <%
-                                                                    int typeId = product.getTypeId();
-                                                                    if (typeId == 17) { 
-                                                                %>
-                                                                <label for="size">Size:</label>
-                                                                <select name="size" id="size">
-                                                                    <option value="39-42">39-42</option>
-                                                                    <option value="43-46">43-46</option>
-                                                                </select>
-                                                                <%
-                                                                    } else if (typeId >= 14 && typeId <= 16) {
-                                                                        // Không hiển thị size
-                                                                    } else { 
-                                                                %>
+
                                                                 <label for="size">Size:</label>
                                                                 <select name="size" id="size">
                                                                     <option value="S">S</option>
@@ -273,10 +265,6 @@
                                                                     <option value="L">L</option>
                                                                     <option value="XL">XL</option>
                                                                 </select>
-                                                                <%
-                                                                    }
-                                                                %>
-
                                                                 <label for="quantity">Quantity:</label>
                                                                 <input type="number" name="quantity" id="quantity" min="1" value="1">
 
@@ -352,7 +340,11 @@
                                                 <img src="<%= product.getImage() %>" alt="<%= product.getName() %>" class="img-responsive"/>
                                                 <h2>$<%= product.getPrice() %></h2>
                                                 <p><%= product.getName() %></p>
-                                                <a href="productDetail.jsp?id=<%= product.getId() %>" class="btn btn-default add-to-cart">
+                                                <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
+                                                   class="btn btn-default add-to-cart"
+                                                   <% if (user != null) { %>
+                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;"
+                                                   <% } %>>
                                                     <i class="fa fa-shopping-cart"></i> Add to cart
                                                 </a>
 
@@ -382,13 +374,7 @@
                         <% brandCount++; } %>
                     </div>
                 </div>
-
-
-
-
-
         </section>
-
         <footer id="footer"><!--Footer-->
             <div class="footer-top">
                 <div class="container">
@@ -546,21 +532,28 @@
             </div>
             <script>
                 function openCartModal(id, name, price) {
+                    console.log("Opening Modal for Product:", id, name, price); // Debug để kiểm tra dữ liệu
                     document.getElementById("productId").value = id;
                     document.getElementById("productName").innerText = name;
                     document.getElementById("productPrice").innerText = price;
 
+                    document.querySelector("input[name='price']").value = price;
+
                     document.getElementById("cartModal").style.display = "flex";
                 }
+
                 function closeCartModal() {
                     document.getElementById("cartModal").style.display = "none";
                 }
+
+
                 window.onclick = function (event) {
                     let modal = document.getElementById("cartModal");
                     if (event.target === modal) {
                         closeCartModal();
                     }
                 };
+
             </script>
         </footer><!--/Footer-->
         <script src="js/jquery.js"></script>

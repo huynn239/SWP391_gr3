@@ -1,6 +1,6 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
-<%@ page import="model.Product, model.Brand, model.Category" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Account" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
@@ -10,6 +10,7 @@
     List<Product> products = (List<Product>) request.getAttribute("list");
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
+    Account user = (Account) session.getAttribute("u");
 %>
 
 <!DOCTYPE html>
@@ -207,10 +208,48 @@
                                                 <img src="<%= product.getImage() %>" alt="<%= product.getName() %>"/>
                                                 <h2>$<%= product.getPrice() %></h2>
                                                 <p><%= product.getName() %></p>
-                                                <a href="#" class="btn btn-default add-to-cart" 
-                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;">
+                                                <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
+                                                   class="btn btn-default add-to-cart"
+                                                   <% if (user != null) { %>
+                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;"
+                                                   <% } %>>
                                                     <i class="fa fa-shopping-cart"></i> Add to cart
                                                 </a>
+                                            </div>
+                                            <div id="cartModal" class="modal">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h2 class="modal-title">Add to Cart</h2>
+                                                            <span class="close" onclick="closeCartModal()">&times;</span>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form action="order" method="post">
+                                                                <input type="hidden" id="productId" name="productId">
+                                                                <input type="hidden" name="price" value="<%= product.getPrice() %>">
+                                                                <p><strong>Product:</strong> <span id="productName"></span></p>
+                                                                <p><strong>Price:</strong> $<span id="productPrice"></span></p>
+
+                                                                <!-- Chọn size dựa theo TypeId -->
+
+                                                                <label for="size">Size:</label>
+                                                                <select name="size" id="size">
+                                                                    <option value="S">S</option>
+                                                                    <option value="M">M</option>
+                                                                    <option value="L">L</option>
+                                                                    <option value="XL">XL</option>
+                                                                </select>
+                                                                <label for="quantity">Quantity:</label>
+                                                                <input type="number" name="quantity" id="quantity" min="1" value="1">
+
+                                                                <div class="modal-footer">
+                                                                    <button type="submit" class="confirm">Confirm</button>
+                                                                    <button type="button" class="cancel" onclick="closeCartModal()">Cancel</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div id="cartModal" class="modal">
                                                 <div class="modal-dialog">
@@ -465,21 +504,28 @@
             </div>
             <script>
                 function openCartModal(id, name, price) {
+                    console.log("Opening Modal for Product:", id, name, price); // Debug để kiểm tra dữ liệu
                     document.getElementById("productId").value = id;
                     document.getElementById("productName").innerText = name;
                     document.getElementById("productPrice").innerText = price;
 
+                    document.querySelector("input[name='price']").value = price;
+
                     document.getElementById("cartModal").style.display = "flex";
                 }
+
                 function closeCartModal() {
                     document.getElementById("cartModal").style.display = "none";
                 }
+
+
                 window.onclick = function (event) {
                     let modal = document.getElementById("cartModal");
                     if (event.target === modal) {
                         closeCartModal();
                     }
                 };
+
             </script>
         </footer><!--/Footer-->
         <script src="js/jquery.js"></script>

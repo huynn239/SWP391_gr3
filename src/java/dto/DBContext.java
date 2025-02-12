@@ -14,7 +14,6 @@ import java.sql.SQLException;
 
 public class DBContext {
 
-   
     protected Connection connection;
 
     {
@@ -32,5 +31,9 @@ public class DBContext {
 
     public static void main(String[] args) {
         System.out.println("Test Commit");
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

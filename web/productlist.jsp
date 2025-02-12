@@ -3,7 +3,7 @@
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.ArrayList" %>
 
-<%@ page import="model.Product, model.Brand, model.Category, model.Material" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Material,model.Account" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
@@ -12,11 +12,12 @@
 
 <%
     String category = (String)request.getParameter("category");
-    List<Product> products = productDAO.getAllProductCat(category);
+    int cate = Integer.parseInt(category);
+    List<Product> products = productDAO.getAllProductCat(cate);
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
     List<Material> materials = materialDAO.getAllMaterial();
-   
+    Account user = (Account) session.getAttribute("u");
 %>
 
 <!DOCTYPE html>
@@ -32,7 +33,7 @@
         <link href="css/animate.css" rel="stylesheet">
         <link href="css/main.css" rel="stylesheet">
         <link href="css/responsive.css" rel="stylesheet">
-
+        <link href="css/modal.css" rel="stylesheet">
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
@@ -250,7 +251,7 @@
     List<Product> filteredProducts = (List<Product>) request.getAttribute("filteredProducts");
     if (filteredProducts == null) {
         if (categoryParam != null) {
-            filteredProducts = productDAO.getAllProductCat(categoryParam);
+            filteredProducts = productDAO.getAllProductCat(cate);
         } else {
             filteredProducts = productDAO.getAllProducts();
         }
@@ -271,9 +272,48 @@
                                                     <img src="<%= p.getImage() %>" alt="<%= p.getName() %>"/>
                                                     <h2>$<%= p.getPrice() %></h2>
                                                     <p><%= p.getName() %></p>
-                                                    <a href="productDetail?id=<%= p.getId() %>" class="btn btn-default add-to-cart">
+                                                    <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
+                                                       class="btn btn-default add-to-cart"
+                                                       <% if (user != null) { %>
+                                                       onclick="openCartModal('<%= p.getId() %>', `<%= p.getName() %>`, '<%= p.getPrice() %>', '<%= p.getTypeId() %>'); return false;"
+                                                       <% } %>>
                                                         <i class="fa fa-shopping-cart"></i> Add to cart
                                                     </a>
+                                                </div>
+                                                <div id="cartModal" class="modal">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h2 class="modal-title">Add to Cart</h2>
+                                                                <span class="close" onclick="closeCartModal()">&times;</span>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form action="order" method="post">
+                                                                    <input type="hidden" id="productId" name="productId">
+                                                                    <input type="hidden" name="price" value="<%= p.getPrice() %>">
+                                                                    <p><strong>Product:</strong> <span id="productName"></span></p>
+                                                                    <p><strong>Price:</strong> $<span id="productPrice"></span></p>
+
+                                                                    <!-- Chọn size dựa theo TypeId -->
+
+                                                                    <label for="size">Size:</label>
+                                                                    <select name="size" id="size">
+                                                                        <option value="S">S</option>
+                                                                        <option value="M">M</option>
+                                                                        <option value="L">L</option>
+                                                                        <option value="XL">XL</option>
+                                                                    </select>
+                                                                    <label for="quantity">Quantity:</label>
+                                                                    <input type="number" name="quantity" id="quantity" min="1" value="1">
+
+                                                                    <div class="modal-footer">
+                                                                        <button type="submit" class="confirm">Confirm</button>
+                                                                        <button type="button" class="cancel" onclick="closeCartModal()">Cancel</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -281,6 +321,8 @@
                                     <% } %>
                                 </div>
                             </div>
+
+
 
                             <!-- Phân trang -->
                             <%
@@ -312,14 +354,32 @@
                     </div>
                 </div>   
             </div> 
-
-
-
-
-
-
         </section>
+        <script>
+            function openCartModal(id, name, price) {
+                console.log("Opening Modal for Product:", id, name, price); // Debug để kiểm tra dữ liệu
+                document.getElementById("productId").value = id;
+                document.getElementById("productName").innerText = name;
+                document.getElementById("productPrice").innerText = price;
 
+                document.querySelector("input[name='price']").value = price;
+
+                document.getElementById("cartModal").style.display = "flex";
+            }
+
+            function closeCartModal() {
+                document.getElementById("cartModal").style.display = "none";
+            }
+
+
+            window.onclick = function (event) {
+                let modal = document.getElementById("cartModal");
+                if (event.target === modal) {
+                    closeCartModal();
+                }
+            };
+
+        </script>
         <footer id="footer"><!--Footer-->
             <div class="footer-top">
                 <div class="container">

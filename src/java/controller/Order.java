@@ -4,22 +4,24 @@
  */
 package controller;
 
-import dto.ProductDAO;
+import dto.OrderDAO;
+import dto.OrderdetailDAO;
+import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.List;
-import model.Product;
+import jakarta.servlet.http.HttpSession;
+import model.Account;
+import model.Orderdetail;
 
 /**
  *
  * @author BAO CHAU
  */
-public class Productlist extends HttpServlet {
+public class Order extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -37,10 +39,10 @@ public class Productlist extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet productlist</title>");
+            out.println("<title>Servlet Order</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet productlist at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet Order at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -58,28 +60,7 @@ public class Productlist extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String category = request.getParameter("category");
-        List<Product> filteredProducts = new ArrayList<>();
-        ProductDAO pro = new ProductDAO();
-        int cate = Integer.parseInt(category);
-        filteredProducts = pro.getAllProductCat(cate);
-        int productsPerPage = 6;
-        int totalProducts = filteredProducts.size();
-        int totalPages = (int) Math.ceil((double) totalProducts / productsPerPage);
-        int currentPage = 1;
-        String pageParam = request.getParameter("page");
-        if (pageParam != null) {
-            currentPage = Integer.parseInt(pageParam);
-        }
-
-        int startIndex = (currentPage - 1) * productsPerPage;
-        int endIndex = Math.min(startIndex + productsPerPage, totalProducts);
-        List<Product> paginatedProducts = filteredProducts.subList(startIndex, endIndex);
-        request.setAttribute("filteredProducts", paginatedProducts);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("currentPage", currentPage);
-        request.setAttribute("category", category);
-        request.getRequestDispatcher("productlist.jsp").forward(request, response);
+        processRequest(request, response);
     }
 
     /**
@@ -91,8 +72,35 @@ public class Productlist extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // Lấy thông tin từ form
+        String productId = request.getParameter("productId");
+        String size = request.getParameter("size");
+        String quantityStr = request.getParameter("quantity");
+        String pricestr = request.getParameter("price");
+        int quantity = Integer.parseInt(quantityStr);
+        int productID = Integer.parseInt(productId);
+        double price = Double.parseDouble(pricestr);
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("u");
+        OrderDAO o = new OrderDAO();
+        OrderdetailDAO od = new OrderdetailDAO();
+        if (o.checkCreateNewOrder(user.getId())) {
+            o.insertOrder(user.getId());
+            int orderID = o.getorderID(user.getId());
+            od.insertOrderdetail(orderID, productID, quantity, size);
+            o.updateTotalAmount(orderID, price, quantity);
+        } else {
+            int orderID = o.getorderID(user.getId());
+            od.insertOrderdetail(orderID, productID, quantity, size);
+            o.updateTotalAmount(orderID, price, quantity);
+        }
+        // Lấy URL trang trước đó (Referer)
+        String referer = request.getHeader("referer");
+        if (referer == null || referer.trim().isEmpty()) {
+            referer = "home.jsp"; 
+        }
+        response.sendRedirect(referer);
 
     }
 

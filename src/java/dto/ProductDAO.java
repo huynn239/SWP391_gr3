@@ -21,7 +21,7 @@ public class ProductDAO extends DBContext {
     // Lấy danh sách sản phẩm từ database
     public List<Product> getAllProducts() {
         List<Product> productList = new ArrayList<>();
-        String sql = "Select * from product";
+        String sql = "Select * from Product order by ID DESC";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
@@ -32,11 +32,9 @@ public class ProductDAO extends DBContext {
                         rs.getInt("ID"),
                         rs.getString("Name"),
                         rs.getString("Image"),
-                        rs.getString("Size"),
                         rs.getInt("MaterialID"),
                         rs.getDouble("Price"),
                         rs.getString("Details"),
-                        rs.getInt("Quantity"),
                         rs.getString("BrandID"),
                         rs.getInt("TypeID")
                 );
@@ -55,15 +53,9 @@ public class ProductDAO extends DBContext {
         return productList;
     }
 
-    public List<Product> getAllProductCat(String cat) {
+    public List<Product> getAllProductCat(int cat) {
         List<Product> productList = new ArrayList<>();
-        String sql = "SELECT ID, Name, Image, Size, MaterialID, Price, Details, Quantity, BrandID, TypeID\n"
-                + "FROM (\n"
-                + "    SELECT *, ROW_NUMBER() OVER (PARTITION BY Name ORDER BY ID DESC) AS rn\n"
-                + "    FROM dbo.product\n"
-                + ") t\n"
-                + "WHERE rn = 1 and TypeID = " + cat + "\n"
-                + "ORDER BY ID DESC;";
+        String sql = "Select * from Product where TypeID = " + cat;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
@@ -74,11 +66,9 @@ public class ProductDAO extends DBContext {
                         rs.getInt("ID"),
                         rs.getString("Name"),
                         rs.getString("Image"),
-                        rs.getString("Size"),
                         rs.getInt("MaterialID"),
                         rs.getDouble("Price"),
                         rs.getString("Details"),
-                        rs.getInt("Quantity"),
                         rs.getString("BrandID"),
                         rs.getInt("TypeID")
                 );
@@ -99,7 +89,7 @@ public class ProductDAO extends DBContext {
 
     public static void main(String[] args) {
         ProductDAO list = new ProductDAO();
-        List<Product> a = list.getAllProductCat("17");
+        List<Product> a = list.getAllProductCat(1);
         for (Product product : a) {
             System.out.println("" + product.getName());
         }

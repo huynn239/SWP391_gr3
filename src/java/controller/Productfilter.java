@@ -65,9 +65,9 @@ public class Productfilter extends HttpServlet {
 
         List<Product> filteredProducts = new ArrayList<>();
         ProductDAO pro = new ProductDAO();
-
+        int cat = Integer.parseInt(categoryParam);
         if (categoryParam != null && !categoryParam.isEmpty()) {
-            filteredProducts = pro.getAllProductCat(categoryParam);
+            filteredProducts = pro.getAllProductCat(cat);
         } else {
             filteredProducts = pro.getAllProducts();
         }
@@ -130,7 +130,7 @@ public class Productfilter extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
     }
 
     /**
