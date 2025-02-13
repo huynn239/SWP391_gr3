@@ -15,10 +15,23 @@ public class Account {
     private String Password;
     private String Gender;
     private String Email;
+    private String Mobile;
+    private String uAddress;
     private int RoleID;
 
     public Account() {
     }
+    public Account(int id, String uName, String Username, String Password, String Gender, String Email, String Mobile, String uAddress, int RoleID) {
+    this.id = id;
+    this.uName = uName;
+    this.Username = Username;
+    this.Password = Password;
+    this.Gender = Gender;
+    this.Email = Email;
+    this.Mobile = Mobile;
+    this.uAddress = uAddress;
+    this.RoleID = RoleID;
+}
 
     public Account(int id, String uName, String Username, String Password, String Gender, String Email, int RoleID) {
         this.id = id;
@@ -77,7 +90,20 @@ public class Account {
     public void setEmail(String Email) {
         this.Email = Email;
     }
+    public String getMobile() {
+        return Mobile;
+    }
 
+    public void setMobile (String Mobile) {
+        this.Mobile = Mobile;
+    }
+    public String getuAddress() {
+        return uAddress;
+    }
+
+    public void setuAddress(String uAdress) {
+        this.uAddress = uAddress;
+    }
     public int getRoleID() {
         return RoleID;
     }
@@ -88,8 +114,10 @@ public class Account {
 
     @Override
     public String toString() {
-        return "Users{" + "id=" + id + ", uName=" + uName + ", Username=" + Username + ", Password=" + Password + ", Gender=" + Gender + ", Email=" + Email + ", RoleID=" + RoleID + '}';
+        return "Account{" + "id=" + id + ", uName=" + uName + ", Username=" + Username + ", Password=" + Password + ", Gender=" + Gender + ", Email=" + Email + ", Mobile=" + Mobile + ", uAddress=" + uAddress + ", RoleID=" + RoleID + '}';
     }
+
+     
     
     
     

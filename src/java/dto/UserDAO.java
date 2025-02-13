@@ -6,6 +6,8 @@ package dto;
 
 import model.Account;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO extends DBContext {
 
@@ -85,29 +87,144 @@ public class UserDAO extends DBContext {
     }
 
     public static void main(String[] args) {
-        UserDAO DAO = new UserDAO();
-
-        String username = "okok";
-        String email = "testuser@example.com";
-        String password = "password123";
-
-        // Kiểm tra xem tài khoản đã tồn tại hay chưa
-        Account acc = DAO.checkAccountExist(username);
-        if (acc != null) {
-            System.out.println("Account already exists: " + acc.getUsername());
-        } else {
-            System.out.println("Account does not exist. Proceeding with registration...");
-
-            // Gọi hàm register() để đăng ký tài khoản mới
-            DAO.register(username, email, password);
-
-            // Kiểm tra lại sau khi đăng ký
-            acc = DAO.checkAccountExist(username);
-            if (acc != null) {
-                System.out.println("Registration successful! New account created: " + acc.getUsername());
-            } else {
-                System.out.println("Registration failed.");
+//        UserDAO DAO = new UserDAO();
+//
+//        String username = "okok";
+//        String email = "testuser@example.com";
+//        String password = "password123";
+//
+//        // Kiểm tra xem tài khoản đã tồn tại hay chưa
+//        Account acc = DAO.checkAccountExist(username);
+//        if (acc != null) {
+//            System.out.println("Account already exists: " + acc.getUsername());
+//        } else {
+//            System.out.println("Account does not exist. Proceeding with registration...");
+//
+//            // Gọi hàm register() để đăng ký tài khoản mới
+//            DAO.register(username, email, password);
+//
+//            // Kiểm tra lại sau khi đăng ký
+//            acc = DAO.checkAccountExist(username);
+//            if (acc != null) {
+//                System.out.println("Registration successful! New account created: " + acc.getUsername());
+//            } else {
+//                System.out.println("Registration failed.");
+//            }
+//        }
+        UserDAO userDAO = new UserDAO();
+        List<Account> list = userDAO.getUserList();
+        System.out.println(list);
+    }
+       // Lấy danh sách người dùng từ database
+    public List<Account> getUserList() {
+        List<Account> userList = new ArrayList<>();
+        String sql = "SELECT * FROM users";
+        try (
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                userList.add(new Account(
+                    rs.getInt("ID"),
+            rs.getString("uName"),
+            rs.getString("Username"),
+            rs.getString("Password"),
+            rs.getString("Gender"),
+            rs.getString("Email"),
+            rs.getString("Mobile"),
+            rs.getString("uAddress"),
+                rs.getInt("RoleID")));
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+        return userList;
+    }
+
+    // Thêm người dùng mới vào database
+    public void addUser(Account user) {
+        String sql = "INSERT INTO users (uName, Username, Password, Avatar, Gender, Email, Mobile, uAddress, RoleID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, user.getuName());
+            ps.setString(2, user.getUsername());
+            ps.setString(3, user.getPassword());
+            ps.setString(4, user.getGender());
+            ps.setString(5, user.getEmail());
+            ps.setString(6, user.getMobile());
+            ps.setString(7, user.getuAddress());
+            ps.setInt(8, user.getRoleID());
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Chỉnh sửa thông tin người dùng trong database
+    public boolean editUser(int id, Account updatedUser) {
+        String sql = "UPDATE users SET uName=?, Username=?, Password=?, Avatar=?, Gender=?, Email=?, Mobile=?, uAddress=?, RoleID=? WHERE ID=?";
+        try (
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, updatedUser.getuName());
+            ps.setString(2, updatedUser.getUsername());
+            ps.setString(3, updatedUser.getPassword());
+            ps.setString(4, updatedUser.getGender());
+            ps.setString(5, updatedUser.getEmail());
+            ps.setString(6, updatedUser.getMobile());
+            ps.setString(7, updatedUser.getuAddress());
+            ps.setInt(8, updatedUser.getRoleID());
+            ps.setInt(9, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    // Tìm kiếm người dùng theo tên hoặc email từ database
+    public List<Account> searchUser(String keyword) {
+        List<Account> result = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE uName LIKE ? OR Email LIKE ?";
+        try (
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ps.setString(2, "%" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                result.add(new Account(
+                    rs.getInt("ID"),
+                    rs.getString("uName"),
+                    rs.getString("Username"),
+                    rs.getString("Password"),
+                    rs.getString("Gender"),
+                    rs.getString("Email"),
+                    rs.getInt("RoleID")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+      public Account getUserById(int id) {
+        String sql = "SELECT * FROM users WHERE ID = ?";
+        try (
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new Account(
+                     rs.getInt("ID"),
+                    rs.getString("uName"),
+                    rs.getString("Username"),
+                    rs.getString("Password"),
+                    rs.getString("Gender"),
+                    rs.getString("Email"),
+                        rs.getString("Mobile"),
+                        rs.getString("uAddress"),
+                    rs.getInt("RoleID"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
