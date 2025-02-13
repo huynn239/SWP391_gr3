@@ -4,25 +4,21 @@
         private int id;
         private String name;
         private String image;
-        private String size;
         private int materialId;
         private double price;
         private String details;
-        private int quantity;
         private String brandId;
         private int typeId;
 
         public Product() {}
 
-        public Product(int id, String name, String image, String size, int materialId, double price, String details, int quantity, String branchId, int typeId) {
+        public Product(int id, String name, String image, int materialId, double price, String details, String branchId, int typeId) {
             this.id = id;
             this.name = name;
             this.image = image;
-            this.size = size;
             this.materialId = materialId;
             this.price = price;
             this.details = details;
-            this.quantity = quantity;
             this.brandId = branchId;
             this.typeId = typeId;
         }
@@ -37,8 +33,6 @@
         public String getImage() { return image; }
         public void setImage(String image) { this.image = image; }
 
-        public String getSize() { return size; }
-        public void setSize(String size) { this.size = size; }
 
         public int getMaterialId() { return materialId; }
         public void setMaterialId(int materialId) { this.materialId = materialId; }
@@ -48,9 +42,6 @@
 
         public String getDetails() { return details; }
         public void setDetails(String details) { this.details = details; }
-
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
 
         public String getBrandId() { return brandId; }
         public void setBrandId(String brandId) { this.brandId = brandId; }

@@ -536,44 +536,6 @@ ul.sub-menu {
 .searchform  button:focus{
     background-color:#000;
 }
-.blog-sidebar {
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-.blog-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.blog-thumbnail img {
-    width: 100%;
-    height: auto;
-    border-radius: 5px;
-}
-
-.blog-content h4 {
-    margin-top: 10px;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-.blog-content p {
-    font-size: 12px;
-    color: #777;
-}
-
-.blog-content .btn {
-    margin-top: 10px;
-    font-size: 12px;
-    padding: 5px 10px;
-}
-
 
 .searchform p {
     color: #8C8C88;
@@ -2433,17 +2395,10 @@ h2.title {
 }
 
 .btn.btn-primary {
-<<<<<<< HEAD
-  background:#0fdb26;
-  border: 0 none;
-  border-radius: 0;
-  margin-top: 16px;
-=======
     background:#FE980F;
     border: 0 none;
     border-radius: 0;
     margin-top: 16px;
->>>>>>> 446f12f31967e0849807191ea43d2840f489c1dd
 }
 
 .blank-arrow {
@@ -2585,44 +2540,6 @@ h2.title {
     align-items: center;
     height: 100%;
 }
-/* Tùy chỉnh phân trang */
-.pagination {
-    display: inline-flex;
-    list-style: none;
-    padding-left: 0;
-    margin-top: 20px;
-}
-
-a .page-link {
-    color: #007bff;
-    padding: 8px 16px;
-    text-decoration: none;
-    border: 1px solid #ddd;
-    margin: 0 4px;
-    border-radius: 5px;
-}
-
-.page-link:hover {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-}
-
-.page-link.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-}
-
-.page-link.disabled {
-    color: #ccc;
-    pointer-events: none;
-}
-
-.page-link:focus {
-    box-shadow: none;
-}
-
 
 
 
