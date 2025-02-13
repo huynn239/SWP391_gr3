@@ -81,7 +81,8 @@
 										<li><a href="login.html">Login</a></li> 
                                     </ul>
                                 </li> 
-								<li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>
+								<li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
+
                                     <ul role="menu" class="sub-menu">
                                         <li><a href="blog.html">Blog List</a></li>
 										<li><a href="blog-single.html">Blog Single</a></li>
@@ -203,6 +204,9 @@
                                         <% } %>
                                 </ul>
                             </div>
+                                  <div class="shipping text-center"><!--shipping-->
+                                    <img src="images/home/shipping.jpg" alt="" />
+						</div><!--/shipping-->
 
                         </div>
                     </div>
