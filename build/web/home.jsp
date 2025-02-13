@@ -59,6 +59,7 @@
                 </div>
             </div>
             <div class="header-bottom"><!--header-bottom-->
+
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-9">
@@ -98,12 +99,12 @@
 
 
 
-                                    <li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>
-                                        <ul role="menu" class="sub-menu">
-                                            <li><a href="blog.html">Blog List</a></li>
-                                            <li><a href="blog-single.html">Blog Single</a></li>
-                                        </ul>
-                                    </li> 
+                                    <li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
+
+                                    <ul role="menu" class="sub-menu">
+                                        <li><a href="blog.html">Blog List</a></li>
+                                        <li><a href="blog-single.html">Blog Single</a></li>
+                                    </ul>
                                     <li><a href="404.html">404</a></li>
                                     <li><a href="contact-us.html">Contact</a></li>
                                 </ul>
@@ -117,6 +118,10 @@
                     </div>
                 </div>
             </div><!--/header-bottom-->
+
+
+
+
         </header>
 
         <section id="slider"><!--slider-->
@@ -291,6 +296,9 @@
                                     } 
                                 %>
                             </div>
+                            <div class="shipping text-center"><!--shipping-->
+                                <img src="images/home/shipping.jpg" alt="" />
+                            </div><!--/shipping-->
 
                         </div>
                     </div>
