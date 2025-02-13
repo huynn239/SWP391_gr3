@@ -22,13 +22,18 @@
               <div class="col-md-10 col-lg-6 col-xl-5 order-2 order-lg-1">
 
                 <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4" type="submit">Sign up</p>
-
+                <div class="text-center mb-4">
+    <p class="text-danger fw-bold">${mess}</p>
+</div>
+<div class="text-center mb-4">
+    <p class="text-danger fw-bold">${mess1}</p>
+</div>
                 <form action="register" method="post" class="mx-1 mx-md-4">
 
                   <div class="d-flex flex-row align-items-center mb-4">
                     <i class="fas fa-user fa-lg me-3 fa-fw"></i>
                     <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                      <input name="user" type="text" id="form3Example1c" class="form-control" />
+                      <input name="user" type="text" id="form3Example1c" class="form-control" autocomplete="off" />
                       <label class="form-label" for="form3Example1c">UserName</label>
                     </div>
                   </div>
@@ -36,7 +41,7 @@
                   <div class="d-flex flex-row align-items-center mb-4">
                     <i class="fas fa-envelope fa-lg me-3 fa-fw"></i>
                     <div data-mdb-input-init class="form-outline flex-fill mb-0">
-                      <input name="email" type="text" id="form3Example3c" class="form-control" />
+                      <input name="email" type="text" id="form3Example3c" class="form-control" autocomplete="off" />
                       <label class="form-label" for="form3Example3c">Your Email</label>
                     </div>
                   </div>
@@ -79,5 +84,14 @@
     </div>
   </div>
 </section>
+<!--<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Khởi tạo MDB Input
+    document.querySelectorAll('.form-outline').forEach((formOutline) => {
+      new mdb.Input(formOutline).init();
+    });
+  });
+</script>-->
+
     </body>
 </html>
