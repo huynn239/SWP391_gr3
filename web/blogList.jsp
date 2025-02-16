@@ -42,46 +42,46 @@
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
         <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
-         <style>
-        /* Tùy chỉnh phân trang */
-        .pagination {
-            display: inline-flex;
-            list-style: none;
-            padding-left: 0;
-            margin-top: 20px;
-        }
+        <style>
+            /* Tùy chỉnh phân trang */
+            .pagination {
+                display: inline-flex;
+                list-style: none;
+                padding-left: 0;
+                margin-top: 20px;
+            }
 
-        .page-link {
-            color: #000;
-            padding: 8px 16px;
-            text-decoration: none;
-            border: 1px solid #ddd;
-            margin: 0 4px;
-            border-radius: 5px;
-            background: white;
-        }
+            .page-link {
+                color: #000;
+                padding: 8px 16px;
+                text-decoration: none;
+                border: 1px solid #ddd;
+                margin: 0 4px;
+                border-radius: 5px;
+                background: white;
+            }
 
-        .page-link:hover {
-            background-color: #red;
-            color: black;
-            border-color: #007bff;
-        }
+            .page-link:hover {
+                background-color: #red;
+                color: black;
+                border-color: #007bff;
+            }
 
-        .page-link.active {
-            background-color: #000;
-            color: white;
-            border-color: #007bff;
-        }
+            .page-link.active {
+                background-color: #000;
+                color: white;
+                border-color: #007bff;
+            }
 
-        .page-link.disabled {
-            color: #ccc;
-            pointer-events: none;
-        }
+            .page-link.disabled {
+                color: #ccc;
+                pointer-events: none;
+            }
 
-        .page-link:focus {
-            box-shadow: none;
-        }
-    </style>
+            .page-link:focus {
+                box-shadow: none;
+            }
+        </style>
     </head>
     <body>
 
@@ -123,15 +123,26 @@
                             <div class="mainmenu pull-left">
                                 <ul class="nav navbar-nav collapse navbar-collapse">
                                     <li><a href="home.jsp" class="active">Home</a></li>
-                                    <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
-                                        <ul role="menu" class="sub-menu">
-                                            <li><a href="shop.html">Products</a></li>
-                                            <li><a href="product-details.html">Product Details</a></li> 
-                                            <li><a href="checkout.html">Checkout</a></li> 
-                                            <li><a href="cart.html">Cart</a></li> 
-                                            <li><a href="login.html">Login</a></li> 
-                                        </ul>
-                                    </li> 
+                                    <li class="menu-item">
+                                        <a href="#">Product</a>
+                                        <div class="sub-menu">
+                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
+                                                <% int count1 = 0; %>
+                                                <% for (Category category : categories) { %>
+                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
+                                                <div class="category-column">
+                                                    <% } %>
+                                                    <a href="productlist?category=<%= category.getId() %>">
+                                                        <%= category.getName() %>
+                                                    </a>
+                                                    <% count1++; %>
+                                                    <% if (count1 % 6 == 0 || count1 == categories.size()) { %>
+                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
+                                                <% } %>
+                                                <% } %>
+                                            </div> <!-- Kết thúc category-container -->
+                                        </div>
+                                    </li>
                                     <li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
 
                                     <ul role="menu" class="sub-menu">
@@ -273,9 +284,9 @@
                             <% } else { %>
                             <% for (Blog blog : blogs) { %>
                             <div class="blog-item">
-                               <h4><a href="blogDetail.jsp?id=<%= blog.getId() %>" style="color: black; font-weight: bold;"> <%= blog.getTitle() %> </a></h4>
+                                <h4><a href="blogDetail.jsp?id=<%= blog.getId() %>" style="color: black; font-weight: bold;"> <%= blog.getTitle() %> </a></h4>
 
-                               <p><i class="fa fa-calendar"></i> <%= blog.getUploadDate() %> - <strong>Author: </strong><%= blog.getAuthor() %></p>
+                                <p><i class="fa fa-calendar"></i> <%= blog.getUploadDate() %> - <strong>Author: </strong><%= blog.getAuthor() %></p>
 
                                 <div class="blog-thumbnail">
                                     <img src="<%= blog.getBlogImage() %>" alt="<%= blog.getTitle() %>" class="img-responsive">

@@ -11,8 +11,8 @@
 <jsp:useBean id="materialDAO" class="dto.MaterialDAO" scope="session"/>
 
 <%
-    String category = (String)request.getParameter("category");
-    int cate = Integer.parseInt(category);
+    String categ = (String)request.getParameter("category");
+    int cate = Integer.parseInt(categ);
     List<Product> products = productDAO.getAllProductCat(cate);
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
@@ -73,7 +73,7 @@
                                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                                     <span class="sr-only">Toggle navigation</span>
                                     <span class="icon-bar"></span>
-                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"  ></span>
                                     <span class="icon-bar"></span>
                                 </button>
                             </div>
@@ -83,21 +83,21 @@
                                     <li class="menu-item">
                                         <a href="#">Product</a>
                                         <div class="sub-menu">
-                                            <div class="category-container"> 
+                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
                                                 <% int count1 = 0; %>
-                                                <% for (Category cat : categories) { %>
-                                                <% if (count1 % 6 == 0) { %> 
+                                                <% for (Category category : categories) { %>
+                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
                                                 <div class="category-column">
                                                     <% } %>
-                                                    <a href="productlist?category=<%= cat.getId() %>">
-                                                        <%= cat.getName() %>
+                                                    <a href="productlist?category=<%= category.getId() %>">
+                                                        <%= category.getName() %>
                                                     </a>
                                                     <% count1++; %>
                                                     <% if (count1 % 6 == 0 || count1 == categories.size()) { %>
-                                                </div> 
+                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
                                                 <% } %>
                                                 <% } %>
-                                            </div> 
+                                            </div> <!-- Kết thúc category-container -->
                                         </div>
                                     </li>
                                     <li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>

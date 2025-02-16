@@ -25,7 +25,7 @@ public class BlogDAO extends DBContext {
         try (ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 Blog blog = new Blog(
-                    rs.getInt("ID"),
+                    rs.getString("ID"),
                     rs.getString("Title"),
                     rs.getString("Content"),
                     rs.getString("BlogImage"),
@@ -59,5 +59,10 @@ public class BlogDAO extends DBContext {
     // Tính toán tổng số trang
     return (int) Math.ceil((double) totalRows / limit);
 }
+   
+    public static void main(String[] args) {
+        BlogDAO b = new BlogDAO();
+        List<Blog> a = b.getAllBlogs(1, 1);
+    }
 
 }
