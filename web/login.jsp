@@ -19,10 +19,11 @@
                     <div class="col col-xl-10">
                         <div class="card" style="border-radius: 1rem;">
                             <div class="row g-0">
-                                <div class="col-md-6 col-lg-5 d-none d-md-block">
+                                <div class="col-md-6 col-lg-5 d-flex justify-content-center align-items-center">
                                     <img src="https://img.freepik.com/premium-vector/men-s-clothing-store-logo-clothing-store-transparent-background-clothing-shop-logo-vector_148524-756.jpg"
-                                         alt="login form" class="img-fluid" style="border-radius: 1rem 0 0 1rem;" />
+                                         alt="login form" class="img-fluid" style="border-radius: 1rem; max-width: 100%;" />
                                 </div>
+
                                 <div class="col-md-6 col-lg-7 d-flex align-items-center">
                                     <div class="card-body p-4 p-lg-5 text-black">
 
@@ -49,7 +50,7 @@
                                                 <button data-mdb-button-init data-mdb-ripple-init class="btn btn-dark btn-lg btn-block" type="submit">Login</button>
                                             </div>
 
-                                            <a class="small text-muted" href="#!">Forgot password?</a>
+                                            <a class="small text-muted" href="requestPassword.jsp">Forgot password?</a>
                                             <p class="mb-5 pb-lg-2" style="color: #393f81;">Don't have an account? <a href="register.jsp"
                                                                                                                       style="color: #393f81;">Register here</a></p>
                                             <a href="#!" class="small text-muted">Terms of use.</a>

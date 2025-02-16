@@ -4,6 +4,7 @@
  */
 package controller;
 
+import model.Account;
 import dto.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,15 +13,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.Account;
 import utils.EncryptPassword;
 
 /**
  *
  * @author NBL
  */
-@WebServlet(name = "RegisterController", urlPatterns = {"/register"})
-public class RegisterController extends HttpServlet {
+@WebServlet(name = "ChangePassword", urlPatterns = {"/ChangePassword"})
+public class ChangePassword extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -39,10 +39,10 @@ public class RegisterController extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet RegisterController</title>");
+            out.println("<title>Servlet ChangePassword</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet RegisterController at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet ChangePassword at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -74,33 +74,21 @@ public class RegisterController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String user = request.getParameter("user").trim();
-        String pass = request.getParameter("pass").trim();
-        String email = request.getParameter("email").trim();
+        String username = request.getParameter("user").trim();
+        String password = request.getParameter("pass").trim();
+        String newpass = request.getParameter("newpass").trim();
+        password = EncryptPassword.toSHA1(password);
 
-        String re_pass = request.getParameter("repass");
-        if (!pass.equals(re_pass)) {
-            request.setAttribute("mess", "Passwords don't mactch !");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+        UserDAO userdao = new UserDAO();
+        Account account = userdao.checkAccToChangePass(username, password);
+        if (account != null) {
+            newpass = EncryptPassword.toSHA1(newpass);
+            userdao.updatePassword(account.getEmail(), newpass);
+            request.setAttribute("message", "Change password successfully");
         } else {
-            UserDAO userdao = new UserDAO();
-            Account a = userdao.checkAccountExist(user,email);
-            if (a == null) {
-                pass = EncryptPassword.toSHA1(pass);
-                userdao.register(user, email, pass);
-                response.sendRedirect("home.jsp");
-
-            } else {
-
-                 if (a.getUsername().equals(user)) {
-                request.setAttribute("mess", "Username already exists!");
-            }
-            if (a.getEmail().equals(email)) {
-                request.setAttribute("mess", "Email already exists!");
-            }
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-            }
+            request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không chính xác!");
         }
+        request.getRequestDispatcher("changepassword.jsp").forward(request, response);
     }
 
     /**

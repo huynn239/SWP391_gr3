@@ -15,7 +15,7 @@ public class UserDAO extends DBContext {
     PreparedStatement ps = null;
     ResultSet rs = null;
 
-    public Account login(String user, String pass) {
+     public Account login(String user, String pass) {
 
         String sql = "SELECT * FROM users WHERE Username = ? AND Password = ?";
         try {
@@ -44,13 +44,14 @@ public class UserDAO extends DBContext {
 
     }
 
-    public Account checkAccountExist(String user) {
+    public Account checkAccountExist(String user, String email) {
 
-        String sql = "SELECT * FROM users WHERE Username = ? ";
+        String sql = "SELECT * FROM users WHERE Username = ? OR Email = ?";
         try {
             conn = new DBContext().getConnection();
             ps = conn.prepareStatement(sql);
             ps.setString(1, user);
+            ps.setString(2, email);
             rs = ps.executeQuery();
             while (rs.next()) {
                 return new Account(
@@ -85,35 +86,120 @@ public class UserDAO extends DBContext {
         } catch (Exception e) {
         }
     }
+        
 
     public static void main(String[] args) {
-//        UserDAO DAO = new UserDAO();
-//
-//        String username = "okok";
-//        String email = "testuser@example.com";
-//        String password = "password123";
-//
-//        // Kiểm tra xem tài khoản đã tồn tại hay chưa
-//        Account acc = DAO.checkAccountExist(username);
-//        if (acc != null) {
-//            System.out.println("Account already exists: " + acc.getUsername());
-//        } else {
-//            System.out.println("Account does not exist. Proceeding with registration...");
-//
-//            // Gọi hàm register() để đăng ký tài khoản mới
-//            DAO.register(username, email, password);
-//
-//            // Kiểm tra lại sau khi đăng ký
-//            acc = DAO.checkAccountExist(username);
-//            if (acc != null) {
-//                System.out.println("Registration successful! New account created: " + acc.getUsername());
-//            } else {
-//                System.out.println("Registration failed.");
-//            }
-//        }
-        UserDAO userDAO = new UserDAO();
-        List<Account> list = userDAO.getUserList();
-        System.out.println(list);
+        UserDAO DAO = new UserDAO();
+
+        String username = "bubucon";
+        String email = "testuser@example.com";
+        String password = "password123";
+
+        // Kiểm tra xem tài khoản đã tồn tại hay chưa
+        Account acc = DAO.checkAccountExist(username,email);
+        if (acc != null) {
+            System.out.println("Account already exists: " + acc.getUsername());
+        } else {
+            System.out.println("Account does not exist. Proceeding with registration...");
+
+            // Gọi hàm register() để đăng ký tài khoản mới
+            DAO.register(username, email, password);
+
+            // Kiểm tra lại sau khi đăng ký
+            acc = DAO.checkAccountExist(username,email);
+            if (acc != null) {
+                System.out.println("Registration successful! New account created: " + acc.getUsername());
+            } else {
+                System.out.println("Registration failed.");
+            }
+        }
+    }
+    public Account getUserByEmail(String email) {
+        String sql = "Select * from [users] where email = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {                
+               return new Account(
+                        rs.getInt("id"),
+                        rs.getString("uName"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getString("Email"),
+                        rs.getInt("RoleID")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+    public Account getUserByIdd(int userId) {
+        String sql = "Select * from [users] where ID = ?";
+        try {
+           conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {                
+                return new Account(
+                        rs.getInt("id"),
+                        rs.getString("uName"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getString("Email"),
+                        rs.getInt("RoleID")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+    
+    public void updatePassword(String email, String password) {
+        String sql = "UPDATE [dbo].[users]\n"
+                + "   SET [Password] = ?\n"
+                + " WHERE [Email] = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, password);
+            st.setString(2, email);
+            st.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+    public Account checkAccToChangePass(String user, String pass) {
+
+        String sql = "SELECT * FROM users WHERE Username = ? AND Password = ?";
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, user);
+            ps.setString(2, pass);
+            rs = ps.executeQuery();
+            while (rs.next()) { 
+                return new Account(
+                        rs.getInt("id"),
+                        rs.getString("uName"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getString("Email"),
+                        rs.getInt("RoleID")
+                );
+
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error in login: " + e.getMessage());
+        }
+        return null;
+
     }
        // Lấy danh sách người dùng từ database
     public List<Account> getUserList() {

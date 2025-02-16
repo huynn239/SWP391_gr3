@@ -48,7 +48,7 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                    <li><a href="#"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getuName() : "Account"}</a></li>
+                                    <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
                                     <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
                                     <li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
                                     <li><a href="#"><i class="fa fa-shopping-cart"></i> Cart</a></li>

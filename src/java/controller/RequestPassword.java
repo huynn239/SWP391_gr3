@@ -2,9 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
+
 package controller;
 
+import dto.DAOTokenForget;
 import dto.UserDAO;
+import model.TokenForgetPassword;
+import model.Account;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -12,46 +16,42 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.Account;
-import utils.EncryptPassword;
+import java.time.LocalDateTime;
 
 /**
  *
- * @author NBL
+ * @author HP
  */
-@WebServlet(name = "RegisterController", urlPatterns = {"/register"})
-public class RegisterController extends HttpServlet {
-
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
+@WebServlet(name="requestPassword", urlPatterns={"/requestPassword"})
+public class RequestPassword extends HttpServlet {
+   
+    /** 
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             /* TODO output your page here. You may use following sample code. */
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet RegisterController</title>");
+            out.println("<title>Servlet requestPassword</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet RegisterController at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet requestPassword at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
-    }
+    } 
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
+    /** 
      * Handles the HTTP <code>GET</code> method.
-     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -59,13 +59,12 @@ public class RegisterController extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
+    throws ServletException, IOException {
+        request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+    } 
 
-    /**
+    /** 
      * Handles the HTTP <code>POST</code> method.
-     *
      * @param request servlet request
      * @param response servlet response
      * @throws ServletException if a servlet-specific error occurs
@@ -73,39 +72,44 @@ public class RegisterController extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String user = request.getParameter("user").trim();
-        String pass = request.getParameter("pass").trim();
-        String email = request.getParameter("email").trim();
-
-        String re_pass = request.getParameter("repass");
-        if (!pass.equals(re_pass)) {
-            request.setAttribute("mess", "Passwords don't mactch !");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-        } else {
-            UserDAO userdao = new UserDAO();
-            Account a = userdao.checkAccountExist(user,email);
-            if (a == null) {
-                pass = EncryptPassword.toSHA1(pass);
-                userdao.register(user, email, pass);
-                response.sendRedirect("home.jsp");
-
-            } else {
-
-                 if (a.getUsername().equals(user)) {
-                request.setAttribute("mess", "Username already exists!");
-            }
-            if (a.getEmail().equals(email)) {
-                request.setAttribute("mess", "Email already exists!");
-            }
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-            }
+    throws ServletException, IOException {
+        UserDAO daoUser = new UserDAO();
+        String email = request.getParameter("email");
+        //email co ton tai trong db
+        Account user = daoUser.getUserByEmail(email);
+        if(user == null) {
+            request.setAttribute("mess", "email khong ton tai");
+            request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+            return;
         }
+        ResetService service = new ResetService();
+        String token = service.generateToken();
+        
+        String linkReset = "http://localhost:9999/SWP391_gr3/resetPassword?token="+token;
+        
+        TokenForgetPassword newTokenForget = new TokenForgetPassword(
+                user.getId(), false, token, service.expireDateTime());
+        
+        //send link to this email
+        DAOTokenForget daoToken = new DAOTokenForget();
+        boolean isInsert = daoToken.insertTokenForget(newTokenForget);
+        if(!isInsert) {
+            request.setAttribute("mess", "have error in server");
+            request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+            return;
+        }
+        boolean isSend = service.sendEmail(email, linkReset, user.getUsername());
+        if(!isSend) {
+            request.setAttribute("mess", "can not send request");
+            request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
+            return;
+        }
+        request.setAttribute("mess", "send request success");
+        request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
     }
 
-    /**
+    /** 
      * Returns a short description of the servlet.
-     *
      * @return a String containing servlet description
      */
     @Override
