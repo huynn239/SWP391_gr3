@@ -11,11 +11,22 @@
 
 <%
        int currentPage = request.getParameter("page") != null ? Integer.parseInt(request.getParameter("page")) : 1;
-    int limit = 3; // Số lượng bài viết mỗi trang
-    // Lấy danh sách các blog từ DAO
-    List<Blog> blogs = blogDAO.getAllBlogs(currentPage, limit);
-    // Lấy tổng số trang từ DAO
-    int totalPages = blogDAO.getTotalPages(limit);
+    int limit = 3;
+    List<Category> blogCategories = blogDAO.getAllBlogCategories();
+
+    // Kiểm tra nếu có tham số category
+    String categoryParam = request.getParameter("category");
+    List<Blog> blogs;
+    int totalPages;
+
+    if (categoryParam != null) { // Nếu có category được chọn
+        int selectedCategory = Integer.parseInt(categoryParam);
+        blogs = blogDAO.getBlogsByCategory(selectedCategory, currentPage, limit);
+        totalPages = blogDAO.getTotalPagesByCategory(selectedCategory, limit);
+    } else { // Nếu không có category, hiển thị tất cả blog
+        blogs = blogDAO.getAllBlogs(currentPage, limit);
+        totalPages = blogDAO.getTotalPages(limit);
+    }
   List<Product> products = productDAO.getAllProducts();
   List<Brand> brands = brandDAO.getAllBrands();
   List<Category> categories = categoryDAO.getAllCategories();
@@ -98,11 +109,10 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                    <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
-                                    <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
+                                    <li><a href="#"><i class="fa fa-user"></i> Account</a></li>
                                     <li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
                                     <li><a href="#"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                                    <li><a href="${not empty sessionScope.u? "logout" : "login.jsp"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
+                                    <li><a href="#"><i class="fa fa-lock"></i> Login</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -124,40 +134,30 @@
                             <div class="mainmenu pull-left">
                                 <ul class="nav navbar-nav collapse navbar-collapse">
                                     <li><a href="home.jsp" class="active">Home</a></li>
-                                    <li class="menu-item">
-                                        <a href="#">Product</a>
-                                        <div class="sub-menu">
-                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
-                                                <% int count1 = 0; %>
-                                                <% for (Category category : categories) { %>
-                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
-                                                <div class="category-column">
-                                                    <% } %>
-                                                    <a href="productlist?category=<%= category.getId() %>">
-                                                        <%= category.getName() %>
-                                                    </a>
-                                                    <% count1++; %>
-                                                    <% if (count1 % 6 == 0 || count1 == categories.size()) { %>
-                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
-                                                <% } %>
-                                                <% } %>
-                                            </div> <!-- Kết thúc category-container -->
-                                        </div>
-                                    </li>
+                                    <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
+                                        <ul role="menu" class="sub-menu">
+                                            <li><a href="shop.html">Products</a></li>
+                                            <li><a href="product-details.html">Product Details</a></li> 
+                                            <li><a href="checkout.html">Checkout</a></li> 
+                                            <li><a href="cart.html">Cart</a></li> 
+                                            <li><a href="login.html">Login</a></li> 
+                                        </ul>
+                                    </li> 
                                     <li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
 
-
-
+                                    <ul role="menu" class="sub-menu">
+                                        <li><a href="blog.html">Blog List</a></li>
+                                        <li><a href="blog-single.html">Blog Single</a></li>
+                                    </ul>
+                                    </li> 
                                     <li><a href="404.html">404</a></li>
                                     <li><a href="contact-us.html">Contact</a></li>
                                 </ul>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <div class="col-sm-3">
-                                <form action="productsearch" method="GET" class="search_box pull-right">
-                                    <input type="text" name="query" placeholder="Search" required />
-                                </form>
+                            <div class="search_box pull-right">
+                                <input type="text" placeholder="Search"/>
                             </div>
                         </div>
                     </div>
@@ -239,14 +239,22 @@
                     <div class="col-sm-3">
                         <div class="left-sidebar">
 
-                            <!-- CATEGORY PANEL -->
-                            <h2>Categories</h2>
+
+                            <!-- CATEGORY PANEL (DANH MỤC BLOG) -->
+                            <h2>Blog Categories</h2>
                             <div class="panel-group category-products">
-                                <% for (Category category : categories) { %>
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
-                                            <a href="shop.jsp?category=<%= category.getId() %>">
+                                            <a href="blogList.jsp">All Blogs</a>
+                                        </h4>
+                                    </div>
+                                </div>
+                                <% for (Category category : blogCategories) { %>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a href="blogList.jsp?category=<%= category.getId() %>">
                                                 <%= category.getName() %>
                                             </a>
                                         </h4>
@@ -254,6 +262,9 @@
                                 </div>
                                 <% } %>
                             </div>
+
+
+
 
                             <!-- BRAND PANEL -->
                             <h2>Brands</h2>
@@ -276,6 +287,7 @@
                     \
                     <!-- FEATURED PRODUCTS -->
                     <!-- Blog List (Bên phải) -->
+                    <!-- Blog List -->
                     <div class="col-sm-9">
                         <h2 class="title text-center">Latest Blogs</h2>
                         <div class="blog-sidebar">
@@ -284,7 +296,11 @@
                             <% } else { %>
                             <% for (Blog blog : blogs) { %>
                             <div class="blog-item">
-                                <h4><a href="blogDetail.jsp?id=<%= blog.getId() %>" style="color: black; font-weight: bold;"> <%= blog.getTitle() %> </a></h4>
+                                <h4>
+                                    <a href="blogDetail.jsp?id=<%= blog.getId() %>" style="color: black; font-weight: bold;">
+                                        <%= blog.getTitle() %>
+                                    </a>
+                                </h4>
 
                                 <p><i class="fa fa-calendar"></i> <%= blog.getUploadDate() %> - <strong>Author: </strong><%= blog.getAuthor() %></p>
 
@@ -303,19 +319,19 @@
                             <!-- Pagination -->
                             <div class="pagination justify-content-center">
                                 <% if (currentPage > 1) { %>
-                                <a class="page-link" href="blogList.jsp?page=<%= currentPage - 1 %>">Previous</a>
+                                <a class="page-link" href="blogList.jsp?page=<%= currentPage - 1 %><%= (categoryParam != null) ? "&category=" + categoryParam : "" %>">Previous</a>
                                 <% } %>
 
                                 <% for (int i = 1; i <= totalPages; i++) { %>
                                 <% if (i == currentPage) { %>
                                 <span class="page-link active"><%= i %></span>
                                 <% } else { %>
-                                <a class="page-link" href="blogList.jsp?page=<%= i %>"><%= i %></a>
+                                <a class="page-link" href="blogList.jsp?page=<%= i %><%= (categoryParam != null) ? "&category=" + categoryParam : "" %>"><%= i %></a>
                                 <% } %>
                                 <% } %>
 
                                 <% if (currentPage < totalPages) { %>
-                                <a class="page-link" href="blogList.jsp?page=<%= currentPage + 1 %>">Next</a>
+                                <a class="page-link" href="blogList.jsp?page=<%= currentPage + 1 %><%= (categoryParam != null) ? "&category=" + categoryParam : "" %>">Next</a>
                                 <% } %>
                             </div>
 
@@ -323,7 +339,9 @@
                     </div>
 
                 </div>
-                <!-- SECTION FOR 2 SELECTED BRANDS -->
+
+            </div>
+            <!-- SECTION FOR 2 SELECTED BRANDS -->
 
 
 
