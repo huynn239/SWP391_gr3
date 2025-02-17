@@ -12,8 +12,7 @@ public class CategoryDAO extends DBContext {
         List<Category> categoryList = new ArrayList<>();
         String sql = "SELECT * FROM Category order by name";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Category category = new Category(

@@ -89,7 +89,7 @@ public class ProductDAO extends DBContext {
 
     public static void main(String[] args) {
         ProductDAO list = new ProductDAO();
-        List<Product> a = list.getAllProductCat(1);
+        List<Product> a = list.getAllProducts();
         for (Product product : a) {
             System.out.println("" + product.getName());
         }
