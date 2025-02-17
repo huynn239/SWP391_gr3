@@ -15,7 +15,7 @@ public class UserDAO extends DBContext {
     PreparedStatement ps = null;
     ResultSet rs = null;
 
-     public Account login(String user, String pass) {
+    public Account login(String user, String pass) {
 
         String sql = "SELECT * FROM users WHERE Username = ? AND Password = ?";
         try {
@@ -86,7 +86,6 @@ public class UserDAO extends DBContext {
         } catch (Exception e) {
         }
     }
-        
 
     public static void main(String[] args) {
         UserDAO DAO = new UserDAO();
@@ -96,7 +95,7 @@ public class UserDAO extends DBContext {
         String password = "password123";
 
         // Kiểm tra xem tài khoản đã tồn tại hay chưa
-        Account acc = DAO.checkAccountExist(username,email);
+        Account acc = DAO.checkAccountExist(username, email);
         if (acc != null) {
             System.out.println("Account already exists: " + acc.getUsername());
         } else {
@@ -106,7 +105,7 @@ public class UserDAO extends DBContext {
             DAO.register(username, email, password);
 
             // Kiểm tra lại sau khi đăng ký
-            acc = DAO.checkAccountExist(username,email);
+            acc = DAO.checkAccountExist(username, email);
             if (acc != null) {
                 System.out.println("Registration successful! New account created: " + acc.getUsername());
             } else {
@@ -114,36 +113,14 @@ public class UserDAO extends DBContext {
             }
         }
     }
+
     public Account getUserByEmail(String email) {
         String sql = "Select * from [users] where email = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
-            while (rs.next()) {                
-               return new Account(
-                        rs.getInt("id"),
-                        rs.getString("uName"),
-                        rs.getString("Username"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getString("Email"),
-                        rs.getInt("RoleID")
-                );
-            }
-        } catch (SQLException e) {
-            System.out.println(e);
-        }
-        return null;
-    }
-    public Account getUserByIdd(int userId) {
-        String sql = "Select * from [users] where ID = ?";
-        try {
-           conn = new DBContext().getConnection();
-            ps = conn.prepareStatement(sql);
-            ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {                
+            while (rs.next()) {
                 return new Account(
                         rs.getInt("id"),
                         rs.getString("uName"),
@@ -159,7 +136,31 @@ public class UserDAO extends DBContext {
         }
         return null;
     }
-    
+
+    public Account getUserByIdd(int userId) {
+        String sql = "Select * from [users] where ID = ?";
+        try {
+            conn = new DBContext().getConnection();
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                return new Account(
+                        rs.getInt("id"),
+                        rs.getString("uName"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getString("Email"),
+                        rs.getInt("RoleID")
+                );
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return null;
+    }
+
     public void updatePassword(String email, String password) {
         String sql = "UPDATE [dbo].[users]\n"
                 + "   SET [Password] = ?\n"
@@ -173,6 +174,7 @@ public class UserDAO extends DBContext {
             System.out.println(e);
         }
     }
+
     public Account checkAccToChangePass(String user, String pass) {
 
         String sql = "SELECT * FROM users WHERE Username = ? AND Password = ?";
@@ -182,7 +184,7 @@ public class UserDAO extends DBContext {
             ps.setString(1, user);
             ps.setString(2, pass);
             rs = ps.executeQuery();
-            while (rs.next()) { 
+            while (rs.next()) {
                 return new Account(
                         rs.getInt("id"),
                         rs.getString("uName"),
@@ -201,24 +203,24 @@ public class UserDAO extends DBContext {
         return null;
 
     }
-       // Lấy danh sách người dùng từ database
+    // Lấy danh sách người dùng từ database
+
     public List<Account> getUserList() {
         List<Account> userList = new ArrayList<>();
         String sql = "SELECT * FROM users";
         try (
-             PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 userList.add(new Account(
-                    rs.getInt("ID"),
-            rs.getString("uName"),
-            rs.getString("Username"),
-            rs.getString("Password"),
-            rs.getString("Gender"),
-            rs.getString("Email"),
-            rs.getString("Mobile"),
-            rs.getString("uAddress"),
-                rs.getInt("RoleID")));
+                        rs.getInt("ID"),
+                        rs.getString("uName"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getString("Email"),
+                        rs.getString("Mobile"),
+                        rs.getString("uAddress"),
+                        rs.getInt("RoleID")));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -230,7 +232,7 @@ public class UserDAO extends DBContext {
     public void addUser(Account user) {
         String sql = "INSERT INTO users (uName, Username, Password, Avatar, Gender, Email, Mobile, uAddress, RoleID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getuName());
             ps.setString(2, user.getUsername());
             ps.setString(3, user.getPassword());
@@ -249,7 +251,7 @@ public class UserDAO extends DBContext {
     public boolean editUser(int id, Account updatedUser) {
         String sql = "UPDATE users SET uName=?, Username=?, Password=?, Avatar=?, Gender=?, Email=?, Mobile=?, uAddress=?, RoleID=? WHERE ID=?";
         try (
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, updatedUser.getuName());
             ps.setString(2, updatedUser.getUsername());
             ps.setString(3, updatedUser.getPassword());
@@ -271,46 +273,60 @@ public class UserDAO extends DBContext {
         List<Account> result = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE uName LIKE ? OR Email LIKE ?";
         try (
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
             ps.setString(2, "%" + keyword + "%");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 result.add(new Account(
-                    rs.getInt("ID"),
-                    rs.getString("uName"),
-                    rs.getString("Username"),
-                    rs.getString("Password"),
-                    rs.getString("Gender"),
-                    rs.getString("Email"),
-                    rs.getInt("RoleID")));
+                        rs.getInt("ID"),
+                        rs.getString("uName"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getString("Email"),
+                        rs.getInt("RoleID")));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
     }
-      public Account getUserById(int id) {
+
+    public Account getUserById(int id) {
         String sql = "SELECT * FROM users WHERE ID = ?";
         try (
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+                PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return new Account(
-                     rs.getInt("ID"),
-                    rs.getString("uName"),
-                    rs.getString("Username"),
-                    rs.getString("Password"),
-                    rs.getString("Gender"),
-                    rs.getString("Email"),
+                        rs.getInt("ID"),
+                        rs.getString("uName"),
+                        rs.getString("Username"),
+                        rs.getString("Password"),
+                        rs.getString("Gender"),
+                        rs.getString("Email"),
                         rs.getString("Mobile"),
                         rs.getString("uAddress"),
-                    rs.getInt("RoleID"));
+                        rs.getInt("RoleID"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
+
+    public boolean deleteUserByID(int id) {
+        String sql = "DELETE FROM users WHERE ID = ?";
+        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ps.executeUpdate(); // Trả về true nếu có ít nhất một dòng bị xóa
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
