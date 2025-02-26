@@ -73,35 +73,42 @@ public class Order extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Lấy thông tin từ form
-        String productId = request.getParameter("productId");
-        String size = request.getParameter("size");
-        String quantityStr = request.getParameter("quantity");
-        String pricestr = request.getParameter("price");
-        int quantity = Integer.parseInt(quantityStr);
-        int productID = Integer.parseInt(productId);
-        double price = Double.parseDouble(pricestr);
-        HttpSession session = request.getSession();
-        Account user = (Account) session.getAttribute("u");
-        OrderDAO o = new OrderDAO();
-        OrderdetailDAO od = new OrderdetailDAO();
-        if (o.checkCreateNewOrder(user.getId())) {
-            o.insertOrder(user.getId());
-            int orderID = o.getorderID(user.getId());
-            od.insertOrderdetail(orderID, productID, quantity, size);
-            o.updateTotalAmount(orderID, price, quantity);
-        } else {
-            int orderID = o.getorderID(user.getId());
-            od.insertOrderdetail(orderID, productID, quantity, size);
-            o.updateTotalAmount(orderID, price, quantity);
-        }
-        // Lấy URL trang trước đó (Referer)
-        String referer = request.getHeader("referer");
-        if (referer == null || referer.trim().isEmpty()) {
-            referer = "home.jsp"; 
-        }
-        response.sendRedirect(referer);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
+        try {
+           
+            String productId = request.getParameter("productId");
+            String size = request.getParameter("size");
+            String quantityStr = request.getParameter("quantity");
+            String pricestr = request.getParameter("price");
+
+            int quantity = Integer.parseInt(quantityStr);
+            int productID = Integer.parseInt(productId);
+            double price = Double.parseDouble(pricestr);
+
+            HttpSession session = request.getSession();
+            Account user = (Account) session.getAttribute("u");
+
+            OrderDAO o = new OrderDAO();
+            OrderdetailDAO od = new OrderdetailDAO();
+            int orderID = o.getorderID(user.getId());
+            if (o.checkSize(quantity, productID, size) == false) {
+                response.getWriter().write("{\"status\": \"error\", \"message\": \"Sản phẩm không đủ số lượng, vui lòng giảm số lượng!\"}");
+                return;
+            }
+            if (o.checkCreateNewOrder(user.getId())) {
+                o.insertOrder(user.getId());
+            }
+
+            od.insertOrderdetail(orderID, productID, quantity, size);
+            o.updateTotalAmount(orderID, price, quantity);
+            response.getWriter().write("{\"status\": \"success\"}");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getWriter().write("{\"status\": \"error\", \"message\": \"Có lỗi xảy ra, vui lòng thử lại!\"}");
+        }
     }
 
     /**

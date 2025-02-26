@@ -243,6 +243,9 @@
 
                                             </div>
 
+                                            <<!-- Thêm thông báo -->
+                                            <div id="orderSuccessMessage" class="order-success">Đặt hàng thành công</div>
+
                                             <!-- Modal -->
                                             <div id="cartModal" class="modal">
                                                 <div class="modal-dialog">
@@ -252,14 +255,13 @@
                                                             <span class="close" onclick="closeCartModal()">&times;</span>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form action="order" method="post">
+                                                            <form id="orderForm">
                                                                 <input type="hidden" id="productId" name="productId">
-                                                                <input type="hidden" name="price" value="<%= product.getPrice() %>">
+                                                                <input type="hidden" id="price" name="price" value="<%= product.getPrice() %>">
                                                                 <p><strong>Product:</strong> <span id="productName"></span></p>
                                                                 <p><strong>Price:</strong> $<span id="productPrice"></span></p>
 
                                                                 <!-- Chọn size dựa theo TypeId -->
-
                                                                 <label for="size">Size:</label>
                                                                 <select name="size" id="size">
                                                                     <option value="S">S</option>
@@ -271,7 +273,7 @@
                                                                 <input type="number" name="quantity" id="quantity" min="1" value="1">
 
                                                                 <div class="modal-footer">
-                                                                    <button type="submit" class="confirm">Confirm</button>
+                                                                    <button type="button" class="confirm" onclick="submitOrder()">Confirm</button>
                                                                     <button type="button" class="cancel" onclick="closeCartModal()">Cancel</button>
                                                                 </div>
                                                             </form>
@@ -279,6 +281,58 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <style>
+                                                /* CSS cho thông báo */
+                                                .order-success {
+                                                    display: none;
+                                                    position: fixed;
+                                                    bottom: 20px;
+                                                    left: 20px;
+                                                    background: black;
+                                                    color: white;
+                                                    padding: 10px 20px;
+                                                    border-radius: 5px;
+                                                    font-size: 16px;
+                                                    z-index: 1000;
+                                                }
+                                            </style>
+
+                                            <script>
+                                                function submitOrder() {
+                                                    let form = document.getElementById("orderForm");
+                                                    let formData = new URLSearchParams(new FormData(form)).toString();
+
+                                                    fetch("order", {
+                                                        method: "POST",
+                                                        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                                                        body: formData
+                                                    })
+                                                            .then(response => response.json()) // Chuyển phản hồi thành JSON
+                                                            .then(data => {
+                                                                let message = document.getElementById("orderSuccessMessage");
+
+                                                                if (data.status === "success") {
+                                                                    message.innerText = "Đặt hàng thành công!";
+                                                                    message.style.backgroundColor = "black"; // Giữ màu đen cho thông báo thành công
+                                                                } else {
+                                                                    message.innerText = data.message; // Hiển thị thông báo lỗi từ server
+                                                                    message.style.backgroundColor = "red"; // Chuyển thành màu đỏ để báo lỗi
+                                                                }
+
+                                                                message.style.display = "block";
+                                                                setTimeout(function () {
+                                                                    message.style.display = "none";
+                                                                }, 3000);
+
+                                                                if (data.status === "success") {
+                                                                    closeCartModal(); // Đóng modal nếu đặt hàng thành công
+                                                                }
+                                                            })
+                                                            .catch(error => console.error("Error:", error));
+                                                }
+
+                                            </script>
                                         </div>
 
                                     </div>
@@ -343,19 +397,15 @@
                                                 <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
                                                    class="btn btn-default add-to-cart"
                                                    <% if (user != null) { %>
-                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;"
+                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>');
+                                                           return false;"
                                                    <% } %>>
                                                     <i class="fa fa-shopping-cart"></i> Add to cart
                                                 </a>
 
                                             </div>
                                         </div>
-                                        <div class="choose">
-                                            <ul class="nav nav-pills nav-justified">
-                                                <li><a href="#"><i class="fa fa-plus-square"></i> Add to wishlist</a></li>
-                                                <li><a href="#"><i class="fa fa-plus-square"></i> Add to compare</a></li>
-                                            </ul>
-                                        </div>
+
                                     </div>
                                 </div>
                                 <% 

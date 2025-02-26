@@ -33,6 +33,25 @@ public class OrderDAO extends DBContext {
         }
     }
 
+    public boolean checkSize(int quantity, int productId, String sizeName) {
+        String sql = "Select Quantity from ProductSize ps join Size s on ps.SizeID = s.ID_Size\n"
+                + "where s.SizeName = ? and ps.ProductID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, sizeName);
+            stmt.setInt(2, productId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                int number = rs.getInt("Quantity");
+                if (quantity > number) {
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
     public boolean checkCreateNewOrder(int userID) {
         String sql = "SELECT TOP 1 PaymentStatus FROM Orders WHERE UsersID = ? ORDER BY ID DESC;";
 
@@ -90,6 +109,6 @@ public class OrderDAO extends DBContext {
 
     public static void main(String[] args) {
         OrderDAO o = new OrderDAO();
-        System.out.println("" + o.getorderID(10));
+        System.out.println("" + o.checkSize(5, 1, "S"));
     }
 }

@@ -48,7 +48,7 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                   <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
+                                    <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
                                     <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
                                     <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
                                     <li><a href="${not empty sessionScope.u? "logout" : "login.jsp"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
@@ -212,6 +212,9 @@
                                                     <i class="fa fa-shopping-cart"></i> Add to cart
                                                 </a>
                                             </div>
+                                            <div id="orderSuccessMessage" class="order-success">Đặt hàng thành công</div>
+
+                                            <!-- Modal -->
                                             <div id="cartModal" class="modal">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
@@ -220,14 +223,13 @@
                                                             <span class="close" onclick="closeCartModal()">&times;</span>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form action="order" method="post">
+                                                            <form id="orderForm">
                                                                 <input type="hidden" id="productId" name="productId">
-                                                                <input type="hidden" name="price" value="<%= product.getPrice() %>">
+                                                                <input type="hidden" id="price" name="price" value="<%= product.getPrice() %>">
                                                                 <p><strong>Product:</strong> <span id="productName"></span></p>
                                                                 <p><strong>Price:</strong> $<span id="productPrice"></span></p>
 
                                                                 <!-- Chọn size dựa theo TypeId -->
-
                                                                 <label for="size">Size:</label>
                                                                 <select name="size" id="size">
                                                                     <option value="S">S</option>
@@ -239,7 +241,7 @@
                                                                 <input type="number" name="quantity" id="quantity" min="1" value="1">
 
                                                                 <div class="modal-footer">
-                                                                    <button type="submit" class="confirm">Confirm</button>
+                                                                    <button type="button" class="confirm" onclick="submitOrder()">Confirm</button>
                                                                     <button type="button" class="cancel" onclick="closeCartModal()">Cancel</button>
                                                                 </div>
                                                             </form>
@@ -247,60 +249,61 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div id="cartModal" class="modal">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h2 class="modal-title">Add to Cart</h2>
-                                                            <span class="close" onclick="closeCartModal()">&times;</span>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form action="order" method="post">
-                                                                <input type="hidden" id="productId" name="productId">
 
-                                                                <p><strong>Product:</strong> <span id="productName"></span></p>
-                                                                <p><strong>Price:</strong> $<span id="productPrice"></span></p>
+                                            <style>
+                                                /* CSS cho thông báo */
+                                                .order-success {
+                                                    display: none;
+                                                    position: fixed;
+                                                    bottom: 20px;
+                                                    left: 20px;
+                                                    background: black;
+                                                    color: white;
+                                                    padding: 10px 20px;
+                                                    border-radius: 5px;
+                                                    font-size: 16px;
+                                                    z-index: 1000;
+                                                }
+                                            </style>
 
-                                                                <!-- Chọn size dựa theo TypeId -->
-                                                                <%
-                                                                    int typeId = product.getTypeId();
-                                                                    if (typeId == 17) { 
-                                                                %>
-                                                                <label for="size">Size:</label>
-                                                                <select name="size" id="size">
-                                                                    <option value="39-42">39-42</option>
-                                                                    <option value="43-46">43-46</option>
-                                                                </select>
-                                                                <%
-                                                                    } else if (typeId >= 14 && typeId <= 16) {
-                                                                        // Không hiển thị size
-                                                                    } else { 
-                                                                %>
-                                                                <label for="size">Size:</label>
-                                                                <select name="size" id="size">
-                                                                    <option value="S">S</option>
-                                                                    <option value="M">M</option>
-                                                                    <option value="L">L</option>
-                                                                    <option value="XL">XL</option>
-                                                                </select>
-                                                                <%
-                                                                    }
-                                                                %>
+                                            <script>
+                                                function submitOrder() {
+                                                    let form = document.getElementById("orderForm");
+                                                    let formData = new URLSearchParams(new FormData(form)).toString();
 
-                                                                <label for="quantity">Quantity:</label>
-                                                                <input type="number" name="quantity" id="quantity" min="1" value="1">
+                                                    fetch("order", {
+                                                        method: "POST",
+                                                        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                                                        body: formData
+                                                    })
+                                                            .then(response => response.json()) // Chuyển phản hồi thành JSON
+                                                            .then(data => {
+                                                                let message = document.getElementById("orderSuccessMessage");
 
-                                                                <div class="modal-footer">
-                                                                    <button type="submit" class="confirm">Confirm</button>
-                                                                    <button type="button" class="cancel" onclick="closeCartModal()">Cancel</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                                if (data.status === "success") {
+                                                                    message.innerText = "Đặt hàng thành công!";
+                                                                    message.style.backgroundColor = "black"; // Giữ màu đen cho thông báo thành công
+                                                                } else {
+                                                                    message.innerText = data.message; // Hiển thị thông báo lỗi từ server
+                                                                    message.style.backgroundColor = "red"; // Chuyển thành màu đỏ để báo lỗi
+                                                                }
+
+                                                                message.style.display = "block";
+                                                                setTimeout(function () {
+                                                                    message.style.display = "none";
+                                                                }, 3000);
+
+                                                                if (data.status === "success") {
+                                                                    closeCartModal(); // Đóng modal nếu đặt hàng thành công
+                                                                }
+                                                            })
+                                                            .catch(error => console.error("Error:", error));
+                                                }
+
+                                            </script>
+
                                         </div>
-                                       
+
                                     </div>
                                 </div>
                                 <%
