@@ -122,6 +122,7 @@
 
 }
 
+
 /* xs */
 @media (max-width: 767px) {
 
@@ -157,6 +158,9 @@
 	display: inline-block;
 	width: 100%;
 }
+
+
+
 
 .mainmenu{
 	width: 100%;
