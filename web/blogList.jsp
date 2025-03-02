@@ -92,6 +92,14 @@
             .page-link:focus {
                 box-shadow: none;
             }
+            .blog-content h4 {
+                display: -webkit-box;
+                -webkit-line-clamp: 1; /* Giới hạn 1 dòng */
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
+            }
         </style>
     </head>
     <body>
@@ -109,10 +117,10 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                    <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
-                                    <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
-                                    <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                                    <li><a href="${not empty sessionScope.u? "logout" : "login.jsp"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
+                                    <li><a href="#"><i class="fa fa-user"></i> Account</a></li>
+                                    <li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
+                                    <li><a href="#"><i class="fa fa-shopping-cart"></i> Cart</a></li>
+                                    <li><a href="#"><i class="fa fa-lock"></i> Login</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -134,26 +142,15 @@
                             <div class="mainmenu pull-left">
                                 <ul class="nav navbar-nav collapse navbar-collapse">
                                     <li><a href="home.jsp" class="active">Home</a></li>
-                                    <li class="menu-item">
-                                        <a href="#">Product</a>
-                                        <div class="sub-menu">
-                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
-                                                <% int count1 = 0; %>
-                                                <% for (Category category : categories) { %>
-                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
-                                                <div class="category-column">
-                                                    <% } %>
-                                                    <a href="productlist?category=<%= category.getId() %>">
-                                                        <%= category.getName() %>
-                                                    </a>
-                                                    <% count1++; %>
-                                                    <% if (count1 % 6 == 0 || count1 == categories.size()) { %>
-                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
-                                                <% } %>
-                                                <% } %>
-                                            </div> <!-- Kết thúc category-container -->
-                                        </div>
-                                    </li>
+                                    <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
+                                        <ul role="menu" class="sub-menu">
+                                            <li><a href="shop.html">Products</a></li>
+                                            <li><a href="product-details.html">Product Details</a></li> 
+                                            <li><a href="checkout.html">Checkout</a></li> 
+                                            <li><a href="cart.html">Cart</a></li> 
+                                            <li><a href="login.html">Login</a></li> 
+                                        </ul>
+                                    </li> 
                                     <li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
 
                                     <ul role="menu" class="sub-menu">
@@ -167,9 +164,9 @@
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <form action="productsearch" method="GET" class="search_box pull-right">
-                                <input type="text" name="query" placeholder="Search" required />
-                            </form>
+                            <div class="search_box pull-right">
+                                <input type="text" placeholder="Search"/>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -312,9 +309,7 @@
                                         <%= blog.getTitle() %>
                                     </a>
                                 </h4>
-
                                 <p><i class="fa fa-calendar"></i> <%= blog.getUploadDate() %> - <strong>Author: </strong><%= blog.getAuthor() %></p>
-
                                 <div class="blog-thumbnail">
                                     <img src="<%= blog.getBlogImage() %>" alt="<%= blog.getTitle() %>" class="img-responsive">
                                 </div>

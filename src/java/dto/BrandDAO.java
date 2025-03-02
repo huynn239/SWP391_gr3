@@ -27,4 +27,21 @@ public class BrandDAO extends DBContext {
         }
         return brandList;
     }
+    public Brand getBrandById(String id) {
+        Brand brand = null;
+        String sql = "SELECT * FROM Brand WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                brand = new Brand(
+                        rs.getString("id"),
+                        rs.getString("name")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return brand;
+    }
 }

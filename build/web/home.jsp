@@ -228,7 +228,9 @@
                                     <div class="product-image-wrapper">
                                         <div class="single-products">
                                             <div class="productinfo text-center">
-                                                <img src="<%= product.getImage() %>" alt="<%= product.getName() %>"/>
+                                                <a href="productDetail.jsp?productId=<%= product.getId() %>">
+                                                    <img src="<%= product.getImage() %>" alt="<%=product.getName() %>"/>
+                                                </a>
                                                 <h2>$<%= product.getPrice() %></h2>
                                                 <p><%= product.getName() %></p>
 
@@ -391,7 +393,9 @@
                                     <div class="product-image-wrapper">
                                         <div class="single-products">
                                             <div class="productinfo text-center">
-                                                <img src="<%= product.getImage() %>" alt="<%= product.getName() %>" class="img-responsive"/>
+                                                <a href="productDetail.jsp?productId=<%= product.getId() %>">
+                                                    <img src="<%= product.getImage() %>" alt="<%=product.getName() %>"/>
+                                                </a>
                                                 <h2>$<%= product.getPrice() %></h2>
                                                 <p><%= product.getName() %></p>
                                                 <a href="<%= (user == null) ? "login.jsp" : "#" %>" 

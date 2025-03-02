@@ -266,7 +266,9 @@
                                         <div class="product-image-wrapper">
                                             <div class="single-products">
                                                 <div class="productinfo text-center">
-                                                    <img src="<%= p.getImage() %>" alt="<%= p.getName() %>"/>
+                                                    <a href="productDetail.jsp?productId=<%= p.getId() %>">
+                                                        <img src="<%= p.getImage() %>" alt="<%= p.getName() %>"/>
+                                                    </a>
                                                     <h2>$<%= p.getPrice() %></h2>
                                                     <p><%= p.getName() %></p>
                                                     <a href="<%= (user == null) ? "login.jsp" : "#" %>" 

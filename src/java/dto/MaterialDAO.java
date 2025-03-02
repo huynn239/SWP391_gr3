@@ -44,4 +44,21 @@ public class MaterialDAO extends DBContext {
             System.out.println("" + material.getMname());
         }
     }
+    public Material getMaterialById(int id) {
+        Material material = null;
+        String sql = "SELECT * FROM Material WHERE ID_Material = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                material = new Material(
+                        rs.getInt("ID_Material"),
+                        rs.getString("Name")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return material;
+    }
 }

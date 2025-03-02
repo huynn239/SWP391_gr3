@@ -11,7 +11,7 @@ public class BlogDAO extends DBContext {
     // Lấy tất cả bài viết có phân trang
     public List<Blog> getAllBlogs(int page, int limit) {
         List<Blog> blogList = new ArrayList<>();
-        String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author " +
+        String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
                      "FROM [shopOnline].[dbo].[blog] b " +
                      "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
                      "ORDER BY b.UploadDate DESC " +
@@ -30,7 +30,8 @@ public class BlogDAO extends DBContext {
                         rs.getString("Content"),
                         rs.getString("BlogImage"),
                         rs.getDate("UploadDate"),
-                        rs.getString("Author")
+                        rs.getString("Author"),
+                        rs.getInt("CateID")
                     ));
                 }
             }
@@ -81,7 +82,7 @@ public class BlogDAO extends DBContext {
     // Lấy blog theo danh mục
     public List<Blog> getBlogsByCategory(int categoryId, int page, int limit) {
         List<Blog> blogList = new ArrayList<>();
-        String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author " +
+        String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
                      "FROM [shopOnline].[dbo].[blog] b " +
                      "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
                      "WHERE b.CateID = ? " +
@@ -102,7 +103,8 @@ public class BlogDAO extends DBContext {
                         rs.getString("Content"),
                         rs.getString("BlogImage"),
                         rs.getDate("UploadDate"),
-                        rs.getString("Author")
+                        rs.getString("Author"),
+                        rs.getInt("CateID")
                     ));
                 }
             }
@@ -111,28 +113,74 @@ public class BlogDAO extends DBContext {
         }
         return blogList;
     }
-    // Lấy tổng số trang của blog theo danh mục
-public int getTotalPagesByCategory(int categoryId, int limit) {
-    String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[blog] WHERE CateID = ?";
-    int totalRows = 0;
 
-    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-        stmt.setInt(1, categoryId);
-        try (ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                totalRows = rs.getInt(1);
+    // Lấy tổng số trang của blog theo danh mục
+    public int getTotalPagesByCategory(int categoryId, int limit) {
+        String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[blog] WHERE CateID = ?";
+        int totalRows = 0;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, categoryId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    totalRows = rs.getInt(1);
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+        return (int) Math.ceil((double) totalRows / limit);
     }
 
-    return (int) Math.ceil((double) totalRows / limit);
-}
+    // Lấy chi tiết blog theo ID
+    public Blog getBlogById(String id) {
+        Blog blog = null;
+        String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
+                     "FROM [shopOnline].[dbo].[blog] b " +
+                     "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "WHERE b.ID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    blog = new Blog(
+                        rs.getString("ID"),
+                        rs.getString("Title"),
+                        rs.getString("Content"),
+                        rs.getString("BlogImage"),
+                        rs.getDate("UploadDate"),
+                        rs.getString("Author"),
+                        rs.getInt("CateID")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return blog;
+    }
+
+    // Lấy danh mục theo CateID
+    public Category getCategoryByCateID(int cateID) {
+        Category category = null;
+        String sql = "SELECT ID, Name FROM [shopOnline].[dbo].[categoryblog] WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, cateID);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    category = new Category(rs.getInt("ID"), rs.getString("Name"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return category;
+    }
 
     public static void main(String[] args) {
-       BlogDAO blogdao = new BlogDAO();
-       blogdao.getBlogsByCategory(1, 1, 3);
+        BlogDAO blogDAO = new BlogDAO();
+        blogDAO.getBlogsByCategory(1, 1, 3);
     }
-    
 }

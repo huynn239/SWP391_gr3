@@ -10,19 +10,21 @@ public class Blog {
     private String blogImage;
     private Date uploadDate;
     private String author;  // Thêm trường author cho tên tác giả
+// Trong Blog.java
+private int cateID; // Thêm trường CateID
 
-    public Blog() {
-    }
+public Blog(String id, String title, String content, String blogImage, Date uploadDate, String author, int cateID) {
+    this.id = id;
+    this.title = title;
+    this.content = content;
+    this.blogImage = blogImage;
+    this.uploadDate = uploadDate;
+    this.author = author;
+    this.cateID = cateID;
+}
 
-    public Blog(String id, String title, String content, String blogImage, Date uploadDate, String author) {
-        this.id = id;
-        this.title = title;
-        this.content = content;
-        this.blogImage = blogImage;
-        this.uploadDate = uploadDate;
-        this.author = author;  // Khởi tạo tác giả
-    }
-
+public int getCateID() { return cateID; }
+public void setCateID(int cateID) { this.cateID = cateID; }
     // Getters and Setters
     public String getId() {
         return id;
