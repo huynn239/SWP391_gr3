@@ -50,7 +50,7 @@
                             </tr>
                         </table>
                         <br>
-                        <a class="btn btn-primary" href="EditUser">EditUser</a>
+                        <a class="btn btn-primary" href="UserControllerServlet?action=editPage">Edit User</a>
                         <a class="btn btn-primary" href="UserControllerServlet">Back to User List</a>
                     </div>
                 </div>

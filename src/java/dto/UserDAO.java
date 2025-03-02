@@ -205,24 +205,24 @@ public class UserDAO extends DBContext {
         return null;
 
     }
-    // Lấy danh sách người dùng từ database
-
+        // Lấy danh sách người dùng từ database
     public List<Account> getUserList() {
         List<Account> userList = new ArrayList<>();
         String sql = "SELECT * FROM users";
         try (
-                PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 userList.add(new Account(
-                        rs.getInt("ID"),
-                        rs.getString("uName"),
-                        rs.getString("Username"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getString("Email"),
-                        rs.getString("Mobile"),
-                        rs.getString("uAddress"),
-                        rs.getInt("RoleID")));
+                    rs.getInt("ID"),
+            rs.getString("uName"),
+            rs.getString("Username"),
+            rs.getString("Password"),
+            rs.getString("Gender"),
+            rs.getString("Email"),
+            rs.getString("Mobile"),
+            rs.getString("uAddress"),
+                rs.getInt("RoleID")));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -234,7 +234,7 @@ public class UserDAO extends DBContext {
     public void addUser(Account user) {
         String sql = "INSERT INTO users (uName, Username, Password, Avatar, Gender, Email, Mobile, uAddress, RoleID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (
-                PreparedStatement ps = connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getuName());
             ps.setString(2, user.getUsername());
             ps.setString(3, user.getPassword());
@@ -253,7 +253,7 @@ public class UserDAO extends DBContext {
     public boolean editUser(int id, Account updatedUser) {
         String sql = "UPDATE users SET uName=?, Username=?, Password=?, Avatar=?, Gender=?, Email=?, Mobile=?, uAddress=?, RoleID=? WHERE ID=?";
         try (
-                PreparedStatement ps = connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, updatedUser.getuName());
             ps.setString(2, updatedUser.getUsername());
             ps.setString(3, updatedUser.getPassword());
@@ -275,60 +275,59 @@ public class UserDAO extends DBContext {
         List<Account> result = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE uName LIKE ? OR Email LIKE ?";
         try (
-                PreparedStatement ps = connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
             ps.setString(2, "%" + keyword + "%");
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 result.add(new Account(
-                        rs.getInt("ID"),
-                        rs.getString("uName"),
-                        rs.getString("Username"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getString("Email"),
-                        rs.getInt("RoleID")));
+                    rs.getInt("ID"),
+                    rs.getString("uName"),
+                    rs.getString("Username"),
+                    rs.getString("Password"),
+                    rs.getString("Gender"),
+                    rs.getString("Email"),
+                    rs.getInt("RoleID")));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
     }
-
-    public Account getUserById(int id) {
+      public Account getUserById(int id) {
         String sql = "SELECT * FROM users WHERE ID = ?";
         try (
-                PreparedStatement ps = connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return new Account(
-                        rs.getInt("ID"),
-                        rs.getString("uName"),
-                        rs.getString("Username"),
-                        rs.getString("Password"),
-                        rs.getString("Gender"),
-                        rs.getString("Email"),
+                     rs.getInt("ID"),
+                    rs.getString("uName"),
+                    rs.getString("Username"),
+                    rs.getString("Password"),
+                    rs.getString("Gender"),
+                    rs.getString("Email"),
                         rs.getString("Mobile"),
                         rs.getString("uAddress"),
-                        rs.getInt("RoleID"));
+                    rs.getInt("RoleID"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-
     public boolean deleteUserByID(int id) {
-        String sql = "DELETE FROM users WHERE ID = ?";
-        try (Connection conn = new DBContext().getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, id);
-            ps.executeUpdate(); // Trả về true nếu có ít nhất một dòng bị xóa
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
+    String sql = "DELETE FROM users WHERE ID = ?";
+    try (Connection conn = new DBContext().getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+         
+        ps.setInt(1, id);
+        ps.executeUpdate() ; // Trả về true nếu có ít nhất một dòng bị xóa
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return false;
     }
 
 }

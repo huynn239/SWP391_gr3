@@ -32,7 +32,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <h3 style="color: green;">${mess}</h3>
-                    <a href=AddUserList >Add a new User</a>
+                    <a href="UserControllerServlet?action=addPage">Add new User</a>
                         <table id="datatable">
                             <thead>
                                 <tr>

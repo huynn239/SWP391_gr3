@@ -32,6 +32,16 @@ public class Account {
     this.uAddress = uAddress;
     this.RoleID = RoleID;
 }
+       public Account(String uName, String Username, String Password, String Gender, String Email, String Mobile, String uAddress, int roleID) {
+        this.uName = uName;
+        this.Username = Username;
+        this.Password = Password;
+        this.Gender = Gender;
+        this.Email = Email;
+        this.Mobile = Mobile;
+        this.uAddress = uAddress;
+        this.RoleID = roleID;
+    }
 
     public Account(int id, String uName, String Username, String Password, String Gender, String Email, int RoleID) {
         this.id = id;
