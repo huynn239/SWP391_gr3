@@ -87,16 +87,18 @@ public class OrderDAO extends DBContext {
         return 0;
     }
 
-    public void updateTotalAmount(int orderID, double price, int quantity) {
-        String sql = "UPDATE orders "
-                + "SET TotalAmount = TotalAmount + ? "
-                + "WHERE ID = ?";
+    public void updateTotalAmount(int orderID) {
+        String sql = "UPDATE orders \n"
+                + "Set TotalAmount = (\n"
+                + "    SELECT SUM(od.Quantity * p.Price) \n"
+                + "    FROM orderdetails od\n"
+                + "    JOIN Product p ON od.ProductID = p.ID\n"
+                + "    WHERE od.OrderID = orders.ID\n"
+                + "	)\n"
+                + "WHERE orders.ID = ?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, (int) (price * quantity)); // Tính tổng tiền cập nhật
-            stmt.setInt(2, orderID); // Cập nhật đúng đơn hàng theo ID
-
+            stmt.setInt(1, orderID); // Cập nhật đúng đơn hàng theo ID
             int rowsUpdated = stmt.executeUpdate(); // Dùng executeUpdate() thay vì executeQuery()
-
             if (rowsUpdated > 0) {
                 System.out.println("TotalAmount updated successfully!");
             } else {

@@ -1629,21 +1629,64 @@ h2.title {
 }
 
 .cart_product {
-    display: block;
-    margin: 15px -70px 10px 25px;
+    display: flex; /* Sử dụng flexbox để căn chỉnh nội dung */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    justify-content: center;
+    gap: 10px; /* Khoảng cách giữa ảnh và chữ */
 }
 
-.cart_quantity_button a {
-    background:#F0F0E9;
-    color: #696763;
-    display: inline-block;
-    font-size: 16px;
-    height: 28px;
-    overflow: hidden;
-    text-align: center;
-    width: 35px;
-    float: left;
+.cart_product img {
+    width: 80px; /* Kích thước ảnh hợp lý */
+    height: auto;
+    border: 2px solid #ddd; /* Viền nhẹ để ảnh nổi bật */
+    border-radius: 8px; /* Bo tròn góc */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
+
+.cart_description {
+    flex-grow: 1; /* Cho phép mô tả mở rộng để tránh bị dồn */
+}
+
+/* Đảm bảo tất cả ô trong bảng có độ cao đồng đều */
+.cart_info table tr td {
+    vertical-align: middle !important;
+    padding: 10px;
+}
+
+
+
+.cart_quantity_form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cart_quantity_button {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Khoảng cách giữa các phần tử */
+}
+
+.cart_btn {
+    width: 32px;
+    height: 32px;
+    background-color: #f8f9fa; /* Màu nền nhẹ */
+    border: 1px solid #ddd;
+    border-radius: 5px; /* Bo góc */
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cart_btn:hover {
+    background-color: #FC9A11; /* Màu xanh khi hover */
+    color: white;
+    border-color: #007bff;
+}
+
+
+
 
 
 .cart_quantity_input {

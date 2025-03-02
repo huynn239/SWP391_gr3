@@ -102,7 +102,7 @@ public class Order extends HttpServlet {
             }
 
             od.insertOrderdetail(orderID, productID, quantity, size);
-            o.updateTotalAmount(orderID, price, quantity);
+            o.updateTotalAmount(orderID);
             response.getWriter().write("{\"status\": \"success\"}");
 
         } catch (Exception e) {

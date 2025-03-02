@@ -32,6 +32,8 @@ public class UserDAO extends DBContext {
                         rs.getString("Password"),
                         rs.getString("Gender"),
                         rs.getString("Email"),
+                        rs.getString("Mobile"),
+                        rs.getString("uAddress"),
                         rs.getInt("RoleID")
                 );
 

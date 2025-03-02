@@ -3,7 +3,7 @@
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.ArrayList" %>
 
-<%@ page import="model.Product, model.Brand, model.Category, model.Material,model.Account" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Material,model.Account,model.Cart" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
@@ -36,7 +36,46 @@
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
         <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+        <style>
+            .chose_area {
+                padding: 20px !important;
+                background: #fff;
+                border-radius: 10px;
+                box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            }
 
+            .chose_area label {
+                font-weight: bold;
+                margin-bottom: 8px;
+                display: block;
+            }
+
+            .chose_area input,
+            .chose_area select {
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 15px;
+                border-radius: 8px;
+                border: 1px solid #ccc;
+                background: #f9f9f9;
+            }
+
+            .location-select {
+                display: flex;
+                gap: 15px;
+                margin-top: 10px;
+            }
+
+            .location-select select {
+                flex: 1;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #ccc;
+                background: #f9f9f9;
+            }
+
+
+        </style>
     </head>
     <body>
 
@@ -54,9 +93,7 @@
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
                                     <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
-                                    <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
-                                    <li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
-                                    <li><a href="#"><i class="fa fa-shopping-cart"></i> Cart</a></li>
+                                    <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
                                     <li><a href="${not empty sessionScope.u? "logout" : "login.jsp"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
                                 </ul>
                             </div>
@@ -132,107 +169,183 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="cart_product">
-                                    <a href=""><img src="images/cart/one.png" alt=""></a>
-                                </td>
-                                <td class="cart_description">
-                                    <h4><a href="">Colorblock Scuba</a></h4>
-                                    <p>Web ID: 1089772</p>
-                                </td>
-                                <td class="cart_price">
-                                    <p>$59</p>
-                                </td>
-                                <td class="cart_quantity">
-                                    <div class="cart_quantity_button">
-                                        <a class="cart_quantity_up" href=""> + </a>
-                                        <input class="cart_quantity_input" type="text" name="quantity" value="1" autocomplete="off" size="2">
-                                        <a class="cart_quantity_down" href=""> - </a>
-                                    </div>
-                                </td>
-                                <td class="cart_total" >
-                                    <p class="cart_total_price">59đ</p>
-                                </td>
-                                <td class="cart_delete">
-                                    <a class="cart_quantity_delete" href=""><i class="fa fa-times"></i></a>
-                                </td>
-                            </tr>
+                            <%
+                                List<Cart> cartList = (List<Cart>) request.getAttribute("cartList");
+                                if (cartList != null && !cartList.isEmpty()) {
+                                    for (Cart c : cartList) {
+                            %>
 
                             <tr>
                                 <td class="cart_product">
-                                    <a href=""><img src="images/cart/two.png" alt=""></a>
+                                    <a href=""><img src="<%= c.getImage() %>" alt=""></a>
                                 </td>
                                 <td class="cart_description">
-                                    <h4><a href="">Colorblock Scuba</a></h4>
-                                    <p>Web ID: 1089772</p>
+                                    <h4><a href=""><%= c.getName() %></a></h4>
+                                    <p>Size: <%= c.getSize() %></p>
                                 </td>
                                 <td class="cart_price">
-                                    <p>$59</p>
+                                    <p>$<%= c.getPrice() %></p>
                                 </td>
                                 <td class="cart_quantity">
-                                    <div class="cart_quantity_button">
-                                        <a class="cart_quantity_up" href=""> + </a>
-                                        <input class="cart_quantity_input" type="text" name="quantity" value="1" autocomplete="off" size="2">
-                                        <a class="cart_quantity_down" href=""> - </a>
-                                    </div>
+                                    <form action="cartcontroller" method="post" class="cart_quantity_form">
+                                        <input type="hidden" name="Size" value="<%= c.getSize() %>"> 
+                                        <input type="hidden" name="productId" value="<%= c.getProductID() %>"> 
+                                        <div class="cart_quantity_button">
+                                            <button type="submit" name="action" value="decrease" class="cart_btn cart_quantity_down">-</button>
+                                            <input class="cart_quantity_input" type="text" name="quantity" value="<%= c.getQuantity() %>" autocomplete="off" size="2">
+                                            <button type="submit" name="action" value="increase" class="cart_btn cart_quantity_up">+</button>
+                                        </div>
+                                    </form>
                                 </td>
+
+
+
                                 <td class="cart_total">
-                                    <p class="cart_total_price">$59</p>
+                                    <p class="cart_total_price"><%= c.getPrice() * c.getQuantity() %>đ</p>
                                 </td>
                                 <td class="cart_delete">
-                                    <a class="cart_quantity_delete" href=""><i class="fa fa-times"></i></a>
+                                    <form action="cartcontroller" method="post" class="cart_delete_form">
+                                        <input type="hidden" name="Size" value="<%= c.getSize() %>"> 
+                                        <input type="hidden" name="productId" value="<%= c.getProductID() %>">
+                                        <input type="hidden" name="Size" value="<%= c.getSize() %>">  
+                                        <button type="submit" name="action" value="delete" class="cart_quantity_delete">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
-                            <tr>
-                                <td class="cart_product">
-                                    <a href=""><img src="images/cart/three.png" alt=""></a>
-                                </td>
-                                <td class="cart_description">
-                                    <h4><a href="">Colorblock Scuba</a></h4>
-                                    <p>Web ID: 1089772</p>
-                                </td>
-                                <td class="cart_price">
-                                    <p>$59</p>
-                                </td>
-                                <td class="cart_quantity">
-                                    <div class="cart_quantity_button">
-                                        <a class="cart_quantity_up" href=""> + </a>
-                                        <input class="cart_quantity_input" type="text" name="quantity" value="1" autocomplete="off" size="2">
-                                        <a class="cart_quantity_down" href=""> - </a>
-                                    </div>
-                                </td>
-                                <td class="cart_total">
-                                    <p class="cart_total_price">$59</p>
-                                </td>
-                                <td class="cart_delete">
-                                    <a class="cart_quantity_delete" href=""><i class="fa fa-times"></i></a>
-                                </td>
-                            </tr>
+                            <% 
+                        String cartMessage = (String) request.getAttribute("cartMessage");
+                        if (cartMessage != null && !cartMessage.isEmpty()) { 
+                            %>
+                        <div id="toast" class="toast"><%= cartMessage %></div>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                var toast = document.getElementById("toast");
+                                toast.style.display = "block";
+                                setTimeout(function () {
+                                    toast.style.display = "none";
+                                }, 3000);
+                            });
+                        </script>
+                        <% } %>
+
+                        <!-- CSS cho Toast -->
+                        <style>
+                            .toast {
+                                position: fixed;
+                                bottom: 20px;
+                                left: 20px;
+                                background: rgba(0, 0, 0, 0.7);
+                                color: white;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                display: none;
+                                z-index: 1000;
+                            }
+                        </style>
+
+                        <%
+                                }
+                            } else {
+                        %>
+                        <tr>
+                            <td colspan="6" style="text-align: center; font-size: 18px; padding: 20px;">
+                                Bạn không có đơn hàng nào.
+                            </td>
+                        </tr>
+                        <% } %>
                         </tbody>
                     </table>
                 </div>
             </div>
-        </section> <!--/#cart_items-->
+        </section>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll(".cart_quantity_input").forEach(input => {
+                    input.addEventListener("keydown", function (event) {
+                        if (event.key === "Enter") {
+                            event.preventDefault(); // Ngăn form gửi mặc định
+
+                            let form = this.closest("form"); // Tìm form chứa input
+                            let actionInput = document.createElement("input");
+                            actionInput.type = "hidden";
+                            actionInput.name = "action";
+                            actionInput.value = "input"; // Gửi action="input"
+                            form.appendChild(actionInput);
+
+                            form.submit(); // Gửi form
+                        }
+                    });
+                });
+            });
+        </script>
+
+        <!--/#cart_items-->
+
+        <% 
+      int subtotal = 0;
+      if (cartList != null) {
+          for (Cart c : cartList) {
+              subtotal += c.getPrice() * c.getQuantity();
+          }
+      }
+      int shippingCost = 0; // Nếu có phí ship, đặt giá trị phù hợp
+      int total = subtotal + shippingCost;
+        %>
 
         <section id="do_action">
-            <div class="container">
-               
-                <div class="row">
-                    
-                    <div class="col-sm-6">
-                        <div class="total_area">
-                            <ul>
-                                <li>Cart Sub Total <span>$59</span></li>
-                                <li>Eco Tax <span>$2</span></li>
-                                <li>Shipping Cost <span>Free</span></li>
-                                <li>Total <span>$61</span></li>
-                            </ul>
-                            <a class="btn btn-default check_out" href="">Check Out</a>
+            <form action="checkout.jsp" method="post" onsubmit="return validateForm()">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="chose_area">
+                                <label for="fullname">Họ và tên</label>
+                                <div>
+                                    <input type="text" id="fullname" name="fullname" value="<%= user.getuName() %>" required>
+                                </div>
+
+                                <label for="phone">Số điện thoại</label>
+                                <input type="text" id="phone" name="phone" value="<%= user.getMobile() %>" required>
+
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" value="<%= user.getEmail() %>" required>
+
+                                <div class="location-select">
+                                    <select id="province" name="province" onchange="loadDistricts()" required>
+                                        <option value="">Chọn tỉnh/thành phố</option>
+                                    </select>
+                                    <select id="district" name="district" onchange="loadWards()" required>
+                                        <option value="">Chọn quận/huyện</option>
+                                    </select>
+                                    <select id="ward" name="ward" required>
+                                        <option value="">Chọn xã/phường</option>
+                                    </select>
+                                </div>
+
+                                <script src="js/location.js"></script>
+
+                                <label for="address">Địa chỉ</label>
+                                <input type="text" id="address" name="address" required>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="total_area">
+                                <ul>
+                                    <li>Tạm tính <span><%= subtotal %>đ</span></li>
+                                    <li>Phí ship <span><%= (shippingCost > 0) ? shippingCost + "đ" : "Free" %></span></li>
+                                    <li>Tổng <span><%= total %>đ</span></li>
+                                </ul>
+                                <button type="submit" class="btn btn-default check_out">Check Out</button> <!-- Chuyển thành nút submit -->
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </section><!--/#do_action-->
+
+
 
         <footer id="footer"><!--Footer-->
             <div class="footer-top">
