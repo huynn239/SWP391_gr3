@@ -12,6 +12,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.Account;
 import utils.EncryptPassword;
 
@@ -77,6 +78,8 @@ public class RegisterController extends HttpServlet {
         String user = request.getParameter("user").trim();
         String pass = request.getParameter("pass").trim();
         String email = request.getParameter("email").trim();
+        SendEmail sm = new SendEmail();
+        String code = sm.getRandom();
 
         String re_pass = request.getParameter("repass");
         if (!pass.equals(re_pass)) {
@@ -84,21 +87,35 @@ public class RegisterController extends HttpServlet {
             request.getRequestDispatcher("register.jsp").forward(request, response);
         } else {
             UserDAO userdao = new UserDAO();
-            Account a = userdao.checkAccountExist(user,email);
+            Account a = userdao.checkAccountExist(user, email);
             if (a == null) {
                 pass = EncryptPassword.toSHA1(pass);
                 userdao.register(user, email, pass);
-                response.sendRedirect("home.jsp");
+                Account newAccount = userdao.checkAccountExist(user, email);
+                HttpSession session = request.getSession();
+                session.setAttribute("authCode", code); // Lưu mã xác thực vào session
+                session.setAttribute("authEmail", email); // Lưu email để xác minh
+                session.setAttribute("authTime", System.currentTimeMillis());
+
+                boolean emailSent = sm.sendEmail(newAccount, code);
+                if (emailSent) {
+                    response.sendRedirect("verifycode.jsp");
+                } else {
+                    request.setAttribute("mess", "Failed to send verification email. Please try again!");
+                    request.getRequestDispatcher("register.jsp").forward(request, response);
+                }
+                //  response.sendRedirect("verifycode.jsp");
+                // response.sendRedirect("home.jsp");
 
             } else {
 
-                 if (a.getUsername().equals(user)) {
-                request.setAttribute("mess", "Username already exists!");
-            }
-            if (a.getEmail().equals(email)) {
-                request.setAttribute("mess", "Email already exists!");
-            }
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+                if (a.getUsername().equals(user)) {
+                    request.setAttribute("mess", "Username already exists!");
+                }
+                if (a.getEmail().equals(email)) {
+                    request.setAttribute("mess", "Email already exists!");
+                }
+                request.getRequestDispatcher("register.jsp").forward(request, response);
             }
         }
     }
