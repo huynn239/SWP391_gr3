@@ -31,32 +31,34 @@
             <div class="table-responsive">
                 <table id="feedbackTable" class="table table-bordered table-hover">
                     <thead class="thead-dark">
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên sản phẩm</th>
-                            <th>Số sao</th>
-                            <th>Bình luận</th>
-                            <th>User ID</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <%
-                            List<Feedback> feedbackList = (List<Feedback>) request.getAttribute("feedbackList");
-                            if (feedbackList != null) {
-                                for (Feedback fb : feedbackList) {
-                        %>
-                        <tr>
-                            <td><%= fb.getId() %></td>
-                            <td><a href="ProductDetail.jsp?productId=<%= fb.getProductId() %>"><%= fb.getProductName() %></a></td>
-                            <td><%= fb.getRatedStar() %> ★</td>
-                            <td><%= fb.getComment() %></td>
-                            <td><%= fb.getUserId() %></td>
-                        </tr>
-                        <%
-                                }
-                            }
-                        %>
-                    </tbody>
+    <tr>
+        <th>ID</th>
+        <th>Tên sản phẩm</th>
+        <th>Số sao</th>
+        <th>Bình luận</th>
+        <th>User ID</th>
+        <th>Chi tiết</th> <%-- Cột mới --%>
+    </tr>
+</thead>
+<tbody>
+    <%
+        List<Feedback> feedbackList = (List<Feedback>) request.getAttribute("feedbackList");
+        if (feedbackList != null) {
+            for (Feedback fb : feedbackList) {
+    %>
+    <tr>
+        <td><%= fb.getId() %></td>
+        <td><a href="ProductDetail.jsp?productId=<%= fb.getProductId() %>"><%= fb.getProductName() %></a></td>
+        <td><%= fb.getRatedStar() %> ★</td>
+        <td><%= fb.getComment() %></td>
+        <td><%= fb.getUserId() %></td>
+        <td><a href="FeedbackDetail.jsp?feedbackId=<%= fb.getId() %>" class="btn btn-info btn-sm">Xem chi tiết</a></td> <%-- Link mới --%>
+    </tr>
+    <%
+            }
+        }
+    %>
+</tbody>
                 </table>
             </div>
         </div>

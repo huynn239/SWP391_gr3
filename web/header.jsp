@@ -56,7 +56,7 @@
                     <div class="mainmenu pull-left">
                         <ul class="nav navbar-nav">
                             <li><a href="home.jsp">Home</a></li>
-                            <li><a href="FeedbackList.jsp" class="active">Feedback List</a></li>
+                            <li><a href="FeedbackListControllerServlet" class="active">Feedback List</a></li>
                             <li><a href="contact-us.html">Contact</a></li>
                         </ul>
                     </div>
