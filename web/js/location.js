@@ -11,64 +11,60 @@ async function loadProvinces() {
         locationData = await response.json();
 
         const provinceSelect = document.getElementById("province");
-        provinceSelect.innerHTML = '<option value="" hidden selected>Chọn tỉnh/thành phố</option>';
-
-        for (const [code, province] of Object.entries(locationData)) {
+      
+        for (const province of Object.values(locationData)) {
             const option = document.createElement("option");
-            option.value = province.name_with_type; // Lấy name_with_type làm value
+            option.value = province.name_with_type; // Cả value và textContent đều là name_with_type
             option.textContent = province.name_with_type;
             provinceSelect.appendChild(option);
         }
     } catch (error) {
-        console.error("Lỗi tải danh sách tỉnh/thành phố:", error);
+        console.error("Lỗi tải dữ liệu:", error);
     }
 }
+
+
 
 // Load danh sách quận/huyện theo tỉnh đã chọn
 function loadDistricts() {
     const provinceName = document.getElementById("province").value;
     const districtSelect = document.getElementById("district");
-    districtSelect.innerHTML = '<option value="" hidden selected>Chọn quận/huyện</option>';
+    districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
 
-    const provinceCode = Object.keys(locationData).find(
-        (key) => locationData[key].name_with_type === provinceName
-    );
+    const province = Object.values(locationData).find(p => p.name_with_type === provinceName);
+    if (!province || !province["quan-huyen"])
+        return;
 
-    if (provinceCode && locationData[provinceCode]["quan-huyen"]) {
-        const districts = locationData[provinceCode]["quan-huyen"];
-        for (const [code, district] of Object.entries(districts)) {
-            const option = document.createElement("option");
-            option.value = district.name_with_type; // Lấy name_with_type làm value
-            option.textContent = district.name_with_type;
-            districtSelect.appendChild(option);
-        }
+    for (const district of Object.values(province["quan-huyen"])) {
+        const option = document.createElement("option");
+        option.value = district.name_with_type; // Giá trị gửi đi là name_with_type
+        option.textContent = district.name_with_type;
+        districtSelect.appendChild(option);
     }
 }
+
 
 // Load danh sách xã/phường theo quận/huyện đã chọn
 function loadWards() {
     const provinceName = document.getElementById("province").value;
     const districtName = document.getElementById("district").value;
     const wardSelect = document.getElementById("ward");
-    wardSelect.innerHTML = '<option value="" hidden selected>Chọn xã/phường</option>';
+    wardSelect.innerHTML = '<option value="">Chọn xã/phường</option>';
 
-    const provinceCode = Object.keys(locationData).find(
-        (key) => locationData[key].name_with_type === provinceName
-    );
+    const province = Object.values(locationData).find(p => p.name_with_type === provinceName);
+    if (!province)
+        return;
 
-    if (!provinceCode) return;
+    const district = Object.values(province["quan-huyen"]).find(d => d.name_with_type === districtName);
+    if (!district || !district["xa-phuong"])
+        return;
 
-    const districtCode = Object.keys(locationData[provinceCode]["quan-huyen"]).find(
-        (key) => locationData[provinceCode]["quan-huyen"][key].name_with_type === districtName
-    );
-
-    if (districtCode && locationData[provinceCode]["quan-huyen"][districtCode]["xa-phuong"]) {
-        const wards = locationData[provinceCode]["quan-huyen"][districtCode]["xa-phuong"];
-        for (const [code, ward] of Object.entries(wards)) {
-            const option = document.createElement("option");
-            option.value = ward.name_with_type; // Lấy name_with_type làm value
-            option.textContent = ward.name_with_type;
-            wardSelect.appendChild(option);
-        }
+    for (const ward of Object.values(district["xa-phuong"])) {
+        const option = document.createElement("option");
+        option.value = ward.name_with_type; // Giá trị gửi đi là name_with_type
+        option.textContent = ward.name_with_type;
+        wardSelect.appendChild(option);
     }
 }
+
+

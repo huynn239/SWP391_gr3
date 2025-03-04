@@ -349,53 +349,6 @@
         </section><!--/#do_action-->
 
         <script>
-                                            document.addEventListener("DOMContentLoaded", async function () {
-                                                const fields = ["fullname", "phone", "email", "address"];
-                                                fields.forEach(field => {
-                                                    const savedValue = localStorage.getItem(field);
-                                                    if (savedValue) {
-                                                        document.getElementById(field).value = savedValue;
-                                                    }
-                                                    document.getElementById(field).addEventListener("input", function () {
-                                                        localStorage.setItem(field, this.value);
-                                                    });
-                                                });
-                                                function restoreSelectValue(id) {
-                                                    return new Promise((resolve) => {
-                                                        const savedValue = localStorage.getItem(id);
-                                                        if (savedValue) {
-                                                            const select = document.getElementById(id);
-                                                            if (select) {
-                                                                const checkExist = setInterval(() => {
-                                                                    if (select.options.length > 1) {
-                                                                        select.value = savedValue;
-                                                                        clearInterval(checkExist);
-                                                                        resolve();
-                                                                    }
-                                                                }, 10);
-                                                            } else {
-                                                                resolve();
-                                                            }
-                                                        } else {
-                                                            resolve();
-                                                        }
-                                                    });
-                                                }
-                                                await restoreSelectValue("province");
-                                                loadDistricts();
-                                                await restoreSelectValue("district");
-                                                loadWards();
-                                                await restoreSelectValue("ward");
-                                                ["province", "district", "ward"].forEach(id => {
-                                                    const element = document.getElementById(id);
-                                                    if (element) {
-                                                        element.addEventListener("change", function () {
-                                                            localStorage.setItem(id, this.value);
-                                                        });
-                                                    }
-                                                });
-                                            });
-
                                             function validateForm() {
                                                 let fullname = document.getElementById("fullname").value.trim();
                                                 let phone = document.getElementById("phone").value.trim();
