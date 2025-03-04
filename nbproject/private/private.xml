@@ -3,9 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Project%20Java/aaa/SWP391_gr3/web/js/location.js</file>
-            <file>file:/D:/Project%20Java/aaa/SWP391_gr3/web/cart.jsp</file>
-            <file>file:/D:/Project%20Java/aaa/SWP391_gr3/web/js/tree.json</file>
+            <file>file:/D:/swp391/Intern2/SWP391_gr3/web/WEB-INF/web.xml</file>
+            <file>file:/D:/swp391/Intern2/SWP391_gr3/web/addSlider.jsp</file>
+            <file>file:/D:/swp391/Intern2/SWP391_gr3/src/java/controller/SliderController.java</file>
+            <file>file:/D:/swp391/Intern2/SWP391_gr3/src/java/controller/UserControllerServlet.java</file>
+            <file>file:/D:/swp391/Intern2/SWP391_gr3/web/sliderList.jsp</file>
+            <file>file:/D:/swp391/Intern2/SWP391_gr3/src/java/model/Slider.java</file>
         </group>
     </open-files>
 </project-private>
