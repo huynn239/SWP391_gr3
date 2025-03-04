@@ -89,6 +89,7 @@ public class LoginController extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("u", a);
             session.setMaxInactiveInterval(30 * 60); 
+            session.setAttribute("id", a.getId());
 
            
             Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());

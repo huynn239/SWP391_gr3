@@ -75,19 +75,23 @@ public class UserDAO extends DBContext {
 
     }
 
-    public void register(String user, String email, String pass) {
+     public void register(String user, String email, String pass,String uName, String Mobile, String uAddress) {
         String sql = "INSERT INTO users  (Username,Email,[Password],uName, Avatar, Gender, Mobile, uAddress, RoleID)  \n"
-                + "values(?,?,?,'0','0','0','0','0','3')";
+                + "values(?,?,?,?,'0','0',?,?,'3')";
         try {
             conn = new DBContext().getConnection();
             ps = conn.prepareStatement(sql);
             ps.setString(1, user);
             ps.setString(2, email);
             ps.setString(3, pass);
+            ps.setString(4, uName);
+            ps.setString(5, Mobile);
+            ps.setString(6, uAddress);
             ps.executeUpdate();
         } catch (Exception e) {
         }
     }
+
 
     public static void main(String[] args) {
         UserDAO DAO = new UserDAO();
@@ -104,7 +108,7 @@ public class UserDAO extends DBContext {
             System.out.println("Account does not exist. Proceeding with registration...");
 
             // Gọi hàm register() để đăng ký tài khoản mới
-            DAO.register(username, email, password);
+         //   DAO.register(username, email, password);
 
             // Kiểm tra lại sau khi đăng ký
             acc = DAO.checkAccountExist(username, email);

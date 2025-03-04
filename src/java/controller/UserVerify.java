@@ -1,5 +1,6 @@
 package controller;
 
+import dto.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Account;
 
 /**
  *
@@ -37,12 +39,22 @@ public class UserVerify extends HttpServlet {
 
         // Kiểm tra mã xác thực nhập vào
         if (sessionCode != null && sessionCode.equals(inputCode)) {
-            session.removeAttribute("authCode"); // Xóa mã xác thực sau khi nhập đúng
+            UserDAO userdao = new UserDAO();
+            Account tempAccount = (Account) session.getAttribute("tempAccount");
+
+            if (tempAccount != null) {
+                userdao.register(tempAccount.getUsername(), tempAccount.getEmail(),
+                        tempAccount.getPassword(), tempAccount.getuName(),
+                        tempAccount.getMobile(), tempAccount.getuAddress());
+            }
+
+            session.removeAttribute("tempAccount"); // Xóa tài khoản tạm
+            session.removeAttribute("authCode");
             session.removeAttribute("authTime");
             session.removeAttribute("authEmail");
-            session.setAttribute("message", "Xác thực thành công! Chào mừng bạn.");
-            response.sendRedirect("home.jsp");
 
+        //    session.setAttribute("message", "Xác thực thành công! Chào mừng bạn.");
+            response.sendRedirect("home.jsp");
         } else {
             request.setAttribute("error", "Mã xác thực không chính xác, vui lòng thử lại.");
             request.getRequestDispatcher("verifycode.jsp").forward(request, response);

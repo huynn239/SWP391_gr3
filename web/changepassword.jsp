@@ -13,11 +13,31 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <style>
+            .back-button {
+                font-size: 14px;
+                padding: 8px 12px;
+                border-radius: 5px;
+                color: white; /* Đổi màu chữ */
+                background-color: #007bff; /* Màu nền xanh dương */
+                border: none;
+            }
+
+            .back-button:hover {
+                background-color: #0056b3; /* Màu nền khi hover */
+                color: #fff; /* Giữ màu chữ trắng */
+            }
+        </style>
     </head>
     <body>
         <div class="container bootstrap snippets bootdey">
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-6 col-md-offset-2">
+                    <div class="back-container">
+                        <a href="home.jsp" class="btn btn-default back-button">
+                            <span class="glyphicon glyphicon-arrow-left"></span> Back
+                        </a>
+                    </div>
                     <div class="panel panel-info">
                         <div class="panel-heading">
                             <h3 class="panel-title">
@@ -35,10 +55,10 @@
                                         <div class="form-group">
                                             <div class="text-danger"><strong>${message}</strong></div>
                                             <div class="text-danger"><strong>${error}</strong></div>
-                                            <div class="input-group">
-                                                <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
-                                                <input class="form-control" type="text" placeholder="Username" name="user" required>
-                                            </div>
+                                            <!--                                            <div class="input-group">
+                                                                                            <div class="input-group-addon"><span class="glyphicon glyphicon-user"></span></div>
+                                                                                            <input class="form-control" type="text" placeholder="Username" name="user" required>
+                                                                                        </div>-->
                                         </div>
                                         <div class="form-group">
                                             <div class="input-group">
@@ -50,6 +70,12 @@
                                             <div class="input-group">
                                                 <div class="input-group-addon"><span class="glyphicon glyphicon-log-in"></span></div>
                                                 <input class="form-control" type="password" placeholder="New Password" name="newpass" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <div class="input-group-addon"><span class="glyphicon glyphicon-log-in"></span></div>
+                                                <input class="form-control" type="password" placeholder="Confirm New Password" name="newpass" required>
                                             </div>
                                         </div>
                                     </div>

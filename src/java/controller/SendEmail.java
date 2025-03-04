@@ -50,7 +50,7 @@ public class SendEmail {
             Message mess = new MimeMessage(session);
             mess.setRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
             mess.setSubject("User Email Verification");
-            mess.setText("Register successfully. Please verify your account using this code" + code);
+            mess.setText("Register successfully. Please verify your account using this code: " +" "+ code);
             Transport.send(mess);
                     
                     

@@ -72,24 +72,38 @@ public class ChangePassword extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String username = request.getParameter("user").trim();
-        String password = request.getParameter("pass").trim();
-        String newpass = request.getParameter("newpass").trim();
-        password = EncryptPassword.toSHA1(password);
-
-        UserDAO userdao = new UserDAO();
-        Account account = userdao.checkAccToChangePass(username, password);
-        if (account != null) {
-            newpass = EncryptPassword.toSHA1(newpass);
-            userdao.updatePassword(account.getEmail(), newpass);
-            request.setAttribute("message", "Change password successfully");
-        } else {
-            request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không chính xác!");
-        }
-        request.getRequestDispatcher("changepassword.jsp").forward(request, response);
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    // Lấy userId từ session
+    Integer userId = (Integer) request.getSession().getAttribute("id");
+    
+    if (userId == null) {
+        request.setAttribute("error", "Bạn chưa đăng nhập!");
+        request.getRequestDispatcher("login.jsp").forward(request, response);
+        return;
     }
+
+    String password = request.getParameter("pass").trim();
+    String newpass = request.getParameter("newpass").trim();
+    
+    // Mã hóa mật khẩu cũ
+    password = EncryptPassword.toSHA1(password);
+
+    UserDAO userdao = new UserDAO();
+    Account user = userdao.getUserById(userId);
+
+    if (user != null && user.getPassword().equals(password)) {
+        // Mã hóa mật khẩu mới
+        newpass = EncryptPassword.toSHA1(newpass);
+        userdao.updatePassword(user.getEmail(), newpass);
+        request.setAttribute("message", "Đổi mật khẩu thành công!");
+        
+    } else {
+        request.setAttribute("error", "Mật khẩu cũ không chính xác!");
+    }
+
+    request.getRequestDispatcher("changepassword.jsp").forward(request, response);
+}
 
     /**
      * Returns a short description of the servlet.

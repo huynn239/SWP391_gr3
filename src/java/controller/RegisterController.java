@@ -78,6 +78,10 @@ public class RegisterController extends HttpServlet {
         String user = request.getParameter("user").trim();
         String pass = request.getParameter("pass").trim();
         String email = request.getParameter("email").trim();
+        String uName = request.getParameter("fullname").trim();
+        String mobile = request.getParameter("mobile").trim();
+        String address = request.getParameter("address").trim();
+
         SendEmail sm = new SendEmail();
         String code = sm.getRandom();
 
@@ -90,14 +94,17 @@ public class RegisterController extends HttpServlet {
             Account a = userdao.checkAccountExist(user, email);
             if (a == null) {
                 pass = EncryptPassword.toSHA1(pass);
-                userdao.register(user, email, pass);
-                Account newAccount = userdao.checkAccountExist(user, email);
+//                userdao.register(user, email, pass, uName, mobile, address);
+//                Account newAccount = userdao.checkAccountExist(user, email);
                 HttpSession session = request.getSession();
+                Account tempAccount = new Account(0, uName, user, pass, null, email, mobile, address, 2);
+                session.setAttribute("tempAccount", tempAccount);
                 session.setAttribute("authCode", code); // Lưu mã xác thực vào session
                 session.setAttribute("authEmail", email); // Lưu email để xác minh
-                session.setAttribute("authTime", System.currentTimeMillis());
+                session.setAttribute("authTime",
+                        System.currentTimeMillis());
 
-                boolean emailSent = sm.sendEmail(newAccount, code);
+                boolean emailSent = sm.sendEmail(tempAccount, code);
                 if (emailSent) {
                     response.sendRedirect("verifycode.jsp");
                 } else {
