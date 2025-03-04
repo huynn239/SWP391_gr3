@@ -109,6 +109,25 @@ public class OrderDAO extends DBContext {
         }
     }
 
+    public void updateOrderInfo(String Name, String Phone, String Email, String Address, int orderID) {
+        String sql = "Update orders\n"
+                + "Set ReceiverName = ?,\n"
+                + "ReceiverPhone = ?,\n"
+                + "ReceiverEmail = ?,\n"
+                + "ReceiverAddress = ?\n"
+                + "where orders.ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, Name);
+            stmt.setString(2, Phone);
+            stmt.setString(3, Email);
+            stmt.setString(4, Address);
+            stmt.setInt(5, orderID);
+            int rowsUpdated = stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         OrderDAO o = new OrderDAO();
         System.out.println("" + o.checkSize(5, 1, "S"));

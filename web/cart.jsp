@@ -295,7 +295,7 @@
         %>
 
         <section id="do_action">
-            <form action="checkout.jsp" method="post" onsubmit="return validateForm()">
+            <form action="orderinfo" method="post" onsubmit="return validateForm()">
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-6">
@@ -312,15 +312,18 @@
                                 <input type="email" id="email" name="email" value="<%= user.getEmail() %>" required>
 
                                 <div class="location-select">
-                                    <select id="province" name="province" onchange="loadDistricts()" required>
-                                        <option value="">Chọn tỉnh/thành phố</option>
-                                    </select>
-                                    <select id="district" name="district" onchange="loadWards()" required>
-                                        <option value="">Chọn quận/huyện</option>
-                                    </select>
-                                    <select id="ward" name="ward" required>
-                                        <option value="">Chọn xã/phường</option>
-                                    </select>
+                                    <div class="location-select">
+                                        <select id="province" name="province" onchange="loadDistricts()" required>
+                                            <option value="" hidden selected>Chọn tỉnh/thành phố</option>
+                                        </select>
+                                        <select id="district" name="district" onchange="loadWards()" required>
+                                            <option value="" hidden selected>Chọn quận/huyện</option>
+                                        </select>
+                                        <select id="ward" name="ward" required>
+                                            <option value="" hidden selected>Chọn xã/phường</option>
+                                        </select>
+                                    </div>
+
                                 </div>
 
                                 <script src="js/location.js"></script>
@@ -345,6 +348,106 @@
             </form>
         </section><!--/#do_action-->
 
+        <script>
+                                            document.addEventListener("DOMContentLoaded", async function () {
+                                                const fields = ["fullname", "phone", "email", "address"];
+                                                fields.forEach(field => {
+                                                    const savedValue = localStorage.getItem(field);
+                                                    if (savedValue) {
+                                                        document.getElementById(field).value = savedValue;
+                                                    }
+                                                    document.getElementById(field).addEventListener("input", function () {
+                                                        localStorage.setItem(field, this.value);
+                                                    });
+                                                });
+                                                function restoreSelectValue(id) {
+                                                    return new Promise((resolve) => {
+                                                        const savedValue = localStorage.getItem(id);
+                                                        if (savedValue) {
+                                                            const select = document.getElementById(id);
+                                                            if (select) {
+                                                                const checkExist = setInterval(() => {
+                                                                    if (select.options.length > 1) {
+                                                                        select.value = savedValue;
+                                                                        clearInterval(checkExist);
+                                                                        resolve();
+                                                                    }
+                                                                }, 10);
+                                                            } else {
+                                                                resolve();
+                                                            }
+                                                        } else {
+                                                            resolve();
+                                                        }
+                                                    });
+                                                }
+                                                await restoreSelectValue("province");
+                                                loadDistricts();
+                                                await restoreSelectValue("district");
+                                                loadWards();
+                                                await restoreSelectValue("ward");
+                                                ["province", "district", "ward"].forEach(id => {
+                                                    const element = document.getElementById(id);
+                                                    if (element) {
+                                                        element.addEventListener("change", function () {
+                                                            localStorage.setItem(id, this.value);
+                                                        });
+                                                    }
+                                                });
+                                            });
+
+                                            function validateForm() {
+                                                let fullname = document.getElementById("fullname").value.trim();
+                                                let phone = document.getElementById("phone").value.trim();
+                                                let email = document.getElementById("email").value.trim();
+                                                let province = document.getElementById("province").value;
+                                                let district = document.getElementById("district").value;
+                                                let ward = document.getElementById("ward").value;
+                                                let address = document.getElementById("address").value.trim();
+
+                                                // Kiểm tra họ và tên
+                                                if (fullname === "") {
+                                                    alert("Vui lòng nhập họ và tên.");
+                                                    return false;
+                                                }
+
+                                                // Kiểm tra số điện thoại (phải có 10 chữ số và chỉ chứa số)
+                                                let phoneRegex = /^\d{10}$/;
+                                                if (!phoneRegex.test(phone)) {
+                                                    alert("Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số.");
+                                                    return false;
+                                                }
+
+                                                // Kiểm tra email hợp lệ
+                                                let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                                                if (!emailRegex.test(email)) {
+                                                    alert("Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
+                                                    return false;
+                                                }
+
+                                                // Kiểm tra chọn địa chỉ đầy đủ
+                                                if (province === "") {
+                                                    alert("Vui lòng chọn tỉnh/thành phố.");
+                                                    return false;
+                                                }
+                                                if (district === "") {
+                                                    alert("Vui lòng chọn quận/huyện.");
+                                                    return false;
+                                                }
+                                                if (ward === "") {
+                                                    alert("Vui lòng chọn xã/phường.");
+                                                    return false;
+                                                }
+
+                                                // Kiểm tra địa chỉ cụ thể
+                                                if (address === "") {
+                                                    alert("Vui lòng nhập địa chỉ cụ thể.");
+                                                    return false;
+                                                }
+
+                                                return true; // Form hợp lệ
+                                            }
+        </script>
 
 
         <footer id="footer"><!--Footer-->
