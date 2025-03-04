@@ -4,7 +4,6 @@
     Author     : thang
 --%>
    
-<%@ page contentType="text/html" pageEncoding="UTF-8" %>
         <footer id="footer">
             <div class="footer-widget">
                 <div class="container">
@@ -17,7 +16,7 @@
                                     <li><a href="#">Contact Us</a></li>
                                     <li><a href="#">Order Status</a></li>
                                     <li><a href="#">Change Location</a></li>
-                                    <li><a href="#">FAQ’s</a></li>
+                                    <li><a href="#">FAQ?s</a></li>
                                 </ul>
                             </div>
                         </div>
