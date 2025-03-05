@@ -1,17 +1,27 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
-<%@ page import="model.Product, model.Brand, model.Category, model.Account" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
 <jsp:useBean id="categoryDAO" class="dto.CategoryDAO" scope="session"/>
+<jsp:useBean id="sliderDAO" class="dto.SliderDAO" scope="session"/>
 
 <%
     List<Product> products = productDAO.getAllProducts();
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
     Account user = (Account) session.getAttribute("u");
+    // Lấy danh sách slider từ SliderDAO, chỉ lấy các slider có status = true
+    List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at"); // Sửa ở đây
+    List<Slider> activeSliders = new ArrayList<>();
+    for (Slider slider : allSliders) {
+        if (slider.isStatus()) { // Chỉ thêm slider có status = true
+            activeSliders.add(slider);
+        }
+    }
+    
 %>
 
 <!DOCTYPE html>
@@ -49,18 +59,8 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                    <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
-                                        <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
-                                        </c:if>
-                                        <c:if test="${sessionScope.u.roleID == 1}">
-                                        <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
-                                        </c:if>
-                                        <c:if test="${sessionScope.u.roleID == 2}">
-                                        <li><a href="mkt.jsp"><i class="fa fa-star"></i> Marketing </a></li>
-                                        </c:if>
-                                        <c:if test="${sessionScope.u.roleID == 3}">
-                                        <li><a href="sale.jsp"><i class="fa fa-star"></i> Sale</a></li>
-                                        </c:if>
+                                    <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
+                                    <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
                                     <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
                                     <li><a href="${not empty sessionScope.u? "logout" : "login.jsp"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
                                 </ul>
@@ -132,71 +132,70 @@
 
         </header>
 
-        <section id="slider"><!--slider-->
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div id="slider-carousel" class="carousel slide" data-ride="carousel">
-                            <ol class="carousel-indicators">
-                                <li data-target="#slider-carousel" data-slide-to="0" class="active"></li>
-                                <li data-target="#slider-carousel" data-slide-to="1"></li>
-                                <li data-target="#slider-carousel" data-slide-to="2"></li>
-                            </ol>
+       <section id="slider">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12">
+                    <div id="slider-carousel" class="carousel slide" data-ride="carousel">
+                        <!-- Carousel Indicators -->
+                        <ol class="carousel-indicators">
+                            <% for (int i = 0; i < activeSliders.size(); i++) { %>
+                            <li data-target="#slider-carousel" data-slide-to="<%= i %>" class="<%= i == 0 ? "active" : "" %>"></li>
+                            <% } %>
+                        </ol>
 
-                            <div class="carousel-inner">
-                                <div class="item active">
-                                    <div class="col-sm-6">
-                                        <h1><span>Men</span>-SHOPPER</h1>
-                                        <h2>NEW
-                                            ARRIVALS</h2>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
-                                        <button type="button" class="btn btn-default get">Get it now</button>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <img src="img/backpackMan.png" class="girl img-responsive" alt="" />
-                                        <img src="img/feature1.png"  class="pricing" alt="" />
-                                    </div>
+                        <!-- Carousel Inner -->
+                        <div class="carousel-inner">
+                            <% 
+                                int index = 0;
+                                for (Slider slider : activeSliders) { 
+                            %>
+                            <div class="item <%= index == 0 ? "active" : "" %>">
+                                <div class="col-sm-6">
+                                    <h1><span>Men</span>-SHOPPER</h1>
+                                    <h2>Featured Promotion</h2> <!-- Có thể thay bằng trường trong Slider nếu có -->
+                                    <p>Check out our latest offers and deals!</p> <!-- Có thể thay bằng trường trong Slider nếu có -->
+                                    <a href="<%= slider.getLink() %>" class="btn btn-default get">Get it now</a>
                                 </div>
-                                <div class="item">
-                                    <div class="col-sm-6">
-                                        <h1><span>Men</span>-SHOPPER</h1>
-                                        <h2>100% Responsive Design</h2>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
-                                        <button type="button" class="btn btn-default get">Get it now</button>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <img src="img/1000_F_192794300_bNE6gfWRqTyhQdcfOesxL7YHyrhkMo5n.jpg" class="girl img-responsive" alt="" />
-                                        <img src="images/home/pricing.png"  class="pricing" alt="" />
-                                    </div>
+                                <div class="col-sm-6">
+                                    <img src="<%= slider.getImageUrl() %>" class="girl img-responsive" alt="Slider Image" />
+                                    <!-- Nếu cần hình pricing, có thể thêm logic kiểm tra hoặc để mặc định -->
+                                    <img src="images/home/pricing.png" class="pricing" alt="" />
                                 </div>
-
-                                <div class="item">
-                                    <div class="col-sm-6">
-                                        <h1><span>Men</span>-SHOPPER</h1>
-                                        <h2>Free Ecommerce Template</h2>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. </p>
-                                        <button type="button" class="btn btn-default get">Get it now</button>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <img src="images/home/girl3.jpg" class="girl img-responsive" alt="" />
-                                        <img src="images/home/pricing.png" class="pricing" alt="" />
-                                    </div>
-                                </div>
-
                             </div>
-
-                            <a href="#slider-carousel" class="left control-carousel hidden-xs" data-slide="prev">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
-                            <a href="#slider-carousel" class="right control-carousel hidden-xs" data-slide="next">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
+                            <% 
+                                index++;
+                                } 
+                                // Nếu không có slider nào, hiển thị mặc định
+                                if (activeSliders.isEmpty()) { 
+                            %>
+                            <div class="item active">
+                                <div class="col-sm-6">
+                                    <h1><span>Men</span>-SHOPPER</h1>
+                                    <h2>NEW ARRIVALS</h2>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                                    <button type="button" class="btn btn-default get">Get it now</button>
+                                </div>
+                                <div class="col-sm-6">
+                                    <img src="img/backpackMan.png" class="girl img-responsive" alt="" />
+                                    <img src="img/feature1.png" class="pricing" alt="" />
+                                </div>
+                            </div>
+                            <% } %>
                         </div>
 
+                        <!-- Carousel Controls -->
+                        <a href="#slider-carousel" class="left control-carousel hidden-xs" data-slide="prev">
+                            <i class="fa fa-angle-left"></i>
+                        </a>
+                        <a href="#slider-carousel" class="right control-carousel hidden-xs" data-slide="next">
+                            <i class="fa fa-angle-right"></i>
+                        </a>
                     </div>
                 </div>
             </div>
-        </section><!--/slider-->
+        </div>
+    </section><!--/slider-->
         <!-- MAIN CONTENT -->
         <section>
             <div class="container">
@@ -221,6 +220,9 @@
                                 </div>
                                 <% } %>
                             </div>
+                        </div>
+                            <div class="shipping text-center">
+                                <img src="img/backpackMan.png" alt="Shipping Promotion" />
                         </div>
                     </div>
 
@@ -355,10 +357,7 @@
                                     } 
                                 %>
                             </div>
-                            <div class="shipping text-center"><!--shipping-->
-                                <img src="images/home/shipping.jpg" alt="" />
-                            </div><!--/shipping-->
-
+                          
                         </div>
                     </div>
 

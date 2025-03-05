@@ -11,42 +11,95 @@ public class SliderDAO {
     public SliderDAO() {
         this.conn = new DBContext().getConnection();
     }
-        
-    // Lấy danh sách slider với phân trang
-    public List<Slider> getSliders(int page, int limit) {
-    List<Slider> sliders = new ArrayList<>();
-    if (conn == null) {
+
+    // Tìm kiếm slider theo từ khóa (link hoặc image_url) với phân trang và sắp xếp
+    public List<Slider> searchSliders(String keyword, int page, int limit, String sortBy) {
+        List<Slider> sliders = new ArrayList<>();
+        if (conn == null) {
+            return sliders;
+        }
+
+        String sql = "SELECT id, image_url, link, status, created_at " +
+                     "FROM Slider " +
+                     "WHERE link LIKE ? OR image_url LIKE ? " +
+                     "ORDER BY " + (sortBy.equals("status") ? "status DESC" : "created_at DESC") + " " +
+                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            String searchPattern = "%" + keyword + "%";
+            ps.setString(1, searchPattern); // Tìm kiếm trong link
+            ps.setString(2, searchPattern); // Tìm kiếm trong image_url
+            ps.setInt(3, (page - 1) * limit); // OFFSET ROWS
+            ps.setInt(4, limit);              // FETCH NEXT ROWS ONLY
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    sliders.add(new Slider(
+                            rs.getInt("id"),
+                            rs.getString("image_url"),
+                            rs.getString("link"),
+                            rs.getBoolean("status"),
+                            rs.getTimestamp("created_at")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return sliders;
     }
 
-    // SQL sử dụng OFFSET ROWS FETCH NEXT cho SQL Server
-    String sql = "SELECT id, image_url, link, status, created_at " +
-                 "FROM Slider " +
-                 "ORDER BY created_at DESC " +
-                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setInt(1, (page - 1) * limit); // OFFSET ROWS
-        ps.setInt(2, limit);              // FETCH NEXT ROWS ONLY
-        
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                sliders.add(new Slider(
-                        rs.getInt("id"),
-                        rs.getString("image_url"),
-                        rs.getString("link"),
-                        rs.getBoolean("status"),
-                        rs.getTimestamp("created_at")
-                ));
+    // Lấy tổng số slider khi tìm kiếm theo từ khóa
+    public int getTotalSlidersByKeyword(String keyword) {
+        String sql = "SELECT COUNT(*) FROM Slider WHERE link LIKE ? OR image_url LIKE ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            String searchPattern = "%" + keyword + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return 0;
     }
-    return sliders;
-}
 
-    // Lấy tổng số slider để tính số trang
+    // Các phương thức hiện có
+    public List<Slider> getSlidersSorted(int page, int limit, String sortBy) {
+        List<Slider> sliders = new ArrayList<>();
+        if (conn == null) {
+            return sliders;
+        }
+
+        String sql = "SELECT id, image_url, link, status, created_at " +
+                     "FROM Slider " +
+                     "ORDER BY " + (sortBy.equals("status") ? "status DESC" : "created_at DESC") + " " +
+                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, (page - 1) * limit);
+            ps.setInt(2, limit);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    sliders.add(new Slider(
+                            rs.getInt("id"),
+                            rs.getString("image_url"),
+                            rs.getString("link"),
+                            rs.getBoolean("status"),
+                            rs.getTimestamp("created_at")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return sliders;
+    }
+
     public int getTotalSliders() {
         String sql = "SELECT COUNT(*) FROM Slider";
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -60,7 +113,6 @@ public class SliderDAO {
         return 0;
     }
 
-    // Lấy slider theo ID
     public Slider getSliderById(int id) {
         String sql = "SELECT * FROM Slider WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -82,23 +134,19 @@ public class SliderDAO {
         return null;
     }
 
-    // Thêm slider mới
-  public boolean addSlider(Slider slider) {
-    String sql = "INSERT INTO Slider (image_url, link, status, created_at) VALUES (?, ?, ?, GETDATE())";
-    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-        ps.setString(1, slider.getImageUrl());
-        ps.setString(2, slider.getLink());
-        ps.setBoolean(3, slider.isStatus());
-        return ps.executeUpdate() > 0;
-    } catch (SQLException e) {
-        e.printStackTrace();
+    public boolean addSlider(Slider slider) {
+        String sql = "INSERT INTO Slider (image_url, link, status, created_at) VALUES (?, ?, ?, GETDATE())";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, slider.getImageUrl());
+            ps.setString(2, slider.getLink());
+            ps.setBoolean(3, slider.isStatus());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
-    return false;
-}
 
-
-
-    // Cập nhật slider
     public boolean updateSlider(Slider slider) {
         String sql = "UPDATE Slider SET image_url = ?, link = ?, status = ? WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -113,7 +161,6 @@ public class SliderDAO {
         return false;
     }
 
-    // Xóa slider
     public boolean deleteSlider(int id) {
         String sql = "DELETE FROM Slider WHERE id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

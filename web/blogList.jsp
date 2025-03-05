@@ -128,6 +128,7 @@
                 </div>
             </div>
             <div class="header-bottom"><!--header-bottom-->
+
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-9">
@@ -142,31 +143,43 @@
                             <div class="mainmenu pull-left">
                                 <ul class="nav navbar-nav collapse navbar-collapse">
                                     <li><a href="home.jsp" class="active">Home</a></li>
-                                    <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
-                                        <ul role="menu" class="sub-menu">
-                                            <li><a href="shop.html">Products</a></li>
-                                            <li><a href="product-details.html">Product Details</a></li> 
-                                            <li><a href="checkout.html">Checkout</a></li> 
-                                            <li><a href="cart.html">Cart</a></li> 
-                                            <li><a href="login.html">Login</a></li> 
-                                        </ul>
-                                    </li> 
+                                    <li class="menu-item">
+                                        <a href="#">Product</a>
+                                        <div class="sub-menu">
+                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
+                                                <% int count1 = 0; %>
+                                                <% for (Category category : categories) { %>
+                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
+                                                <div class="category-column">
+                                                    <% } %>
+                                                    <a href="productlist?category=<%= category.getId() %>">
+                                                        <%= category.getName() %>
+                                                    </a>
+                                                    <% count1++; %>
+                                                    <% if (count1 % 6 == 0 || count1 == categories.size()) { %>
+                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
+                                                <% } %>
+                                                <% } %>
+                                            </div> <!-- Kết thúc category-container -->
+                                        </div>
+                                    </li>
+
+
+
+
+
                                     <li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
 
-                                    <ul role="menu" class="sub-menu">
-                                        <li><a href="blog.html">Blog List</a></li>
-                                        <li><a href="blog-single.html">Blog Single</a></li>
-                                    </ul>
-                                    </li> 
+
                                     <li><a href="404.html">404</a></li>
                                     <li><a href="contact-us.html">Contact</a></li>
                                 </ul>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <div class="search_box pull-right">
-                                <input type="text" placeholder="Search"/>
-                            </div>
+                            <form action="productsearch" method="GET" class="search_box pull-right">
+                                <input type="text" name="query" placeholder="Search" required />
+                            </form>
                         </div>
                     </div>
                 </div>
