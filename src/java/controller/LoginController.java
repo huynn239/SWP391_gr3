@@ -90,6 +90,7 @@ public class LoginController extends HttpServlet {
             session.setAttribute("u", a);
             session.setMaxInactiveInterval(30 * 60); 
             session.setAttribute("id", a.getId());
+            
 
            
             Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
@@ -97,7 +98,24 @@ public class LoginController extends HttpServlet {
             sessionCookie.setPath("/"); 
             response.addCookie(sessionCookie);
 
-            response.sendRedirect("home");
+          //  response.sendRedirect("home");
+              switch (a.getRoleID()) {
+            case 1:
+                response.sendRedirect("admin.jsp");
+                break;
+            case 2:
+                response.sendRedirect("mkt.jsp");
+                break;
+            case 3:
+                response.sendRedirect("sale.jsp");
+                break;
+            case 4:
+                response.sendRedirect("home.jsp");
+                break;
+            default:
+                response.sendRedirect("home.jsp"); // Mặc định quay về trang chính nếu RoleID không hợp lệ
+                break;
+        }
         }
     }
 
