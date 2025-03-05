@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Arrays" %>
@@ -108,7 +109,18 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                    <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
+                                    <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
+                                        <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
+                                        </c:if>
+                                        <c:if test="${sessionScope.u.roleID == 1}">
+                                        <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
+                                        </c:if>
+                                        <c:if test="${sessionScope.u.roleID == 2}">
+                                        <li><a href="mkt.jsp"><i class="fa fa-star"></i> Marketing </a></li>
+                                        </c:if>
+                                        <c:if test="${sessionScope.u.roleID == 3}">
+                                        <li><a href="sale.jsp"><i class="fa fa-star"></i> Sale</a></li>
+                                        </c:if>
                                     <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
                                     <li><a href="${not empty sessionScope.u? "logout" : "login.jsp"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
                                 </ul>
