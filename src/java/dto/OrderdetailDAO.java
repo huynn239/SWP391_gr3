@@ -139,7 +139,7 @@ public class OrderdetailDAO extends DBContext {
 
     public static void main(String[] args) {
         OrderdetailDAO od = new OrderdetailDAO();
-        od.deleteCart(30, "S", 1);
+        od.insertOrderdetail(10, 1, 2, "S");
     }
 
 }

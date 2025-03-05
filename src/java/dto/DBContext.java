@@ -19,7 +19,7 @@ public class DBContext {
     {
         try {
             // Edit URL , username, password to authenticate with your MS SQL Server
-            String url = "jdbc:sqlserver://localhost:1433;databaseName=shopOnline1";
+            String url = "jdbc:sqlserver://localhost:1433;databaseName=shopOnline";
             String username = "sa";
             String password = "123";
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
@@ -30,7 +30,7 @@ public class DBContext {
     }
 
     public static void main(String[] args) {
-        System.out.println("Test Commit");
+        DBContext a = new DBContext();
     }
 
     public Connection getConnection() {

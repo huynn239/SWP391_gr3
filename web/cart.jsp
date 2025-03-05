@@ -3,19 +3,35 @@
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.ArrayList" %>
 
-<%@ page import="model.Product, model.Brand, model.Category, model.Material,model.Account,model.Cart" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Material,model.Account,model.Cart,model.Order" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
 <jsp:useBean id="categoryDAO" class="dto.CategoryDAO" scope="session"/>
 <jsp:useBean id="materialDAO" class="dto.MaterialDAO" scope="session"/>
-
+<jsp:useBean id="orderDAO" class="dto.OrderDAO" scope="session"/>
 <%
     String categ = (String)request.getParameter("category");
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
     List<Material> materials = materialDAO.getAllMaterial();
     Account user = (Account) session.getAttribute("u");
+     String province = "";
+    String districts = "";
+    String wards = "";
+    String address = "";
+    if (orderDAO.getorderID(user.getId()) != 0) {
+        Order o = orderDAO.getInfoOrder(orderDAO.getorderID(user.getId()));
+        if (o.getReciverAddress() != null) {
+            String reciverAddress = o.getReciverAddress();
+            String[] a = reciverAddress.split("-");
+                province = a[0];
+                districts = a[1];
+                wards = a[2];
+                address = a[3];
+            }
+        }
+    
 %>
 
 <!DOCTYPE html>
@@ -323,16 +339,21 @@
                                             <option value="" hidden selected>Chọn xã/phường</option>
                                         </select>
                                     </div>
-
                                 </div>
 
                                 <script src="js/location.js"></script>
 
                                 <label for="address">Địa chỉ</label>
-                                <input type="text" id="address" name="address" required>
+                                <input type="text" id="address" name="address" value="<%= address %>" required>
                             </div>
                         </div>
-
+                        <script>
+                                            window.onload = async function () {
+                                                await loadProvinces("<%= province %>");
+                                                await loadDistricts("<%= province %>", "<%= districts %>");
+                                                await loadWards("<%= province %>", "<%= districts %>", "<%= wards %>");
+                                            };
+                        </script>
                         <div class="col-sm-6">
                             <div class="total_area">
                                 <ul>
@@ -349,57 +370,57 @@
         </section><!--/#do_action-->
 
         <script>
-                                            function validateForm() {
-                                                let fullname = document.getElementById("fullname").value.trim();
-                                                let phone = document.getElementById("phone").value.trim();
-                                                let email = document.getElementById("email").value.trim();
-                                                let province = document.getElementById("province").value;
-                                                let district = document.getElementById("district").value;
-                                                let ward = document.getElementById("ward").value;
-                                                let address = document.getElementById("address").value.trim();
+            function validateForm() {
+                let fullname = document.getElementById("fullname").value.trim();
+                let phone = document.getElementById("phone").value.trim();
+                let email = document.getElementById("email").value.trim();
+                let province = document.getElementById("province").value;
+                let district = document.getElementById("district").value;
+                let ward = document.getElementById("ward").value;
+                let address = document.getElementById("address").value.trim();
 
-                                                // Kiểm tra họ và tên
-                                                if (fullname === "") {
-                                                    alert("Vui lòng nhập họ và tên.");
-                                                    return false;
-                                                }
+                // Kiểm tra họ và tên
+                if (fullname === "") {
+                    alert("Vui lòng nhập họ và tên.");
+                    return false;
+                }
 
-                                                // Kiểm tra số điện thoại (phải có 10 chữ số và chỉ chứa số)
-                                                let phoneRegex = /^\d{10}$/;
-                                                if (!phoneRegex.test(phone)) {
-                                                    alert("Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số.");
-                                                    return false;
-                                                }
+                // Kiểm tra số điện thoại (phải có 10 chữ số và chỉ chứa số)
+                let phoneRegex = /^\d{10}$/;
+                if (!phoneRegex.test(phone)) {
+                    alert("Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số.");
+                    return false;
+                }
 
-                                                // Kiểm tra email hợp lệ
-                                                let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                                                if (!emailRegex.test(email)) {
-                                                    alert("Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
-                                                    return false;
-                                                }
+                // Kiểm tra email hợp lệ
+                let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(email)) {
+                    alert("Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
+                    return false;
+                }
 
-                                                // Kiểm tra chọn địa chỉ đầy đủ
-                                                if (province === "") {
-                                                    alert("Vui lòng chọn tỉnh/thành phố.");
-                                                    return false;
-                                                }
-                                                if (district === "") {
-                                                    alert("Vui lòng chọn quận/huyện.");
-                                                    return false;
-                                                }
-                                                if (ward === "") {
-                                                    alert("Vui lòng chọn xã/phường.");
-                                                    return false;
-                                                }
+                // Kiểm tra chọn địa chỉ đầy đủ
+                if (province === "") {
+                    alert("Vui lòng chọn tỉnh/thành phố.");
+                    return false;
+                }
+                if (district === "") {
+                    alert("Vui lòng chọn quận/huyện.");
+                    return false;
+                }
+                if (ward === "") {
+                    alert("Vui lòng chọn xã/phường.");
+                    return false;
+                }
 
-                                                // Kiểm tra địa chỉ cụ thể
-                                                if (address === "") {
-                                                    alert("Vui lòng nhập địa chỉ cụ thể.");
-                                                    return false;
-                                                }
+                // Kiểm tra địa chỉ cụ thể
+                if (address === "") {
+                    alert("Vui lòng nhập địa chỉ cụ thể.");
+                    return false;
+                }
 
-                                                return true; // Form hợp lệ
-                                            }
+                return true; // Form hợp lệ
+            }
         </script>
 
 

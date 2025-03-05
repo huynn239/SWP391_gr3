@@ -16,6 +16,7 @@ public class Order {
     private String PaymentStatus;
     private LocalDate orderDate;
     private double totalAmount, userID;
+    private String ReceiverName, ReceiverPhone, ReceiverEmail, ReciverAddress;
 
     public Order(int orderID, String PaymentStatus, LocalDate orderDate, double totalAmount, int userID) {
         this.orderID = orderID;
@@ -25,9 +26,51 @@ public class Order {
         this.userID = userID;
     }
 
+    public Order(String ReceiverName, String ReceiverPhone, String ReceiverEmail, String ReciverAddress) {
+        this.ReceiverName = ReceiverName;
+        this.ReceiverPhone = ReceiverPhone;
+        this.ReceiverEmail = ReceiverEmail;
+        this.ReciverAddress = ReciverAddress;
+    }
+    
+    
+
     public Order() {
     }
 
+    public String getReceiverName() {
+        return ReceiverName;
+    }
+
+    public void setReceiverName(String ReceiverName) {
+        this.ReceiverName = ReceiverName;
+    }
+
+    public String getReceiverPhone() {
+        return ReceiverPhone;
+    }
+
+    public void setReceiverPhone(String ReceiverPhone) {
+        this.ReceiverPhone = ReceiverPhone;
+    }
+
+    public String getReceiverEmail() {
+        return ReceiverEmail;
+    }
+
+    public void setReceiverEmail(String ReceiverEmail) {
+        this.ReceiverEmail = ReceiverEmail;
+    }
+
+    public String getReciverAddress() {
+        return ReciverAddress;
+    }
+
+    public void setReciverAddress(String ReciverAddress) {
+        this.ReciverAddress = ReciverAddress;
+    }
+
+    
     public int getOrderID() {
         return orderID;
     }

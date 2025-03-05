@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Date;
 import model.Category;
+import model.Order;
 
 /**
  *
@@ -128,8 +129,31 @@ public class OrderDAO extends DBContext {
         }
     }
 
+    public Order getInfoOrder(int orderID) {
+        String sql = "SELECT ReceiverName, ReceiverPhone, ReceiverEmail, ReceiverAddress FROM orders WHERE ID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, orderID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Order(
+                            rs.getString("ReceiverName"),
+                            rs.getString("ReceiverPhone"),
+                            rs.getString("ReceiverEmail"),
+                            rs.getString("ReceiverAddress")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     public static void main(String[] args) {
         OrderDAO o = new OrderDAO();
-        System.out.println("" + o.checkSize(5, 1, "S"));
+        System.out.println("" + o.getorderID(38));
     }
 }

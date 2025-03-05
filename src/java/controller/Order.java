@@ -77,7 +77,7 @@ public class Order extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-           
+
             String productId = request.getParameter("productId");
             String size = request.getParameter("size");
             String quantityStr = request.getParameter("quantity");
@@ -99,6 +99,7 @@ public class Order extends HttpServlet {
             }
             if (o.checkCreateNewOrder(user.getId())) {
                 o.insertOrder(user.getId());
+                orderID = o.getorderID(user.getId());
             }
 
             od.insertOrderdetail(orderID, productID, quantity, size);
