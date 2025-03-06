@@ -48,7 +48,7 @@
     %>
     <tr>
         <td><%= fb.getId() %></td>
-        <td><a href="ProductDetail.jsp?productId=<%= fb.getProductId() %>"><%= fb.getProductName() %></a></td>
+        <td><a href="productDetail.jsp?productId=<%= fb.getProductId() %>"><%= fb.getProductName() %></a></td>
         <td><%= fb.getRatedStar() %> ★</td>
         <td><%= fb.getComment() %></td>
         <td><%= fb.getUserId() %></td>

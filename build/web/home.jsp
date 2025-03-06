@@ -67,7 +67,7 @@
                                         <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 2}">
-                                        <li><a href="mkt.jsp"><i class="fa fa-star"></i> Marketing </a></li>
+                                        <li><a href="sliderList"><i class="fa fa-star"></i> Marketing </a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 3}">
                                         <li><a href="sale.jsp"><i class="fa fa-star"></i> Sale</a></li>

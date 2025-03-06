@@ -154,6 +154,6 @@ public class OrderDAO extends DBContext {
 
     public static void main(String[] args) {
         OrderDAO o = new OrderDAO();
-        System.out.println("" + o.getorderID(38));
+        System.out.println("" + o.getorderID(1));
     }
 }

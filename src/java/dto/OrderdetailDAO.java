@@ -139,7 +139,8 @@ public class OrderdetailDAO extends DBContext {
 
     public static void main(String[] args) {
         OrderdetailDAO od = new OrderdetailDAO();
-        od.insertOrderdetail(10, 1, 2, "S");
+     
+      od.insertOrderdetail(1, 1, 2, "S");
     }
 
 }
