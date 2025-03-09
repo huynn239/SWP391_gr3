@@ -110,19 +110,19 @@
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
                                     <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
-                                        <li><a href="changepassword"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
+                                        <li><a href="changepassword.jsp"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 1}">
                                         <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 2}">
-                                        <li><a href="sliderList"><i class="fa fa-star"></i> Marketing </a></li>
+                                        <li><a href="mkt.jsp"><i class="fa fa-star"></i> Marketing </a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 3}">
                                         <li><a href="sale.jsp"><i class="fa fa-star"></i> Sale</a></li>
                                         </c:if>
                                     <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                                    <li><a href="${not empty sessionScope.u? "logout" : "login"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
+                                    <li><a href="${not empty sessionScope.u? "logout" : "login.jsp"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -198,7 +198,7 @@
                         </thead>
                         <tbody>
                             <%
-                                List<Cart> cartList = (List<Cart>) request.getAttribute("cartList");
+                                List<Cart> cartList = (List<Cart>) session.getAttribute("cartList");
                                 if (cartList != null && !cartList.isEmpty()) {
                                     for (Cart c : cartList) {
                             %>
@@ -215,99 +215,33 @@
                                     <p>$<%= c.getPrice() %></p>
                                 </td>
                                 <td class="cart_quantity">
-                                    <form action="cartcontroller" method="post" class="cart_quantity_form">
-                                        <input type="hidden" name="Size" value="<%= c.getSize() %>"> 
-                                        <input type="hidden" name="productId" value="<%= c.getProductID() %>"> 
-                                        <div class="cart_quantity_button">
-                                            <button type="submit" name="action" value="decrease" class="cart_btn cart_quantity_down">-</button>
-                                            <input class="cart_quantity_input" type="text" name="quantity" value="<%= c.getQuantity() %>" autocomplete="off" size="2">
-                                            <button type="submit" name="action" value="increase" class="cart_btn cart_quantity_up">+</button>
-                                        </div>
-                                    </form>
+                                    <div class="cart_quantity_button">
+                                        <input class="cart_quantity_input" type="text" name="quantity" value="<%= c.getQuantity() %>" autocomplete="off" size="2" readonly>
+                                    </div>
                                 </td>
-
-
-
                                 <td class="cart_total">
                                     <p class="cart_total_price"><%= c.getPrice() * c.getQuantity() %>đ</p>
                                 </td>
-                                <td class="cart_delete">
-                                    <form action="cartcontroller" method="post" class="cart_delete_form">
-                                        <input type="hidden" name="Size" value="<%= c.getSize() %>"> 
-                                        <input type="hidden" name="productId" value="<%= c.getProductID() %>">
-                                        <input type="hidden" name="Size" value="<%= c.getSize() %>">  
-                                        <button type="submit" name="action" value="delete" class="cart_quantity_delete">
-                                            <i class="fa fa-times"></i>
-                                        </button>
-                                    </form>
+
+                            </tr>
+
+
+                            <%
+                                    }
+                                } else {
+                            %>
+                            <tr>
+                                <td colspan="6" style="text-align: center; font-size: 18px; padding: 20px;">
+                                    Bạn không có đơn hàng nào.
                                 </td>
                             </tr>
-                            <% 
-                        String cartMessage = (String) request.getAttribute("cartMessage");
-                        if (cartMessage != null && !cartMessage.isEmpty()) { 
-                            %>
-                        <div id="toast" class="toast"><%= cartMessage %></div>
-                        <script>
-                            document.addEventListener("DOMContentLoaded", function () {
-                                var toast = document.getElementById("toast");
-                                toast.style.display = "block";
-                                setTimeout(function () {
-                                    toast.style.display = "none";
-                                }, 3000);
-                            });
-                        </script>
-                        <% } %>
-
-                        <!-- CSS cho Toast -->
-                        <style>
-                            .toast {
-                                position: fixed;
-                                bottom: 20px;
-                                left: 20px;
-                                background: rgba(0, 0, 0, 0.7);
-                                color: white;
-                                padding: 10px 20px;
-                                border-radius: 5px;
-                                display: none;
-                                z-index: 1000;
-                            }
-                        </style>
-
-                        <%
-                                }
-                            } else {
-                        %>
-                        <tr>
-                            <td colspan="6" style="text-align: center; font-size: 18px; padding: 20px;">
-                                Bạn không có đơn hàng nào.
-                            </td>
-                        </tr>
-                        <% } %>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                document.querySelectorAll(".cart_quantity_input").forEach(input => {
-                    input.addEventListener("keydown", function (event) {
-                        if (event.key === "Enter") {
-                            event.preventDefault(); // Ngăn form gửi mặc định
 
-                            let form = this.closest("form"); // Tìm form chứa input
-                            let actionInput = document.createElement("input");
-                            actionInput.type = "hidden";
-                            actionInput.name = "action";
-                            actionInput.value = "input"; // Gửi action="input"
-                            form.appendChild(actionInput);
-
-                            form.submit(); // Gửi form
-                        }
-                    });
-                });
-            });
-        </script>
 
         <!--/#cart_items-->
 
@@ -374,6 +308,7 @@
                                     <li>Tổng <span><%= total %>đ</span></li>
                                 </ul>
                                 <button type="submit" class="btn btn-default check_out">Check Out</button> <!-- Chuyển thành nút submit -->
+                                <a href="cartdetail.jsp" class="btn btn-default check_out">Update</a>
                             </div>
                         </div>
                     </div>
@@ -434,8 +369,6 @@
                 return true; // Form hợp lệ
             }
         </script>
-
-
         <footer id="footer"><!--Footer-->
             <div class="footer-top">
                 <div class="container">

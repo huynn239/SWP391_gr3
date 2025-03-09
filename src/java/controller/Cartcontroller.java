@@ -68,11 +68,11 @@ public class Cartcontroller extends HttpServlet {
 
         if (user != null) {
             OrderdetailDAO od = new OrderdetailDAO();
-            List<Cart> list = new ArrayList<>();
-            list = od.cartDetail(user.getId());
+            List<Cart> list = od.cartDetail(user.getId());
             System.out.println("" + list.size());
-            request.setAttribute("cartList", list);
-            RequestDispatcher dispatcher = request.getRequestDispatcher("cart.jsp");
+
+            session.setAttribute("cartList", list); // Lưu vào session
+            RequestDispatcher dispatcher = request.getRequestDispatcher("cartdetail.jsp");
             dispatcher.forward(request, response);
         } else {
             response.sendRedirect("login.jsp"); // Chưa đăng nhập thì về trang login
@@ -109,21 +109,28 @@ public class Cartcontroller extends HttpServlet {
             message = "Sản phẩm đã được xóa khỏi giỏ hàng!";
         } else {
             int quantity = Integer.parseInt(request.getParameter("quantity"));
-            if ("increase".equals(action)) {
-                quantity++;
-            } else if ("decrease".equals(action) && quantity > 1) {
-                quantity--;
-            }
-            if (o.checkSize(quantity, productId, size)) {
-                od.updateQuantity(quantity, productId, size, user.getId());
-                message = "Cập nhật giỏ hàng thành công!";
+
+            if ("decrease".equals(action) && quantity == 1) {
+                message = "Số lượng sản phẩm tối thiểu là 1! Nếu muốn xóa sản phẩm, hãy nhấn nút xóa.";
             } else {
-                message = "Số lượng sản phẩm không đủ!";
+                if ("increase".equals(action)) {
+                    quantity++;
+                } else if ("decrease".equals(action) && quantity > 1) {
+                    quantity--;
+                }
+
+                if (o.checkSize(quantity, productId, size)) {
+                    od.updateQuantity(quantity, productId, size, user.getId());
+                    message = "Cập nhật giỏ hàng thành công!";
+                } else {
+                    message = "Số lượng sản phẩm không đủ!";
+                }
             }
         }
-        request.setAttribute("cartList", od.cartDetail(user.getId()));
+
+        session.setAttribute("cartList", od.cartDetail(user.getId()));
         request.setAttribute("cartMessage", message);
-        request.getRequestDispatcher("cart.jsp").forward(request, response);
+        request.getRequestDispatcher("cartdetail.jsp").forward(request, response);
     }
 
     /**
