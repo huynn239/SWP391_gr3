@@ -147,7 +147,7 @@ public class ResetPassword extends HttpServlet {
         DAOToken.updateStatus(tokenForgetPassword);
 
         //save user in session and redirect to home
-        request.getRequestDispatcher("home.jsp").forward(request, response);
+    response.sendRedirect("home");
     }
 
     /**

@@ -61,7 +61,7 @@ public class RegisterController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+                request.getRequestDispatcher("register.jsp").forward(request, response);
     }
 
     /**
@@ -106,7 +106,7 @@ public class RegisterController extends HttpServlet {
 
                 boolean emailSent = sm.sendEmail(tempAccount, code);
                 if (emailSent) {
-                    response.sendRedirect("verifycode.jsp");
+                    response.sendRedirect(request.getContextPath() + "/verifycode");
                 } else {
                     request.setAttribute("mess", "Failed to send verification email. Please try again!");
                     request.getRequestDispatcher("register.jsp").forward(request, response);

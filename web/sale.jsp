@@ -31,6 +31,6 @@
     <body>
         <h1>Sale Dashboard</h1>
         
-        <a href="home.jsp" class="back-button">Back to Home</a>
+        <a href="home" class="back-button">Back to Home</a>
     </body>
 </html>

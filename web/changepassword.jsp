@@ -34,7 +34,7 @@
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-6 col-md-offset-2">
                     <div class="back-container">
-                        <a href="home.jsp" class="btn btn-default back-button">
+                        <a href="home" class="btn btn-default back-button">
                             <span class="glyphicon glyphicon-arrow-left"></span> Back
                         </a>
                     </div>
@@ -50,7 +50,7 @@
                                 <div class="col-xs-6 col-sm-6 col-md-6 separator social-login-box"> <br>
                                     <img alt="" class="img-thumbnail" src="https://img.freepik.com/premium-vector/men-s-clothing-store-logo-clothing-store-transparent-background-clothing-shop-logo-vector_148524-756.jpg">                        
                                 </div>
-                                <form action="ChangePassword" method="post">
+                                <form action="changepassword" method="post">
                                     <div style="margin-top:50px;" class="col-xs-6 col-sm-6 col-md-6 login-box">
                                         <div class="form-group">
                                             <div class="text-danger"><strong>${message}</strong></div>

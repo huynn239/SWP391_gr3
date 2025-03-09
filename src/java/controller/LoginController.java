@@ -61,7 +61,8 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+                request.getRequestDispatcher("login.jsp").forward(request, response);
+
     }
 
     /**
@@ -110,10 +111,10 @@ public class LoginController extends HttpServlet {
                 response.sendRedirect("sale.jsp");
                 break;
             case 4:
-                response.sendRedirect("home.jsp");
+                response.sendRedirect("home");
                 break;
             default:
-                response.sendRedirect("home.jsp"); // Mặc định quay về trang chính nếu RoleID không hợp lệ
+                response.sendRedirect("home"); // Mặc định quay về trang chính nếu RoleID không hợp lệ
                 break;
         }
         }

@@ -45,7 +45,7 @@
         <div class="container">
             <h1>Access Denied</h1>
             <p>You don't have permission to access this page!</p>
-            <p>Please <a href="login.jsp">login</a> or return to <a href="home.jsp">the home page</a>.</p>
+            <p>Please <a href="login">login</a> or return to <a href="home">the home page</a>.</p>
         </div>
     </body>
 </html>

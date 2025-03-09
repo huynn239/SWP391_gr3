@@ -13,7 +13,7 @@
         <link href="css/verify.css" rel="stylesheet">
     </head>
     <body>
-        <form action="UserVerify" method="post">
+        <form action="${pageContext.request.contextPath}/verifycode" method="post">
             <div class="container">
                 <img src="https://img.freepik.com/premium-vector/men-s-clothing-store-logo-clothing-store-transparent-background-clothing-shop-logo-vector_148524-756.jpg" alt="Logo" class="logo">
                 <p class ="text-danger"><strong>${error}</strong></p>

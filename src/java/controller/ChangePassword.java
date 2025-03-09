@@ -19,7 +19,7 @@ import utils.EncryptPassword;
  *
  * @author NBL
  */
-@WebServlet(name = "ChangePassword", urlPatterns = {"/ChangePassword"})
+@WebServlet(name = "ChangePassword", urlPatterns = {"/changepassword"})
 public class ChangePassword extends HttpServlet {
 
     /**
@@ -60,7 +60,7 @@ public class ChangePassword extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+                request.getRequestDispatcher("changepassword.jsp").forward(request, response);
     }
 
     /**
@@ -96,10 +96,10 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
         // Mã hóa mật khẩu mới
         newpass = EncryptPassword.toSHA1(newpass);
         userdao.updatePassword(user.getEmail(), newpass);
-        request.setAttribute("message", "Đổi mật khẩu thành công!");
+        request.setAttribute("message", "Password changed successfully!");
         
     } else {
-        request.setAttribute("error", "Mật khẩu cũ không chính xác!");
+        request.setAttribute("error", "Old password is incorrect!");
     }
 
     request.getRequestDispatcher("changepassword.jsp").forward(request, response);

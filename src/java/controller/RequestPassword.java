@@ -94,17 +94,17 @@ public class RequestPassword extends HttpServlet {
         DAOTokenForget daoToken = new DAOTokenForget();
         boolean isInsert = daoToken.insertTokenForget(newTokenForget);
         if(!isInsert) {
-            request.setAttribute("mess", "have error in server");
+            request.setAttribute("mess", "Have error in server");
             request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
             return;
         }
         boolean isSend = service.sendEmail(email, linkReset, user.getUsername());
         if(!isSend) {
-            request.setAttribute("mess", "can not send request");
+            request.setAttribute("mess", "Can not send request");
             request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
             return;
         }
-        request.setAttribute("mess", "send request success");
+        request.setAttribute("mess", "Send request success. Please check your email.");
         request.getRequestDispatcher("requestPassword.jsp").forward(request, response);
     }
 

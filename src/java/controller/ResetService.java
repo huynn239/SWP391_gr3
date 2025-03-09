@@ -62,7 +62,7 @@ public class ResetService {
             msg.setFrom(from);
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
             msg.setSubject("Reset Password", "UTF-8");
-            String content = "<h1>Hello"+name+"</h1>"+"<p>Click the link to reset password "
+            String content = "<h1>Hello"+" "+name+"</h1>"+"<p>Click the link to reset password "
                     + "<a href="+link+">Click here</a></p>";
             msg.setContent(content, "text/html; charset=UTF-8");
             Transport.send(msg);

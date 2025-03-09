@@ -14,7 +14,7 @@ import model.Account;
  *
  * @author NBL
  */
-@WebServlet(name = "UserVerify", urlPatterns = {"/UserVerify"})
+@WebServlet(name = "UserVerify", urlPatterns = {"/verifycode"})
 public class UserVerify extends HttpServlet {
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -32,7 +32,7 @@ public class UserVerify extends HttpServlet {
         if (authTime == null || (currentTime - authTime > 60000)) { // 60000ms = 1 phút
             session.removeAttribute("authCode");
             session.removeAttribute("authTime");
-            request.setAttribute("error", "Mã xác thực đã hết hạn, vui lòng yêu cầu mã mới.");
+            request.setAttribute("error", "Verification code has expired, please request a new code.");
             request.getRequestDispatcher("verifycode.jsp").forward(request, response);
             return;
         }
@@ -54,9 +54,9 @@ public class UserVerify extends HttpServlet {
             session.removeAttribute("authEmail");
 
         //    session.setAttribute("message", "Xác thực thành công! Chào mừng bạn.");
-            response.sendRedirect("home.jsp");
+            response.sendRedirect(request.getContextPath() + "/home");
         } else {
-            request.setAttribute("error", "Mã xác thực không chính xác, vui lòng thử lại.");
+            request.setAttribute("error", "The verification code is incorrect, please try again.");
             request.getRequestDispatcher("verifycode.jsp").forward(request, response);
         }
     }
@@ -64,7 +64,7 @@ public class UserVerify extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+    request.getRequestDispatcher("verifycode.jsp").forward(request, response);
     }
 
     @Override
