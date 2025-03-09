@@ -130,7 +130,8 @@ public class Cartcontroller extends HttpServlet {
 
         session.setAttribute("cartList", od.cartDetail(user.getId()));
         request.setAttribute("cartMessage", message);
-        request.getRequestDispatcher("cartdetail.jsp").forward(request, response);
+       response.sendRedirect("cartdetail.jsp");
+
     }
 
     /**

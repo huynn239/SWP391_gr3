@@ -12,6 +12,12 @@
 <jsp:useBean id="materialDAO" class="dto.MaterialDAO" scope="session"/>
 <jsp:useBean id="orderDAO" class="dto.OrderDAO" scope="session"/>
 <%
+    response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+    response.setHeader("Pragma", "no-cache");
+    response.setHeader("Expires", "0");
+%>
+
+<%
     String categ = (String)request.getParameter("category");
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
@@ -53,6 +59,7 @@
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
         <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+
         <style>
             .chose_area {
                 padding: 20px !important;
@@ -332,8 +339,10 @@
                                 <li>Phí ship <span><%= (shippingCost > 0) ? shippingCost + "đ" : "Free" %></span></li>
                                 <li>Tổng <span><%= total %>đ</span></li>
                             </ul>
-                            <a href="cartcontact.jsp" class="btn btn-default check_out">Check Out</a>
 
+                            <% if (cartList != null && !cartList.isEmpty()) { %>
+                            <a href="cartcontact.jsp" class="btn btn-default check_out">Check Out</a>
+                            <% } %>
                         </div>
                     </div>
                 </div>
