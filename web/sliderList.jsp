@@ -246,11 +246,16 @@
                     <table class="table table-custom">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Hình ảnh</th>
-                                <th>Liên kết</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
+                                <th style="
+    text-align: center">ID</th>
+                                <th style="
+    text-align: center">Hình ảnh</th>
+                                <th style="
+    text-align: center">Liên kết</th>
+                                <th style="
+    text-align: center">Trạng thái</th>
+                                <th style="
+    text-align: center">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>

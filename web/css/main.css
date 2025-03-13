@@ -1628,6 +1628,19 @@ h2.title {
     font-size: 24px;
 }
 
+.cart_select {
+    text-align: center;
+    justify-content: center;
+    
+}
+
+.cart_select input[type="checkbox"] {
+    width: 20px;  /* Điều chỉnh chiều rộng */
+    height: 20px; /* Điều chỉnh chiều cao */
+    cursor: pointer; /* Hiển thị con trỏ khi hover */
+}
+
+
 .cart_product {
     display: flex; /* Sử dụng flexbox để căn chỉnh nội dung */
     align-items: center; /* Căn giữa theo chiều dọc */

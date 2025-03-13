@@ -14,11 +14,11 @@
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
     Account user = (Account) session.getAttribute("u");
-    // Lấy danh sách slider từ SliderDAO, chỉ lấy các slider có status = true
-    List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at"); // Sửa ở đây
+  
+    List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at"); 
     List<Slider> activeSliders = new ArrayList<>();
     for (Slider slider : allSliders) {
-        if (slider.isStatus()) { // Chỉ thêm slider có status = true
+        if (slider.isStatus()) { 
             activeSliders.add(slider);
         }
     }
@@ -269,7 +269,7 @@
 
                                             </div>
 
-                                            <<!-- Thêm thông báo -->
+                                            <!-- Thêm thông báo -->
                                             <div id="orderSuccessMessage" class="order-success">Đặt hàng thành công</div>
 
                                             <!-- Modal -->

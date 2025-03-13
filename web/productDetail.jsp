@@ -116,7 +116,7 @@ if (productId != null && !productId.trim().isEmpty()) {
                         </div>
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
-                              <ul class="nav navbar-nav">
+                                <ul class="nav navbar-nav">
                                     <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
                                         <li><a href="changepassword"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
                                         </c:if>
@@ -393,34 +393,7 @@ if (productId != null && !productId.trim().isEmpty()) {
                                     <img src="<%= product.getImage() %>" alt="<%= product.getName() %>" class="img-responsive" />
 
                                 </div>
-                                <div id="similar-product" class="carousel slide" data-ride="carousel">
-                                    <!-- Wrapper for slides -->
-                                    <div class="carousel-inner">
-                                        <div class="item active">
-                                            <a href=""><img src="images/product-details/similar1.jpg" alt="Similar Product"></a>
-                                            <a href=""><img src="images/product-details/similar2.jpg" alt="Similar Product"></a>
-                                            <a href=""><img src="images/product-details/similar3.jpg" alt="Similar Product"></a>
-                                        </div>
-                                        <div class="item">
-                                            <a href=""><img src="images/product-details/similar1.jpg" alt="Similar Product"></a>
-                                            <a href=""><img src="images/product-details/similar2.jpg" alt="Similar Product"></a>
-                                            <a href=""><img src="images/product-details/similar3.jpg" alt="Similar Product"></a>
-                                        </div>
-                                        <div class="item">
-                                            <a href=""><img src="images/product-details/similar1.jpg" alt="Similar Product"></a>
-                                            <a href=""><img src="images/product-details/similar2.jpg" alt="Similar Product"></a>
-                                            <a href=""><img src="images/product-details/similar3.jpg" alt="Similar Product"></a>
-                                        </div>
-                                    </div>
 
-                                    <!-- Controls -->
-                                    <a class="left item-control" href="#similar-product" data-slide="prev">
-                                        <i class="fa fa-angle-left"></i>
-                                    </a>
-                                    <a class="right item-control" href="#similar-product" data-slide="next">
-                                        <i class="fa fa-angle-right"></i>
-                                    </a>
-                                </div>
                             </div>
                             <div class="col-sm-7">
                                 <div class="product-information">
@@ -430,23 +403,37 @@ if (productId != null && !productId.trim().isEmpty()) {
                                     <img src="images/product-details/rating.png" alt="Rating" />
                                     <span>
                                         <span>US $<%= product.getPrice() %></span>
-                                        <label>Quantity:</label>
-                                        <input type="number" min="1" value="1" id="quantity" />
-                                        <label>Size:</label>
-                                        <select id="size">
-                                            <option value="S">S</option>
-                                            <option value="M">M</option>
-                                            <option value="L">L</option>
-                                            <option value="XL">XL</option>
-                                        </select>
-                                        <br><br>
-                                        <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
-                                           class="btn btn-default add-to-cart"
-                                           <% if (user != null) { %>
-                                           onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;"
-                                           <% } %>>
-                                            <i class="fa fa-shopping-cart"></i> Add to Cart
-                                        </a>
+                                        <form id="addToCartForm" action="orderpdetail" method="POST" style="display:contents    ">
+                                            <input type="hidden" name="productId" value="<%= product.getId() %>">
+                                            <input type="hidden" name="productName" value="<%= product.getName() %>">
+                                            <input type="hidden" name="price" value="<%= product.getPrice() %>">
+
+                                            <label>Quantity:</label>
+                                            
+                                            <input type="number" name="quantity" min="1" value="1" id="quantity" required />
+
+                                            <label>Size:</label>
+                                            <select name="size" id="size" required>
+                                                <option value="S">S</option>
+                                                <option value="M">M</option>
+                                                <option value="L">L</option>
+                                                <option value="XL">XL</option>
+                                            </select>
+                                            <br><br>
+
+                                            <% if (user == null) { %>
+
+                                            <a href="login.jsp" class="btn btn-default add-to-cart">
+                                                <i class="fa fa-shopping-cart"></i> Add to Cart
+                                            </a>
+                                            <% } else { %>
+
+                                            <button type="submit" class="btn btn-default add-to-cart">
+                                                <i class="fa fa-shopping-cart"></i> Add to Cart
+                                            </button>
+                                            <% } %>
+                                        </form>
+
                                     </span>
 
                                     <p><strong>Condition:</strong> New</p>
@@ -505,7 +492,7 @@ if (productId != null && !productId.trim().isEmpty()) {
                             </div>
                         </div>
 
-                       
+
                     </div>
                 </div>
             </div>
@@ -673,34 +660,6 @@ if (productId != null && !productId.trim().isEmpty()) {
         <script src="js/price-range.js"></script>
         <script src="js/jquery.prettyPhoto.js"></script>
         <script src="js/main.js"></script>
-        <script>
-                                               function openCartModal(id, name, price, typeId) {
-                                                   console.log("Opening Modal for Product:", id, name, price, typeId); // Debug để kiểm tra dữ liệu
-                                                   document.getElementById("productId").value = id;
-                                                   document.getElementById("productName").innerText = name;
-                                                   document.getElementById("productPrice").innerText = price;
 
-                                                   // Lấy giá trị size và quantity từ trang trước khi mở modal
-                                                   const size = document.getElementById("size").value;
-                                                   const quantity = document.getElementById("quantity").value;
-
-                                                   document.querySelector("input[name='price']").value = price;
-                                                   document.getElementById("sizeModal").value = size; // Đặt giá trị size trong modal
-                                                   document.getElementById("quantityModal").value = quantity; // Đặt giá trị quantity trong modal
-
-                                                   document.getElementById("cartModal").style.display = "flex";
-                                               }
-
-                                               function closeCartModal() {
-                                                   document.getElementById("cartModal").style.display = "none";
-                                               }
-
-                                               window.onclick = function (event) {
-                                                   let modal = document.getElementById("cartModal");
-                                                   if (event.target === modal) {
-                                                       closeCartModal();
-                                                   }
-                                               };
-        </script>
     </body>
 </html>

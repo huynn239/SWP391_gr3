@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="6.0" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
-    
     <!-- Các servlet khác -->
     <servlet>
         <servlet-name>NewServlet</servlet-name>
         <servlet-class>controller.NewServlet</servlet-class>
     </servlet>
-    
     <servlet>
         <servlet-name>productlist</servlet-name>
         <servlet-class>controller.Productlist</servlet-class>
     </servlet>
-
     <servlet>
         <servlet-name>Productfilter</servlet-name>
         <servlet-class>controller.Productfilter</servlet-class>
     </servlet>
-
     <servlet>
         <servlet-name>Productsearch</servlet-name>
         <servlet-class>controller.Productsearch</servlet-class>
     </servlet>
-
     <servlet>
         <servlet-name>Order</servlet-name>
         <servlet-class>controller.Order</servlet-class>
     </servlet>
-
     <servlet>
         <servlet-name>Cartcontroller</servlet-name>
         <servlet-class>controller.Cartcontroller</servlet-class>
     </servlet>
-
     <servlet>
         <servlet-name>Orderinfo</servlet-name>
         <servlet-class>controller.Orderinfo</servlet-class>
     </servlet>
-
     <!-- SliderController servlet -->
-
-
-    
     <servlet>
         <servlet-name>SliderController</servlet-name>
         <servlet-class>controller.SliderController</servlet-class>
     </servlet>
-
+    <servlet>
+        <servlet-name>Orderpdetail</servlet-name>
+        <servlet-class>controller.Orderpdetail</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CartCheckBox</servlet-name>
+        <servlet-class>controller.CartCheckBox</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CheckoutSevlet</servlet-name>
+        <servlet-class>controller.CheckoutSevlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>SliderController</servlet-name>
         <url-pattern>/sliderList</url-pattern>
     </servlet-mapping>
-
     <servlet-mapping>
         <servlet-name>SliderController</servlet-name>
         <url-pattern>/addSlider</url-pattern>
     </servlet-mapping>
-
-<servlet-mapping>
-    <servlet-name>SliderController</servlet-name>
-    <url-pattern>/sliderDetail</url-pattern>
-</servlet-mapping>
-
-
+    <servlet-mapping>
+        <servlet-name>SliderController</servlet-name>
+        <url-pattern>/sliderDetail</url-pattern>
+    </servlet-mapping>
     <servlet>
-    <servlet-name>Homecontroller</servlet-name>
-    <servlet-class>controller.Homecontroller</servlet-class>
-</servlet>
-
-<servlet-mapping>
-    <servlet-name>Homecontroller</servlet-name>
-    <url-pattern>/home/</url-pattern>
-</servlet-mapping>
-
-<servlet-mapping>
-    <servlet-name>productlist</servlet-name>
-    <url-pattern>/productlist</url-pattern>
-</servlet-mapping>
-
-<servlet-mapping>
-    <servlet-name>Productfilter</servlet-name>
-    <url-pattern>/productfilter</url-pattern>
-</servlet-mapping>
-
-<servlet-mapping>
-    <servlet-name>Productsearch</servlet-name>
-    <url-pattern>/productsearch</url-pattern>
-</servlet-mapping>
-
-<servlet-mapping>
-    <servlet-name>Order</servlet-name>
-    <url-pattern>/order</url-pattern>
-</servlet-mapping>
-
-<servlet-mapping>
-    <servlet-name>Cartcontroller</servlet-name>
-    <url-pattern>/cartcontroller</url-pattern>
-</servlet-mapping>
-
-<servlet-mapping>
-    <servlet-name>Orderinfo</servlet-name>
-    <url-pattern>/orderinfo</url-pattern>
-</servlet-mapping>
-<error-page>
-    <error-code>404</error-code>
-    <location>/404error.jsp</location>
-</error-page>
-    
+        <servlet-name>Homecontroller</servlet-name>
+        <servlet-class>controller.Homecontroller</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Homecontroller</servlet-name>
+        <url-pattern>/home/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>productlist</servlet-name>
+        <url-pattern>/productlist</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Productfilter</servlet-name>
+        <url-pattern>/productfilter</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Productsearch</servlet-name>
+        <url-pattern>/productsearch</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Order</servlet-name>
+        <url-pattern>/order</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Cartcontroller</servlet-name>
+        <url-pattern>/cartcontroller</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Orderinfo</servlet-name>
+        <url-pattern>/orderinfo</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Orderpdetail</servlet-name>
+        <url-pattern>/orderpdetail</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CartCheckBox</servlet-name>
+        <url-pattern>/cartcheckbox</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CheckoutSevlet</servlet-name>
+        <url-pattern>/checkoutservlet</url-pattern>
+    </servlet-mapping>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/404error.jsp</location>
+    </error-page>
 </web-app>

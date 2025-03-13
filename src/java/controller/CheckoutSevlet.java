@@ -6,7 +6,6 @@ package controller;
 
 import dto.OrderDAO;
 import dto.OrderdetailDAO;
-import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -14,17 +13,16 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import model.Account;
 import model.Cart;
-import model.Orderdetail;
 
 /**
  *
  * @author BAO CHAU
  */
-public class Cartcontroller extends HttpServlet {
+public class CheckoutSevlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -42,10 +40,10 @@ public class Cartcontroller extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet Cartcontroller</title>");
+            out.println("<title>Servlet CheckoutSevlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet Cartcontroller at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet CheckoutSevlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -63,20 +61,7 @@ public class Cartcontroller extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        Account user = (Account) session.getAttribute("u");
-
-        if (user != null) {
-            OrderdetailDAO od = new OrderdetailDAO();
-            List<Cart> list = od.cartDetail(user.getId());
-            System.out.println("" + list.size());
-
-            session.setAttribute("cartList", list); // Lưu vào session
-            RequestDispatcher dispatcher = request.getRequestDispatcher("cartdetail.jsp");
-            dispatcher.forward(request, response);
-        } else {
-            response.sendRedirect("login.jsp"); // Chưa đăng nhập thì về trang login
-        }
+        processRequest(request, response);
     }
 
     /**
@@ -91,47 +76,33 @@ public class Cartcontroller extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
+        List<Cart> cartList = (List<Cart>) session.getAttribute("cartList");
         Account user = (Account) session.getAttribute("u");
-
-        if (user == null) {
-            response.sendRedirect("login.jsp");
+        double total = Double.parseDouble(request.getParameter("total"));
+        OrderDAO o = new OrderDAO();
+        OrderdetailDAO od = new OrderdetailDAO();
+        if (cartList == null || cartList.isEmpty()) {
+            response.sendRedirect("cartdetail.jsp");
             return;
         }
-        String message = "";
-        OrderdetailDAO od = new OrderdetailDAO();
-        OrderDAO o = new OrderDAO();
-        String action = request.getParameter("action");
-        String size = request.getParameter("Size");
-        int productId = Integer.parseInt(request.getParameter("productId"));
-
-        if ("delete".equalsIgnoreCase(action)) {
-            od.deleteCart(productId, size, user.getId());
-            message = "Sản phẩm đã được xóa khỏi giỏ hàng!";
-        } else {
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
-
-            if ("decrease".equals(action) && quantity == 1) {
-                message = "Số lượng sản phẩm tối thiểu là 1! Nếu muốn xóa sản phẩm, hãy nhấn nút xóa.";
-            } else {
-                if ("increase".equals(action)) {
-                    quantity++;
-                } else if ("decrease".equals(action) && quantity > 1) {
-                    quantity--;
-                }
-
-                if (o.checkSize(quantity, productId, size)) {
-                    od.updateQuantity(quantity, productId, size, user.getId());
-                    message = "Cập nhật giỏ hàng thành công!";
-                } else {
-                    message = "Số lượng sản phẩm không đủ!";
-                }
-            }
+        List<Cart> selectedItems = cartList.stream()
+                .filter(c -> "checked".equals(c.getCheckboxStatus()))
+                .collect(Collectors.toList());
+        if (selectedItems.isEmpty()) {
+            session.setAttribute("cartMessage", "Vui lòng chọn sản phẩm để đặt hàng!");
+            response.sendRedirect("cartdetail.jsp");
+            return;
         }
-
-        session.setAttribute("cartList", od.cartDetail(user.getId()));
-        session.setAttribute("cartMessage", message);
-        response.sendRedirect("cartdetail.jsp");
-
+        if (o.checkCreateNewSubOrder(user.getId())) {
+            o.insertsubOrder(user.getId(), total);
+            od.updatesuborder(user.getId(), selectedItems);
+            od.updateToTalamountSuborder(user.getId(), selectedItems);
+        } else {
+            od.updatesuborder(user.getId(), selectedItems);
+            od.updateToTalamountSuborder(user.getId(), selectedItems);
+        }
+        session.setAttribute("selectedItems", selectedItems);
+        response.sendRedirect("cartcontact.jsp");
     }
 
     /**

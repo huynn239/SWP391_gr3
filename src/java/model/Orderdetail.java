@@ -12,17 +12,20 @@ public class Orderdetail {
 
     int orderDetail, orderID, productID, quantity;
     String size;
-
+    String CheckboxStatus;
     public Orderdetail() {
     }
 
-    public Orderdetail(int orderDetail, int orderID, int productID, int quantity, String size) {
+    public Orderdetail(int orderDetail, int orderID, int productID, int quantity, String size, String CheckboxStatus) {
         this.orderDetail = orderDetail;
         this.orderID = orderID;
         this.productID = productID;
         this.quantity = quantity;
         this.size = size;
+        this.CheckboxStatus = CheckboxStatus;
     }
+
+   
 
     public int getOrderDetail() {
         return orderDetail;

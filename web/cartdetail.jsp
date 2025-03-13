@@ -23,21 +23,7 @@
     List<Category> categories = categoryDAO.getAllCategories();
     List<Material> materials = materialDAO.getAllMaterial();
     Account user = (Account) session.getAttribute("u");
-     String province = "";
-    String districts = "";
-    String wards = "";
-    String address = "";
-    if (orderDAO.getorderID(user.getId()) != 0) {
-        Order o = orderDAO.getInfoOrder(orderDAO.getorderID(user.getId()));
-        if (o.getReciverAddress() != null) {
-            String reciverAddress = o.getReciverAddress();
-            String[] a = reciverAddress.split("-");
-                province = a[0];
-                districts = a[1];
-                wards = a[2];
-                address = a[3];
-            }
-        }
+    
     
 %>
 
@@ -189,6 +175,7 @@
             </div><!--/header-bottom-->
         </header>
 
+
         <section id="cart_items">
             <div class="container">
                 <div class="table-responsive cart_info">
@@ -211,6 +198,18 @@
                             %>
 
                             <tr>
+
+                                <td class="cart_select">
+                                    <form action="cartcheckbox" method="post">
+                                        <input type="hidden" name="productId" value="<%= c.getProductID() %>">
+                                        <input type="hidden" name="size" value="<%= c.getSize() %>">
+                                        <input type="hidden" name="action" value="updateCheckbox">
+                                        <input type="hidden" name="status" value="<%= c.getCheckboxStatus() %>">
+                                        <input type="checkbox" name="status" value="checked" 
+                                               <%= "checked".equals(c.getCheckboxStatus()) ? "checked" : "" %> 
+                                               onchange="this.form.submit()">
+                                    </form>
+                                </td>
                                 <td class="cart_product">
                                     <a href=""><img src="<%= c.getImage() %>" alt=""></a>
                                 </td>
@@ -250,8 +249,8 @@
                                 </td>
                             </tr>
                             <% 
-                        String cartMessage = (String) request.getAttribute("cartMessage");
-                        if (cartMessage != null && !cartMessage.isEmpty()) { 
+     String cartMessage = (String) session.getAttribute("cartMessage");
+     if (cartMessage != null && !cartMessage.isEmpty()) { 
                             %>
                         <div id="toast" class="toast"><%= cartMessage %></div>
                         <script>
@@ -263,7 +262,12 @@
                                 }, 3000);
                             });
                         </script>
-                        <% } %>
+
+                        <%
+                            session.removeAttribute("cartMessage"); // Xóa message sau khi hiển thị
+                            } 
+                        %>
+
 
                         <!-- CSS cho Toast -->
                         <style>
@@ -322,7 +326,9 @@
       int subtotal = 0;
       if (cartList != null) {
           for (Cart c : cartList) {
+            if(c.getCheckboxStatus().equals("checked")){
               subtotal += c.getPrice() * c.getQuantity();
+            }
           }
       }
       int shippingCost = 0; // Nếu có phí ship, đặt giá trị phù hợp
@@ -341,7 +347,10 @@
                             </ul>
 
                             <% if (cartList != null && !cartList.isEmpty()) { %>
-                            <a href="cartcontact.jsp" class="btn btn-default check_out">Check Out</a>
+                            <form action="checkoutservlet" method="post">
+                                <input type="hidden" name="total" value="<%= total %>">
+                                <button type="submit" class="btn btn-default check_out">Check Out</button>
+                            </form>
                             <% } %>
                         </div>
                     </div>

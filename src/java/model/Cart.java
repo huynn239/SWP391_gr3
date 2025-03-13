@@ -12,15 +12,27 @@ public class Cart {
 
     private String image, name, size;
     private int price, quantity,productID;
+    private String CheckboxStatus;
 
-    public Cart(String image, String name, String size, int price, int quantity,int productID) {
+    public Cart(String image, String name, String size, int price, int quantity, int productID, String CheckboxStatus) {
         this.image = image;
         this.name = name;
         this.size = size;
         this.price = price;
         this.quantity = quantity;
         this.productID = productID;
+        this.CheckboxStatus = CheckboxStatus;
     }
+
+    public String getCheckboxStatus() {
+        return CheckboxStatus;
+    }
+
+    public void setCheckboxStatus(String CheckboxStatus) {
+        this.CheckboxStatus = CheckboxStatus;
+    }
+    
+    
 
     public String getImage() {
         return image;

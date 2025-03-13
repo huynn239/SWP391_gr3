@@ -66,9 +66,7 @@
                     </div>
                 </div>
                 <div class="col-sm-3">
-                    <form action="productsearch" method="GET" class="search_box pull-right">
-                        <input type="text" name="query" placeholder="Search" required />
-                    </form>
+                            
                 </div>
             </div>
         </div>
