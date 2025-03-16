@@ -1,17 +1,21 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
-<%@ page import="model.Product, model.Brand, model.Category, model.Account" %>
-
+<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.ProductImage,model.Color" %>
+<%@ page import="com.google.gson.Gson" %>
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
 <jsp:useBean id="categoryDAO" class="dto.CategoryDAO" scope="session"/>
-
+<jsp:useBean id="productimageDAO" class="dto.ProductImageDAO" scope="session"/>
+<jsp:useBean id="colorDAO" class="dto.ColorDAO" scope="session"/>
 <%
     List<Product> products = (List<Product>) request.getAttribute("list");
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
     Account user = (Account) session.getAttribute("u");
+    List<ProductImage> productImages = productimageDAO.getAllImagesProduct();
+    List<Color> colors = colorDAO.getAllColors();
+    Gson gson = new Gson();
 %>
 
 <!DOCTYPE html>
@@ -48,7 +52,7 @@
                         </div>
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
-                                   <ul class="nav navbar-nav">
+                                <ul class="nav navbar-nav">
                                     <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
                                         <li><a href="changepassword"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
                                         </c:if>
@@ -236,11 +240,23 @@
                                                         <div class="modal-body">
                                                             <form id="orderForm">
                                                                 <input type="hidden" id="productId" name="productId">
-                                                                <input type="hidden" id="price" name="price" value="<%= product.getPrice() %>">
+                                                                <input type="hidden" id="price" name="price">
+
+
+                                                                <div class="product-modal-image">
+                                                                    <img id="productImage" src="" alt="Product Image">
+                                                                </div>
+
                                                                 <p><strong>Product:</strong> <span id="productName"></span></p>
                                                                 <p><strong>Price:</strong> $<span id="productPrice"></span></p>
 
-                                                                <!-- Chọn size dựa theo TypeId -->
+
+                                                                <label for="color">Color:</label>
+                                                                <select name="color" id="color" onchange="updateCartImage()">
+                                                                    <!-- Màu sẽ được load từ JS -->
+                                                                </select>
+
+                                                                <!-- Chọn size -->
                                                                 <label for="size">Size:</label>
                                                                 <select name="size" id="size">
                                                                     <option value="S">S</option>
@@ -248,6 +264,8 @@
                                                                     <option value="L">L</option>
                                                                     <option value="XL">XL</option>
                                                                 </select>
+
+                                                                <!-- Số lượng -->
                                                                 <label for="quantity">Quantity:</label>
                                                                 <input type="number" name="quantity" id="quantity" min="1" value="1">
 
@@ -508,16 +526,103 @@
                 </div>
             </div>
             <script>
-                function openCartModal(id, name, price) {
-                    console.log("Opening Modal for Product:", id, name, price); // Debug để kiểm tra dữ liệu
-                    document.getElementById("productId").value = id;
-                    document.getElementById("productName").innerText = name;
-                    document.getElementById("productPrice").innerText = price;
+                 var productImages = <%= gson.toJson(productImages) %>;
+                var colors = <%= gson.toJson(colors) %>;
 
-                    document.querySelector("input[name='price']").value = price;
+                console.log("Danh sách màu:", colors);
+                console.log("Danh sách ảnh sản phẩm:", productImages);
 
-                    document.getElementById("cartModal").style.display = "flex";
+                function openCartModal(productId, productName, productPrice) {
+                    document.getElementById("productId").value = productId;
+                    document.getElementById("productName").innerText = productName;
+                    document.getElementById("productPrice").innerText = productPrice;
+                     document.getElementById("price").value = productPrice;
+                    let colorSelect = document.getElementById("color");
+                    colorSelect.innerHTML = "";// Xóa danh sách cũ và thêm option mặc định
+
+                    let imageElement = document.getElementById("productImage");
+                    imageElement.src = "default.jpg"; // Đặt hình ảnh mặc định
+
+                    // Lọc danh sách ảnh theo productId
+                    let images = productImages.filter(img => img.productId == productId);
+
+                    if (images.length > 0) {
+                        let uniqueColors = [...new Set(images.map(img => Number(img.colorId)))];
+                        console.log("Màu sắc có sẵn cho sản phẩm này:", uniqueColors);
+                        uniqueColors.forEach(colorId => {
+                            console.log("ColorId đang xét:", colorId);
+                            let colorObj = colors.find(c => c.ID === colorId);  
+                            console.log("Tìm thấy màu:", colorObj); 
+
+                            if (colorObj) {
+                                let option = document.createElement("option");
+                                option.value = colorObj.ID;
+                                option.textContent = colorObj.colorName;
+                                colorSelect.appendChild(option);
+                            } else {
+                                console.warn("Không tìm thấy màu cho colorId:", colorId);
+                            }
+                        });
+                        if (uniqueColors.length > 0) {
+                            let firstColor = uniqueColors[0];
+                            let firstImage = images.find(img => Number(img.colorId) === firstColor);
+                            if (firstImage) {
+                                imageElement.src = firstImage.imageUrl;
+                            }
+                        }
+                    }
+
+                    document.getElementById("cartModal").style.display = "block";
                 }
+
+                function updateCartImage() {
+                    let selectedColor = document.getElementById("color").value;
+                    let productId = document.getElementById("productId").value;
+                    let imageElement = document.getElementById("productImage");
+
+                    let image = productImages.find(img => img.productId == productId && img.colorId == selectedColor);
+                    imageElement.src = image ? image.imageUrl : "default.jpg";
+                }
+
+
+
+                function closeCartModal() {
+                    document.getElementById("cartModal").style.display = "none";
+                }
+
+                function submitOrder() {
+                    let form = document.getElementById("orderForm");
+                    let formData = new URLSearchParams(new FormData(form)).toString();
+
+                    fetch("order", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                        body: formData
+                    })
+                            .then(response => response.json())
+                            .then(data => {
+                                let message = document.getElementById("orderSuccessMessage");
+
+                                if (data.status === "success") {
+                                    message.innerText = "Đặt hàng thành công!";
+                                    message.style.backgroundColor = "black";
+                                } else {
+                                    message.innerText = data.message;
+                                    message.style.backgroundColor = "red";
+                                }
+
+                                message.style.display = "block";
+                                setTimeout(() => {
+                                    message.style.display = "none";
+                                }, 3000);
+
+                                if (data.status === "success") {
+                                    closeCartModal();
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                }
+
 
                 function closeCartModal() {
                     document.getElementById("cartModal").style.display = "none";

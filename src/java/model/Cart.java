@@ -4,17 +4,14 @@
  */
 package model;
 
-/**
- *
- * @author BAO CHAU
- */
 public class Cart {
 
     private String image, name, size;
     private int price, quantity,productID;
     private String CheckboxStatus;
+    private String color;
 
-    public Cart(String image, String name, String size, int price, int quantity, int productID, String CheckboxStatus) {
+    public Cart(String image, String name, String size, int price, int quantity, int productID, String CheckboxStatus,String color) {
         this.image = image;
         this.name = name;
         this.size = size;
@@ -22,7 +19,18 @@ public class Cart {
         this.quantity = quantity;
         this.productID = productID;
         this.CheckboxStatus = CheckboxStatus;
+        this.color = color;
     }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+    
+    
 
     public String getCheckboxStatus() {
         return CheckboxStatus;

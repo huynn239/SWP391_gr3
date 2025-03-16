@@ -3,8 +3,8 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.util.ArrayList" %>
-
-<%@ page import="model.Product, model.Brand, model.Category, model.Material,model.Account,model.Cart,model.Order" %>
+<%@ page import="com.google.gson.Gson" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Material,model.Account,model.Cart,model.Order,model.Address" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
@@ -17,8 +17,14 @@
     List<Category> categories = categoryDAO.getAllCategories();
     List<Material> materials = materialDAO.getAllMaterial();
     Account user = (Account) session.getAttribute("u");
-    
-    
+   List<Address> listAddress = new ArrayList<>();
+    if (user != null) {
+        listAddress = orderDAO.listAddress(user.getId());
+    } else {
+        response.sendRedirect("login.jsp"); 
+    }
+    Gson gson = new Gson();
+   
 %>
 
 <!DOCTYPE html>
@@ -35,6 +41,7 @@
         <link href="css/main.css" rel="stylesheet">
         <link href="css/responsive.css" rel="stylesheet">
         <link href="css/modal.css" rel="stylesheet">
+        <link href="css/saveaddress.css" rel="stylesheet">
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
@@ -75,6 +82,25 @@
                 border-radius: 8px;
                 border: 1px solid #ccc;
                 background: #f9f9f9;
+            }
+
+            .save {
+                display: flex;
+                align-items: center;
+                gap: 8px; /* Tạo khoảng cách giữa checkbox và label */
+                margin-top: 10px; /* Khoảng cách với phần trên */
+            }
+
+            .save input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                accent-color: #007bff; /* Màu xanh giống Bootstrap */
+                cursor: pointer;
+            }
+
+            .save label {
+                font-size: 14px;
+                cursor: pointer;
             }
 
 
@@ -167,7 +193,7 @@
                 </div>
             </div><!--/header-bottom-->
         </header>
-
+        <script src="js/location.js"></script>
         <section id="cart_items">
             <div class="container">
                 <div class="table-responsive cart_info">
@@ -195,7 +221,7 @@
                                 </td>
                                 <td class="cart_description">
                                     <h4><a href=""><%= c.getName() %></a></h4>
-                                    <p>Size: <%= c.getSize() %></p>
+                                    <p>Size: <%= c.getSize() %> | <span class="color-id"><%= c.getColor() %></span></p>
                                 </td>
                                 <td class="cart_price">
                                     <p>$<%= c.getPrice() %></p>
@@ -242,6 +268,212 @@
       int total = subtotal + shippingCost;
         %>
 
+        <button class="address-btn" onclick="openAddressModal()">
+            <i class="fa fa-book"></i> Chọn từ sổ địa chỉ
+        </button>
+
+
+        <div id="addressModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeAddressModal()">&times;</span>
+
+
+                <div id="addressListContainer">
+                    <h2>Sổ địa chỉ</h2>
+                    <div id="addressList">
+
+                    </div>
+                    <button class="add-address" onclick="showAddressForm()">Thêm địa chỉ</button>
+                </div>
+
+                <form id="addressForm" action="orderinfo" method="get" style="display: none;">
+                    <h2>Thêm địa chỉ</h2>
+                    <input type="text" name="inputname" id="name-input" placeholder="Tên" required>
+
+                    <input type="text" name="inputphone" id="phone-input" placeholder="Số điện thoại" required 
+                           pattern="[0-9]{10}" title="Số điện thoại gồm 10 chữ số">
+
+                    <input type="text" name="inputaddress" id="address-input" placeholder="Địa chỉ" required>
+                    <input type="text" name="inputemail" id="email-input" placeholder="Email" required>
+                    <select name="inputprovince" id="province-input" onchange="loadDistrictsForm()" required>
+                        <option value="" hidden selected>Chọn tỉnh/thành phố</option>
+                    </select>
+
+                    <select name="inputdistrict" id="district-input" onchange="loadWardsForm()" required>
+                        <option value="" hidden selected>Chọn quận/huyện</option>
+                    </select>
+
+                    <select name="inputward" id="ward-input" required>
+                        <option value="" hidden selected>Chọn xã/phường</option>
+                    </select>
+
+                    <br>
+                    <button type="button" onclick="cancelNewAddress()">Huỷ</button>
+                    <button type="submit">Thêm</button>
+                </form>
+
+
+            </div>
+        </div>
+        <script>
+            var addresses = <%= gson.toJson(listAddress) %>;
+            console.log(addresses);
+
+            function openAddressModal() {
+                document.getElementById('addressModal').style.display = 'block';
+                loadAddresses();
+            }
+
+// Đóng modal
+            function closeAddressModal() {
+                document.getElementById('addressModal').style.display = 'none';
+                resetAddressForm();
+            }
+
+            function showAddressList() {
+                document.getElementById('addressListContainer').style.display = 'block';
+                document.getElementById('addressForm').style.display = 'none';
+                loadAddresses();
+
+            }
+
+            function selectAddress(element, addressText) {
+                console.log("Đang chọn địa chỉ:", addressText);
+                const lines = addressText.split("\n").map(line => line.trim());
+                if (lines.length < 2) {
+                    console.error("Dữ liệu địa chỉ không hợp lệ");
+                    return;
+                }
+                let fullAddress = lines[0];
+                let userInfo = lines[1].split(",").map(part => part.trim()); // Tên, SĐT, Email
+                let receiverName = userInfo[0] || "Không có tên";
+                let receiverPhone = userInfo[1] || "Không có SĐT";
+                let receiverEmail = userInfo[2] || "Không có email";
+                let addressParts = fullAddress.split("-").map(part => part.trim());
+
+                let addressDetail = addressParts.slice(3).join(" - "); // Phần chi tiết địa chỉ
+                let province = addressParts.length > 0 ? addressParts[0] : "";
+                let district = addressParts.length > 1 ? addressParts[1] : "";
+                let ward = addressParts.length > 2 ? addressParts[2] : "";
+                document.getElementById("fullname").value = receiverName;
+                document.getElementById("phone").value = receiverPhone;
+                document.getElementById("email").value = receiverEmail;
+                document.getElementById("address").value = addressDetail;
+                loadProvinces(province).then(() => {
+                    loadDistricts(province, district).then(() => {
+                        loadWards(province, district, ward);
+                    });
+                });
+                closeAddressModal();
+            }
+
+
+            function showAddressForm() {
+                document.getElementById('addressListContainer').style.display = 'none';
+                document.getElementById('addressForm').style.display = 'block';
+                loadProvincesForm();
+
+            }
+
+
+            function loadAddresses() {
+                let container = document.getElementById('addressList');
+                if (!container) {
+                    console.error("Không tìm thấy phần tử #addressList");
+                    return;
+                }
+                container.innerHTML = '';
+
+                if (!addresses || addresses.length === 0) {
+                    container.innerHTML = "<p>Không có địa chỉ nào.</p>";
+                    return;
+                }
+
+                let latestAddress = null; // Lưu địa chỉ mới nhất
+
+                addresses.forEach((address, index) => {
+                    let div = document.createElement('div');
+                    div.className = 'address-item';
+
+                    let receiverAddress = address.reciverAddress || address.receiverAddress || "Không có địa chỉ";
+                    let receiverName = address.reciverName || address.receiverName || "Không có tên";
+                    let receiverPhone = address.reciverPhone || address.receiverPhone || "Không có SĐT";
+                    let receiverEmail = address.reciverEmail || address.receiverEmail || "Không có email";
+
+                    div.innerHTML = receiverAddress + '<br>' + receiverName + ', ' + receiverPhone + ',' + receiverEmail;
+
+                    let actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'address-actions';
+                    let deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Xóa';
+                    deleteButton.onclick = function (event) {
+                        event.stopPropagation();
+                        deleteAddressFromServer(index);
+                    };
+
+                    actionsDiv.appendChild(deleteButton);
+                    div.appendChild(actionsDiv);
+
+                    div.addEventListener('click', function () {
+                        let addressText = receiverAddress + '\n' + receiverName + ', ' + receiverPhone + ',' + receiverEmail;
+                        console.log("Chọn địa chỉ:", addressText);
+                        selectAddress(div, addressText);
+                    });
+
+                    container.appendChild(div);
+                });
+            }
+
+            function selectLatestAddress() {
+                if (!addresses || addresses.length === 0) {
+                    console.log("Không có địa chỉ nào để chọn.");
+                    return;
+                }
+                let latestAddress = addresses.at(-1);
+                let receiverAddress = latestAddress.reciverAddress || latestAddress.receiverAddress || "Không có địa chỉ";
+                let receiverName = latestAddress.reciverName || latestAddress.receiverName || "Không có tên";
+                let receiverPhone = latestAddress.reciverPhone || latestAddress.receiverPhone || "Không có SĐT";
+                let receiverEmail = latestAddress.reciverEmail || latestAddress.receiverEmail || "Không có email";
+                let addressText = receiverAddress + '\n' + receiverName + ', ' + receiverPhone + ',' + receiverEmail;
+                console.log("Chọn địa chỉ mới nhất:", addressText);
+                let div = document.createElement('div');
+                div.className = 'address-item';
+                selectAddress(div, addressText); 
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                selectLatestAddress();
+            });
+
+
+            function deleteAddressFromServer(index) {
+                console.log("blabla");
+                if (!addresses[index]) {
+                    console.error("Không tìm thấy địa chỉ để xóa");
+                    return;
+                }
+
+                let addressId = addresses[index].AddressID;
+                console.log(addressId);
+                window.location.href = "orderinfo?action=delete&id=" + addressId;
+            }
+
+
+
+            function cancelNewAddress() {
+                showAddressList();
+                resetAddressForm();
+            }
+
+            function resetAddressForm() {
+                document.getElementById('name-input').value = '';
+                document.getElementById('phone-input').value = '';
+                document.getElementById('address-input').value = '';
+                document.getElementById('province-input').selectedIndex = 0;
+                document.getElementById('district-input').selectedIndex = 0;
+                document.getElementById('ward-input').selectedIndex = 0;
+            }
+        </script>
         <section id="do_action">
             <form action="orderinfo" method="post" onsubmit="return validateForm()">
                 <div class="container">
@@ -273,10 +505,14 @@
                                     </div>
                                 </div>
 
-                                <script src="js/location.js"></script>
+
 
                                 <label for="address">Địa chỉ</label>
                                 <input type="text" id="address" name="address" value="" required>
+                                <div class="save">
+                                    <input type="checkbox" id="saveAddress" name="saveAddress" >
+                                    <label for="saveAddress">Lưu địa chỉ này</label>
+                                </div>
                             </div>
                         </div>
 
@@ -297,57 +533,57 @@
         </section><!--/#do_action-->
 
         <script>
-                                            function validateForm() {
-                                                let fullname = document.getElementById("fullname").value.trim();
-                                                let phone = document.getElementById("phone").value.trim();
-                                                let email = document.getElementById("email").value.trim();
-                                                let province = document.getElementById("province").value;
-                                                let district = document.getElementById("district").value;
-                                                let ward = document.getElementById("ward").value;
-                                                let address = document.getElementById("address").value.trim();
+            function validateForm() {
+                let fullname = document.getElementById("fullname").value.trim();
+                let phone = document.getElementById("phone").value.trim();
+                let email = document.getElementById("email").value.trim();
+                let province = document.getElementById("province").value;
+                let district = document.getElementById("district").value;
+                let ward = document.getElementById("ward").value;
+                let address = document.getElementById("address").value.trim();
 
-                                                // Kiểm tra họ và tên
-                                                if (fullname === "") {
-                                                    alert("Vui lòng nhập họ và tên.");
-                                                    return false;
-                                                }
+                // Kiểm tra họ và tên
+                if (fullname === "") {
+                    alert("Vui lòng nhập họ và tên.");
+                    return false;
+                }
 
-                                                // Kiểm tra số điện thoại (phải có 10 chữ số và chỉ chứa số)
-                                                let phoneRegex = /^\d{10}$/;
-                                                if (!phoneRegex.test(phone)) {
-                                                    alert("Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số.");
-                                                    return false;
-                                                }
+                // Kiểm tra số điện thoại (phải có 10 chữ số và chỉ chứa số)
+                let phoneRegex = /^\d{10}$/;
+                if (!phoneRegex.test(phone)) {
+                    alert("Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số.");
+                    return false;
+                }
 
-                                                // Kiểm tra email hợp lệ
-                                                let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                                                if (!emailRegex.test(email)) {
-                                                    alert("Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
-                                                    return false;
-                                                }
+                // Kiểm tra email hợp lệ
+                let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(email)) {
+                    alert("Email không hợp lệ. Vui lòng nhập đúng định dạng email.");
+                    return false;
+                }
 
-                                                // Kiểm tra chọn địa chỉ đầy đủ
-                                                if (province === "") {
-                                                    alert("Vui lòng chọn tỉnh/thành phố.");
-                                                    return false;
-                                                }
-                                                if (district === "") {
-                                                    alert("Vui lòng chọn quận/huyện.");
-                                                    return false;
-                                                }
-                                                if (ward === "") {
-                                                    alert("Vui lòng chọn xã/phường.");
-                                                    return false;
-                                                }
+                // Kiểm tra chọn địa chỉ đầy đủ
+                if (province === "") {
+                    alert("Vui lòng chọn tỉnh/thành phố.");
+                    return false;
+                }
+                if (district === "") {
+                    alert("Vui lòng chọn quận/huyện.");
+                    return false;
+                }
+                if (ward === "") {
+                    alert("Vui lòng chọn xã/phường.");
+                    return false;
+                }
 
-                                                // Kiểm tra địa chỉ cụ thể
-                                                if (address === "") {
-                                                    alert("Vui lòng nhập địa chỉ cụ thể.");
-                                                    return false;
-                                                }
+                // Kiểm tra địa chỉ cụ thể
+                if (address === "") {
+                    alert("Vui lòng nhập địa chỉ cụ thể.");
+                    return false;
+                }
 
-                                                return true; // Form hợp lệ
-                                            }
+                return true; // Form hợp lệ
+            }
         </script>
         <footer id="footer"><!--Footer-->
             <div class="footer-top">
@@ -507,6 +743,33 @@
 
         </footer><!--/Footer-->
 
+        <script>
+            // Tạo đối tượng ánh xạ ID_Color -> ColorName
+            const colorMap = {
+                1: "Đen",
+                2: "Xám",
+                3: "Trắng",
+                4: "Be",
+                5: "Đỏ",
+                6: "Cam",
+                7: "Vàng",
+                8: "Nâu",
+                9: "Xanh sáng",
+                10: "Xanh đậm",
+                11: "Xanh lá"
+            };
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll(".color-id").forEach(element => {
+                    let colorID = element.innerText.trim(); // Lấy ID
+                    if (colorMap[colorID]) {
+                        element.innerText = colorMap[colorID]; // Thay bằng tên màu
+                    }
+                });
+            }
+            );
+        </script>
 
 
         <script src="js/jquery.js"></script>

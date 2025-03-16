@@ -77,12 +77,12 @@ public class Order extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-
             String productId = request.getParameter("productId");
             String size = request.getParameter("size");
             String quantityStr = request.getParameter("quantity");
             String pricestr = request.getParameter("price");
-
+            String color = request.getParameter("color");
+            int colorID = Integer.parseInt(color);
             int quantity = Integer.parseInt(quantityStr);
             int productID = Integer.parseInt(productId);
             double price = Double.parseDouble(pricestr);
@@ -93,7 +93,7 @@ public class Order extends HttpServlet {
             OrderDAO o = new OrderDAO();
             OrderdetailDAO od = new OrderdetailDAO();
             int orderID = o.getorderID(user.getId());
-            if (o.checkSize(quantity, productID, size) == false) {
+            if (o.checkSize(quantity, productID, size, colorID) == false) {
                 response.getWriter().write("{\"status\": \"error\", \"message\": \"Sản phẩm không đủ số lượng, vui lòng giảm số lượng!\"}");
                 return;
             }
@@ -102,7 +102,7 @@ public class Order extends HttpServlet {
                 orderID = o.getorderID(user.getId());
             }
 
-            od.insertOrderdetail(orderID, productID, quantity, size);
+            od.insertOrderdetail(orderID, productID, quantity, size, color);
             o.updateTotalAmount(orderID);
             response.getWriter().write("{\"status\": \"success\"}");
 

@@ -57,7 +57,34 @@ public class Orderinfo extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        String action = request.getParameter("action");
+        OrderDAO o = new OrderDAO();
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("u");
+        int userID = user.getId();
+        if (action == null) {
+            String name = request.getParameter("inputname");
+            String phone = request.getParameter("inputphone");
+            String address = request.getParameter("inputaddress");
+            String email = request.getParameter("inputemail");
+            String province = request.getParameter("inputprovince");
+            String district = request.getParameter("inputdistrict");
+            String ward = request.getParameter("inputward");
+            o.addAddress(name, phone, email, province + "-" + district + "-" + ward + "-" + address, userID);
+            response.sendRedirect("cartcontact.jsp"); // Chuyển hướng sau khi thêm thành công
+
+        } else if ("delete".equals(action)) { // Nếu có action=delete thì xóa địa chỉ
+            String idStr = request.getParameter("id");
+            if (idStr != null) {
+                int addressID = Integer.parseInt(idStr);
+                boolean success = o.deleteAddress(addressID); // Xóa địa chỉ theo userID
+                if (success) {
+                    response.sendRedirect("cartcontact.jsp?message=Xóa thành công");
+                } else {
+                    response.sendRedirect("cartcontact.jsp?error=Xóa thất bại");
+                }
+            }
+        }
     }
 
     /**
@@ -71,6 +98,7 @@ public class Orderinfo extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String checkbox = request.getParameter("saveAddress");
         String fullname = request.getParameter("fullname");
         String phone = request.getParameter("phone");
         String email = request.getParameter("email");
@@ -81,14 +109,19 @@ public class Orderinfo extends HttpServlet {
         HttpSession session = request.getSession();
         Account user = (Account) session.getAttribute("u");
         OrderDAO o = new OrderDAO();
-
+        int userID = user.getId();
         if (user == null) {
             response.sendRedirect("login.jsp");
             return;
         }
         int orderId = o.getorderID(user.getId());
+        if (checkbox != null) {
+            o.addAddress(fullname, phone, email, province + "-" + district + "-"
+                    + ward + "-" + address, userID);
+        }
         o.updateOrderInfo(fullname, phone, email, province + "-" + district + "-"
-                + ward + "-" + address, orderId);
+                + ward + "-" + address, userID);
+
         request.getRequestDispatcher("payment.jsp").forward(request, response);
     }
 

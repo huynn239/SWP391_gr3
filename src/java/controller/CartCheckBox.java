@@ -83,11 +83,11 @@ public class CartCheckBox extends HttpServlet {
         int productId = Integer.parseInt(request.getParameter("productId"));
         String size = request.getParameter("size");
         String status = request.getParameter("status");
-
+        String color = request.getParameter("color");
         OrderdetailDAO od = new OrderdetailDAO();
 
         if ("updateCheckbox".equalsIgnoreCase(action)) {
-            boolean updated = od.updateCheckboxStatus(productId, size, user.getId(), status);
+            boolean updated = od.updateCheckboxStatus(productId, size, user.getId(), status,color);
             
         }
         session.setAttribute("cartList", od.cartDetail(user.getId()));

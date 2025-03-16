@@ -1,0 +1,150 @@
+.address-btn {
+    margin-left: 20%;
+    margin-bottom: 10px;
+    background: none;
+    border: none;
+    color: blue;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    overflow: auto;
+}
+
+.modal-content {
+    background: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 8px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center; /* Căn giữa nội dung trong modal */
+}
+
+/* Danh sách địa chỉ */
+.address-item {
+    white-space: pre-line;
+    padding: 12px;
+    margin: 8px auto; /* Căn giữa các item */
+    border-radius: 8px;
+    width: 90%; /* Giữ các item có chiều rộng phù hợp */
+    text-align: left; /* Căn chữ về bên trái */
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+.address-item:hover {
+    background: #e0e0e0;
+}
+
+.selected {
+    background-color: blue;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Nút đóng modal */
+.close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+    margin-top: -10px;
+}
+
+/* Nút thêm địa chỉ */
+.add-address-btn {
+    display: block;
+    width: 90%;
+    margin: 15px auto; /* Giữ căn giữa */
+    padding: 10px;
+    background: blue;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.add-address-btn:hover {
+    background: darkblue;
+}
+
+/* Nút lưu và hủy */
+.save-address, .cancel-address {
+    padding: 8px 12px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.save-address {
+    background: blue;
+    color: white;
+}
+
+.save-address:hover {
+    background: darkblue;
+}
+
+.cancel-address {
+    background: #ccc;
+    color: black;
+}
+
+.cancel-address:hover {
+    background: #b3b3b3;
+}
+
+/* Căn chỉnh form nhập */
+#addressForm input,
+#addressForm select {
+    width: 90%;  /* Đồng bộ chiều rộng */
+    padding: 8px;
+    margin: 8px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box; /* Tránh trường hợp padding làm thay đổi kích thước */
+    appearance: none; /* Ẩn giao diện mặc định của trình duyệt */
+}
+
+#addressForm select {
+    background-color: white;
+    cursor: pointer;
+}
+
+#addressForm select:focus {
+    border-color: blue;
+    outline: none;
+}
+
+/* Căn chỉnh lại nút hủy để không bị lệch */
+.cancel-address {
+    display: inline-block;
+    margin-left: 10px;
+    background: #ccc;
+    color: black;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cancel-address:hover {
+    background: #b3b3b3;
+}
+
+

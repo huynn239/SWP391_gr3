@@ -102,10 +102,12 @@ public class Cartcontroller extends HttpServlet {
         OrderDAO o = new OrderDAO();
         String action = request.getParameter("action");
         String size = request.getParameter("Size");
+        String color = request.getParameter("color");
+        int colorID = Integer.parseInt(color);
         int productId = Integer.parseInt(request.getParameter("productId"));
 
         if ("delete".equalsIgnoreCase(action)) {
-            od.deleteCart(productId, size, user.getId());
+            od.deleteCart(productId, size, user.getId(),color);
             message = "Sản phẩm đã được xóa khỏi giỏ hàng!";
         } else {
             int quantity = Integer.parseInt(request.getParameter("quantity"));
@@ -119,8 +121,8 @@ public class Cartcontroller extends HttpServlet {
                     quantity--;
                 }
 
-                if (o.checkSize(quantity, productId, size)) {
-                    od.updateQuantity(quantity, productId, size, user.getId());
+                if (o.checkSize(quantity, productId, size,colorID)) {
+                    od.updateQuantity(quantity, productId, size, user.getId(),color);
                     message = "Cập nhật giỏ hàng thành công!";
                 } else {
                     message = "Số lượng sản phẩm không đủ!";

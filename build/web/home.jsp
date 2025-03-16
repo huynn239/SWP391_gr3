@@ -2,19 +2,22 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider" %>
-
+<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider,model.ProductImage,model.Color" %>
+<%@ page import="com.google.gson.Gson" %>
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
 <jsp:useBean id="categoryDAO" class="dto.CategoryDAO" scope="session"/>
 <jsp:useBean id="sliderDAO" class="dto.SliderDAO" scope="session"/>
-
+<jsp:useBean id="productimageDAO" class="dto.ProductImageDAO" scope="session"/>
+<jsp:useBean id="colorDAO" class="dto.ColorDAO" scope="session"/>
 <%
     List<Product> products = productDAO.getAllProducts();
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
     Account user = (Account) session.getAttribute("u");
-  
+    List<ProductImage> productImages = productimageDAO.getAllImagesProduct();
+    List<Color> colors = colorDAO.getAllColors();
+    Gson gson = new Gson();
     List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at"); 
     List<Slider> activeSliders = new ArrayList<>();
     for (Slider slider : allSliders) {
@@ -59,7 +62,7 @@
                         </div>
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
-                               <ul class="nav navbar-nav">
+                                <ul class="nav navbar-nav">
                                     <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
                                         <li><a href="changepassword"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
                                         </c:if>
@@ -143,70 +146,70 @@
 
         </header>
 
-       <section id="slider">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-12">
-                    <div id="slider-carousel" class="carousel slide" data-ride="carousel">
-                        <!-- Carousel Indicators -->
-                        <ol class="carousel-indicators">
-                            <% for (int i = 0; i < activeSliders.size(); i++) { %>
-                            <li data-target="#slider-carousel" data-slide-to="<%= i %>" class="<%= i == 0 ? "active" : "" %>"></li>
-                            <% } %>
-                        </ol>
+        <section id="slider">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div id="slider-carousel" class="carousel slide" data-ride="carousel">
+                            <!-- Carousel Indicators -->
+                            <ol class="carousel-indicators">
+                                <% for (int i = 0; i < activeSliders.size(); i++) { %>
+                                <li data-target="#slider-carousel" data-slide-to="<%= i %>" class="<%= i == 0 ? "active" : "" %>"></li>
+                                    <% } %>
+                            </ol>
 
-                        <!-- Carousel Inner -->
-                        <div class="carousel-inner">
-                            <% 
-                                int index = 0;
-                                for (Slider slider : activeSliders) { 
-                            %>
-                            <div class="item <%= index == 0 ? "active" : "" %>">
-                                <div class="col-sm-6">
-                                    <h1><span>Men</span>-SHOPPER</h1>
-                                    <h2>Featured Promotion</h2> <!-- Có thể thay bằng trường trong Slider nếu có -->
-                                    <p>Check out our latest offers and deals!</p> <!-- Có thể thay bằng trường trong Slider nếu có -->
-                                    <a href="<%= slider.getLink() %>" class="btn btn-default get">Get it now</a>
+                            <!-- Carousel Inner -->
+                            <div class="carousel-inner">
+                                <% 
+                                    int index = 0;
+                                    for (Slider slider : activeSliders) { 
+                                %>
+                                <div class="item <%= index == 0 ? "active" : "" %>">
+                                    <div class="col-sm-6">
+                                        <h1><span>Men</span>-SHOPPER</h1>
+                                        <h2>Featured Promotion</h2> <!-- Có thể thay bằng trường trong Slider nếu có -->
+                                        <p>Check out our latest offers and deals!</p> <!-- Có thể thay bằng trường trong Slider nếu có -->
+                                        <a href="<%= slider.getLink() %>" class="btn btn-default get">Get it now</a>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <img src="<%= slider.getImageUrl() %>" class="girl img-responsive" alt="Slider Image" />
+                                        <!-- Nếu cần hình pricing, có thể thêm logic kiểm tra hoặc để mặc định -->
+                                        <img src="images/home/pricing.png" class="pricing" alt="" />
+                                    </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <img src="<%= slider.getImageUrl() %>" class="girl img-responsive" alt="Slider Image" />
-                                    <!-- Nếu cần hình pricing, có thể thêm logic kiểm tra hoặc để mặc định -->
-                                    <img src="images/home/pricing.png" class="pricing" alt="" />
+                                <% 
+                                    index++;
+                                    } 
+                                    // Nếu không có slider nào, hiển thị mặc định
+                                    if (activeSliders.isEmpty()) { 
+                                %>
+                                <div class="item active">
+                                    <div class="col-sm-6">
+                                        <h1><span>Men</span>-SHOPPER</h1>
+                                        <h2>NEW ARRIVALS</h2>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                                        <button type="button" class="btn btn-default get">Get it now</button>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <img src="img/backpackMan.png" class="girl img-responsive" alt="" />
+                                        <img src="img/feature1.png" class="pricing" alt="" />
+                                    </div>
                                 </div>
+                                <% } %>
                             </div>
-                            <% 
-                                index++;
-                                } 
-                                // Nếu không có slider nào, hiển thị mặc định
-                                if (activeSliders.isEmpty()) { 
-                            %>
-                            <div class="item active">
-                                <div class="col-sm-6">
-                                    <h1><span>Men</span>-SHOPPER</h1>
-                                    <h2>NEW ARRIVALS</h2>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-                                    <button type="button" class="btn btn-default get">Get it now</button>
-                                </div>
-                                <div class="col-sm-6">
-                                    <img src="img/backpackMan.png" class="girl img-responsive" alt="" />
-                                    <img src="img/feature1.png" class="pricing" alt="" />
-                                </div>
-                            </div>
-                            <% } %>
+
+                            <!-- Carousel Controls -->
+                            <a href="#slider-carousel" class="left control-carousel hidden-xs" data-slide="prev">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a href="#slider-carousel" class="right control-carousel hidden-xs" data-slide="next">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
                         </div>
-
-                        <!-- Carousel Controls -->
-                        <a href="#slider-carousel" class="left control-carousel hidden-xs" data-slide="prev">
-                            <i class="fa fa-angle-left"></i>
-                        </a>
-                        <a href="#slider-carousel" class="right control-carousel hidden-xs" data-slide="next">
-                            <i class="fa fa-angle-right"></i>
-                        </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </section><!--/slider-->
+        </section><!--/slider-->
         <!-- MAIN CONTENT -->
         <section>
             <div class="container">
@@ -232,8 +235,8 @@
                                 <% } %>
                             </div>
                         </div>
-                            <div class="shipping text-center">
-                                <img src="img/backpackMan.png" alt="Shipping Promotion" />
+                        <div class="shipping text-center">
+                            <img src="img/backpackMan.png" alt="Shipping Promotion" />
                         </div>
                     </div>
 
@@ -262,16 +265,22 @@
                                                 <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
                                                    class="btn btn-default add-to-cart"
                                                    <% if (user != null) { %>
-                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>'); return false;"
+                                                   onclick="openCartModal('<%= product.getId() %>',
+                                                                   `<%= product.getName() %>`,
+                                                                   '<%= product.getPrice() %>');
+                                                           return false;"
                                                    <% } %>>
                                                     <i class="fa fa-shopping-cart"></i> Add to cart
                                                 </a>
+
+
 
                                             </div>
 
                                             <!-- Thêm thông báo -->
                                             <div id="orderSuccessMessage" class="order-success">Đặt hàng thành công</div>
 
+                                            <!-- Modal -->
                                             <!-- Modal -->
                                             <div id="cartModal" class="modal">
                                                 <div class="modal-dialog">
@@ -283,11 +292,20 @@
                                                         <div class="modal-body">
                                                             <form id="orderForm">
                                                                 <input type="hidden" id="productId" name="productId">
-                                                                <input type="hidden" id="price" name="price" value="<%= product.getPrice() %>">
+                                                                <input type="hidden" id="price" name="price">
+                                                                <div class="product-modal-image">
+                                                                    <img id="productImage" src="" alt="Product Image">
+                                                                </div>
                                                                 <p><strong>Product:</strong> <span id="productName"></span></p>
                                                                 <p><strong>Price:</strong> $<span id="productPrice"></span></p>
 
-                                                                <!-- Chọn size dựa theo TypeId -->
+
+                                                                <label for="color">Color:</label>
+                                                                <select name="color" id="color" onchange="updateCartImage()">
+                                                                    <!-- Màu sẽ được load từ JS -->
+                                                                </select>
+
+                                                                <!-- Chọn size -->
                                                                 <label for="size">Size:</label>
                                                                 <select name="size" id="size">
                                                                     <option value="S">S</option>
@@ -295,6 +313,8 @@
                                                                     <option value="L">L</option>
                                                                     <option value="XL">XL</option>
                                                                 </select>
+
+                                                                <!-- Số lượng -->
                                                                 <label for="quantity">Quantity:</label>
                                                                 <input type="number" name="quantity" id="quantity" min="1" value="1">
 
@@ -307,6 +327,7 @@
                                                     </div>
                                                 </div>
                                             </div>
+
 
                                             <style>
                                                 /* CSS cho thông báo */
@@ -324,41 +345,7 @@
                                                 }
                                             </style>
 
-                                            <script>
-                                                function submitOrder() {
-                                                    let form = document.getElementById("orderForm");
-                                                    let formData = new URLSearchParams(new FormData(form)).toString();
 
-                                                    fetch("order", {
-                                                        method: "POST",
-                                                        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-                                                        body: formData
-                                                    })
-                                                            .then(response => response.json()) // Chuyển phản hồi thành JSON
-                                                            .then(data => {
-                                                                let message = document.getElementById("orderSuccessMessage");
-
-                                                                if (data.status === "success") {
-                                                                    message.innerText = "Đặt hàng thành công!";
-                                                                    message.style.backgroundColor = "black"; // Giữ màu đen cho thông báo thành công
-                                                                } else {
-                                                                    message.innerText = data.message; // Hiển thị thông báo lỗi từ server
-                                                                    message.style.backgroundColor = "red"; // Chuyển thành màu đỏ để báo lỗi
-                                                                }
-
-                                                                message.style.display = "block";
-                                                                setTimeout(function () {
-                                                                    message.style.display = "none";
-                                                                }, 3000);
-
-                                                                if (data.status === "success") {
-                                                                    closeCartModal(); // Đóng modal nếu đặt hàng thành công
-                                                                }
-                                                            })
-                                                            .catch(error => console.error("Error:", error));
-                                                }
-
-                                            </script>
                                         </div>
 
                                     </div>
@@ -368,7 +355,7 @@
                                     } 
                                 %>
                             </div>
-                          
+
                         </div>
                     </div>
 
@@ -606,16 +593,104 @@
                 </div>
             </div>
             <script>
-                function openCartModal(id, name, price) {
-                    console.log("Opening Modal for Product:", id, name, price); // Debug để kiểm tra dữ liệu
-                    document.getElementById("productId").value = id;
-                    document.getElementById("productName").innerText = name;
-                    document.getElementById("productPrice").innerText = price;
+                var productImages = <%= gson.toJson(productImages) %>;
+                var colors = <%= gson.toJson(colors) %>;
 
-                    document.querySelector("input[name='price']").value = price;
+                console.log("Danh sách màu:", colors);
+                console.log("Danh sách ảnh sản phẩm:", productImages);
 
-                    document.getElementById("cartModal").style.display = "flex";
+                function openCartModal(productId, productName, productPrice) {
+                    document.getElementById("productId").value = productId;
+                    document.getElementById("productName").innerText = productName;
+                    document.getElementById("productPrice").innerText = productPrice;
+                    document.getElementById("price").value = productPrice;
+                    console.log("Price:", price);
+                    let colorSelect = document.getElementById("color");
+                    colorSelect.innerHTML = "";// Xóa danh sách cũ và thêm option mặc định
+
+                    let imageElement = document.getElementById("productImage");
+                    imageElement.src = "default.jpg"; // Đặt hình ảnh mặc định
+
+                    // Lọc danh sách ảnh theo productId
+                    let images = productImages.filter(img => img.productId == productId);
+
+                    if (images.length > 0) {
+                        let uniqueColors = [...new Set(images.map(img => Number(img.colorId)))];
+                        console.log("Màu sắc có sẵn cho sản phẩm này:", uniqueColors);
+                        uniqueColors.forEach(colorId => {
+                            console.log("ColorId đang xét:", colorId);
+                            let colorObj = colors.find(c => c.ID === colorId);
+                            console.log("Tìm thấy màu:", colorObj);
+
+                            if (colorObj) {
+                                let option = document.createElement("option");
+                                option.value = colorObj.ID;
+                                option.textContent = colorObj.colorName;
+                                colorSelect.appendChild(option);
+                            } else {
+                                console.warn("Không tìm thấy màu cho colorId:", colorId);
+                            }
+                        });
+                        if (uniqueColors.length > 0) {
+                            let firstColor = uniqueColors[0];
+                            let firstImage = images.find(img => Number(img.colorId) === firstColor);
+                            if (firstImage) {
+                                imageElement.src = firstImage.imageUrl;
+                            }
+                        }
+                    }
+
+                    document.getElementById("cartModal").style.display = "block";
                 }
+
+                function updateCartImage() {
+                    let selectedColor = document.getElementById("color").value;
+                    let productId = document.getElementById("productId").value;
+                    let imageElement = document.getElementById("productImage");
+
+                    let image = productImages.find(img => img.productId == productId && img.colorId == selectedColor);
+                    imageElement.src = image ? image.imageUrl : "default.jpg";
+                }
+
+
+
+                function closeCartModal() {
+                    document.getElementById("cartModal").style.display = "none";
+                }
+
+                function submitOrder() {
+                    let form = document.getElementById("orderForm");
+                    let formData = new URLSearchParams(new FormData(form)).toString();
+                    console.log("FormData:", formData);
+                    fetch("order", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                        body: formData
+                    })
+                            .then(response => response.json())
+                            .then(data => {
+                                let message = document.getElementById("orderSuccessMessage");
+
+                                if (data.status === "success") {
+                                    message.innerText = "Đặt hàng thành công!";
+                                    message.style.backgroundColor = "black";
+                                } else {
+                                    message.innerText = data.message;
+                                    message.style.backgroundColor = "red";
+                                }
+
+                                message.style.display = "block";
+                                setTimeout(() => {
+                                    message.style.display = "none";
+                                }, 3000);
+
+                                if (data.status === "success") {
+                                    closeCartModal();
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                }
+
 
                 function closeCartModal() {
                     document.getElementById("cartModal").style.display = "none";

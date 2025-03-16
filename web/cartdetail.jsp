@@ -203,6 +203,7 @@
                                     <form action="cartcheckbox" method="post">
                                         <input type="hidden" name="productId" value="<%= c.getProductID() %>">
                                         <input type="hidden" name="size" value="<%= c.getSize() %>">
+                                        <input type="hidden" name="color" value="<%= c.getColor() %>">
                                         <input type="hidden" name="action" value="updateCheckbox">
                                         <input type="hidden" name="status" value="<%= c.getCheckboxStatus() %>">
                                         <input type="checkbox" name="status" value="checked" 
@@ -215,7 +216,7 @@
                                 </td>
                                 <td class="cart_description">
                                     <h4><a href=""><%= c.getName() %></a></h4>
-                                    <p>Size: <%= c.getSize() %></p>
+                                    <p>Size: <%= c.getSize() %> | <span class="color-id"><%= c.getColor() %></span></p>
                                 </td>
                                 <td class="cart_price">
                                     <p>$<%= c.getPrice() %></p>
@@ -223,7 +224,9 @@
                                 <td class="cart_quantity">
                                     <form action="cartcontroller" method="post" class="cart_quantity_form">
                                         <input type="hidden" name="Size" value="<%= c.getSize() %>"> 
-                                        <input type="hidden" name="productId" value="<%= c.getProductID() %>"> 
+                                        <input type="hidden" name="productId" value="<%= c.getProductID() %>">
+                                        <input type="hidden" name="color" value="<%= c.getColor() %>">
+
                                         <div class="cart_quantity_button">
                                             <button type="submit" name="action" value="decrease" class="cart_btn cart_quantity_down">-</button>
                                             <input class="cart_quantity_input" type="text" name="quantity" value="<%= c.getQuantity() %>" autocomplete="off" size="2">
@@ -242,6 +245,7 @@
                                         <input type="hidden" name="Size" value="<%= c.getSize() %>"> 
                                         <input type="hidden" name="productId" value="<%= c.getProductID() %>">
                                         <input type="hidden" name="Size" value="<%= c.getSize() %>">  
+                                        <input type="hidden" name="color" value="<%= c.getColor() %>">
                                         <button type="submit" name="action" value="delete" class="cart_quantity_delete">
                                             <i class="fa fa-times"></i>
                                         </button>
@@ -518,6 +522,33 @@
             </div>
 
         </footer><!--/Footer-->
+
+        <script>
+            // Tạo đối tượng ánh xạ ID_Color -> ColorName
+            const colorMap = {
+                1: "Đen",
+                2: "Xám",
+                3: "Trắng",
+                4: "Be",
+                5: "Đỏ",
+                6: "Cam",
+                7: "Vàng",
+                8: "Nâu",
+                9: "Xanh sáng",
+                10: "Xanh đậm",
+                11: "Xanh lá"
+            };
+
+
+            document.addEventListener("DOMContentLoaded", function () {
+                document.querySelectorAll(".color-id").forEach(element => {
+                    let colorID = element.innerText.trim(); // Lấy ID
+                    if (colorMap[colorID]) {
+                        element.innerText = colorMap[colorID]; // Thay bằng tên màu
+                    }
+                });
+            });
+        </script>
 
 
 

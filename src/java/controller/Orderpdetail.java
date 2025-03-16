@@ -77,18 +77,19 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
         String size = request.getParameter("size");
         String quantityStr = request.getParameter("quantity");
         String pricestr = request.getParameter("price");
-
+        String color = request.getParameter("color");
+        int colorID = Integer.parseInt(color);
         int quantity = Integer.parseInt(quantityStr);
         int productID = Integer.parseInt(productId);
         double price = Double.parseDouble(pricestr);
-
+        
         HttpSession session = request.getSession();
         Account user = (Account) session.getAttribute("u");
 
         OrderDAO o = new OrderDAO();
         OrderdetailDAO od = new OrderdetailDAO();
         int orderID = o.getorderID(user.getId());
-        if (!o.checkSize(quantity, productID, size)) {
+        if (!o.checkSize(quantity, productID, size,colorID)) {
             return;
         }
         if (o.checkCreateNewOrder(user.getId())) {
@@ -96,7 +97,7 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
             orderID = o.getorderID(user.getId());
         }
 
-        od.insertOrderdetail(orderID, productID, quantity, size);
+        od.insertOrderdetail(orderID, productID, quantity, size,color);
         o.updateTotalAmount(orderID);
 
         // Chuyển hướng về trang trước đó
