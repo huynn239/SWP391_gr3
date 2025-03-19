@@ -12,7 +12,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import model.Account;
+import model.Cart;
+import vnpay.VNPayConfig;
 
 /**
  *
@@ -114,15 +119,30 @@ public class Orderinfo extends HttpServlet {
             response.sendRedirect("login.jsp");
             return;
         }
-        int orderId = o.getorderID(user.getId());
+      //  int orderId = o.getorderID(user.getId());
+      String orderId = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + VNPayConfig.getRandomNumber(4);
         if (checkbox != null) {
             o.addAddress(fullname, phone, email, province + "-" + district + "-"
                     + ward + "-" + address, userID);
         }
         o.updateOrderInfo(fullname, phone, email, province + "-" + district + "-"
                 + ward + "-" + address, userID);
-
-        request.getRequestDispatcher("payment.jsp").forward(request, response);
+List<Cart> selectedItems = (List<Cart>) session.getAttribute("selectedItems");
+        session.setAttribute("fullname", fullname);
+    session.setAttribute("phone", phone);
+    session.setAttribute("email", email);
+    session.setAttribute("province", province);
+    session.setAttribute("district", district);
+    session.setAttribute("ward", ward);
+    session.setAttribute("address", address);
+    session.setAttribute("orderId", orderId); // Lưu thêm orderId nếu cần
+    
+    // Chuyển hướng sang payment.jsp
+    response.sendRedirect("payment");
+        
+    }
+    private Integer generateOrderId() {
+        return (int) (System.currentTimeMillis() % 1000000);
     }
 
     /**
