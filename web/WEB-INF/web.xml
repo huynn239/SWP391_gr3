@@ -46,6 +46,10 @@
         <servlet-name>CheckoutSevlet</servlet-name>
         <servlet-class>controller.CheckoutSevlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ProductlistSevlet</servlet-name>
+        <servlet-class>controller.ProductlistSevlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>SliderController</servlet-name>
         <url-pattern>/sliderList</url-pattern>
@@ -101,6 +105,10 @@
     <servlet-mapping>
         <servlet-name>CheckoutSevlet</servlet-name>
         <url-pattern>/checkoutservlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ProductlistSevlet</servlet-name>
+        <url-pattern>/productlistsevlet</url-pattern>
     </servlet-mapping>
     <error-page>
         <error-code>404</error-code>
