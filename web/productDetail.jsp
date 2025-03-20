@@ -1,12 +1,15 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
-<%@ page import="model.Product, model.Brand, model.Category, model.Material, model.Account" %>
+<%@ page import="java.util.ArrayList, java.util.List" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Material, model.Account,model.Color" %>
 <%@ page import="dto.ProductDAO, dto.BrandDAO, dto.CategoryDAO, dto.MaterialDAO" %>
 
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
 <jsp:useBean id="categoryDAO" class="dto.CategoryDAO" scope="session"/>
 <jsp:useBean id="materialDAO" class="dto.MaterialDAO" scope="session"/>
+<jsp:useBean id="productimageDAO" class="dto.ProductImageDAO" scope="session"/>
+<jsp:useBean id="colorDAO" class="dto.ColorDAO" scope="session"/>
 
 <%
     // Lấy tham số "id" từ URL (khớp với liên kết trong productlist.jsp)
@@ -28,7 +31,9 @@ if (productId != null && !productId.trim().isEmpty()) {
 
     // Lấy thông tin liên quan
     Brand brand = brandDAO.getBrandById(product.getBrandId());
-    Category category = categoryDAO.getCategoryById(product.getTypeId()); // Sử dụng TypeId thay vì CategoryId
+      List<Color> colors = colorDAO.getAllColors();
+    Category category = categoryDAO.getCategoryById(product.getTypeId()); 
+     List<Category> categories = categoryDAO.getAllCategories();
     Material material = materialDAO.getMaterialById(product.getMaterialId());
     Account user = (Account) session.getAttribute("u");
 %>
@@ -253,111 +258,18 @@ if (productId != null && !productId.trim().isEmpty()) {
                     <div class="col-sm-3">
                         <div class="left-sidebar">
                             <h2>Category</h2>
-                            <div class="panel-group category-products" id="accordian">
+                            <div class="panel-group category-products">
+                                <% for (Category cat : categories) { %>
                                 <div class="panel panel-default">
                                     <div class="panel-heading">
                                         <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordian" href="#sportswear">
-                                                <span class="badge pull-right"><i class="fa fa-plus"></i></span>
-                                                Sportswear
+                                            <a href="productlist?category=<%= cat.getId() %>">
+                                                <%= cat.getName() %>
                                             </a>
                                         </h4>
                                     </div>
-                                    <div id="sportswear" class="panel-collapse collapse">
-                                        <div class="panel-body">
-                                            <ul>
-                                                <li><a href="productlist?category=1">Nike</a></li> <!-- Giả sử category ID là 1 -->
-                                                <li><a href="productlist?category=2">Under Armour</a></li> <!-- Giả sử category ID là 2 -->
-                                                <li><a href="productlist?category=3">Adidas</a></li> <!-- Giả sử category ID là 3 -->
-                                                <li><a href="productlist?category=4">Puma</a></li> <!-- Giả sử category ID là 4 -->
-                                                <li><a href="productlist?category=5">ASICS</a></li> <!-- Giả sử category ID là 5 -->
-                                            </ul>
-                                        </div>
-                                    </div>
                                 </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordian" href="#mens">
-                                                <span class="badge pull-right"><i class="fa fa-plus"></i></span>
-                                                Mens
-                                            </a>
-                                        </h4>
-                                    </div>
-                                    <div id="mens" class="panel-collapse collapse">
-                                        <div class="panel-body">
-                                            <ul>
-                                                <li><a href="productlist?category=6">Fendi</a></li> <!-- Giả sử category ID là 6 -->
-                                                <li><a href="productlist?category=7">Guess</a></li> <!-- Giả sử category ID là 7 -->
-                                                <li><a href="productlist?category=8">Valentino</a></li> <!-- Giả sử category ID là 8 -->
-                                                <li><a href="productlist?category=9">Dior</a></li> <!-- Giả sử category ID là 9 -->
-                                                <li><a href="productlist?category=10">Versace</a></li> <!-- Giả sử category ID là 10 -->
-                                                <li><a href="productlist?category=11">Armani</a></li> <!-- Giả sử category ID là 11 -->
-                                                <li><a href="productlist?category=12">Prada</a></li> <!-- Giả sử category ID là 12 -->
-                                                <li><a href="productlist?category=13">Dolce and Gabbana</a></li> <!-- Giả sử category ID là 13 -->
-                                                <li><a href="productlist?category=14">Chanel</a></li> <!-- Giả sử category ID là 14 -->
-                                                <li><a href="productlist?category=15">Gucci</a></li> <!-- Giả sử category ID là 15 -->
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a data-toggle="collapse" data-parent="#accordian" href="#womens">
-                                                <span class="badge pull-right"><i class="fa fa-plus"></i></span>
-                                                Womens
-                                            </a>
-                                        </h4>
-                                    </div>
-                                    <div id="womens" class="panel-collapse collapse">
-                                        <div class="panel-body">
-                                            <ul>
-                                                <li><a href="productlist?category=16">Fendi</a></li> <!-- Giả sử category ID là 16 -->
-                                                <li><a href="productlist?category=17">Guess</a></li> <!-- Giả sử category ID là 17 -->
-                                                <li><a href="productlist?category=18">Valentino</a></li> <!-- Giả sử category ID là 18 -->
-                                                <li><a href="productlist?category=19">Dior</a></li> <!-- Giả sử category ID là 19 -->
-                                                <li><a href="productlist?category=20">Versace</a></li> <!-- Giả sử category ID là 20 -->
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title"><a href="productlist?category=21">Kids</a></h4> <!-- Giả sử category ID là 21 -->
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title"><a href="productlist?category=22">Fashion</a></h4> <!-- Giả sử category ID là 22 -->
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title"><a href="productlist?category=23">Households</a></h4> <!-- Giả sử category ID là 23 -->
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title"><a href="productlist?category=24">Interiors</a></h4> <!-- Giả sử category ID là 24 -->
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title"><a href="productlist?category=25">Clothing</a></h4> <!-- Giả sử category ID là 25 -->
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title"><a href="productlist?category=26">Bags</a></h4> <!-- Giả sử category ID là 26 -->
-                                    </div>
-                                </div>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title"><a href="productlist?category=27">Shoes</a></h4> <!-- Giả sử category ID là 27 -->
-                                    </div>
-                                </div>
+                                <% } %>
                             </div>
 
                             <div class="brands_products">
@@ -409,7 +321,7 @@ if (productId != null && !productId.trim().isEmpty()) {
                                             <input type="hidden" name="price" value="<%= product.getPrice() %>">
 
                                             <label>Quantity:</label>
-                                            
+
                                             <input type="number" name="quantity" min="1" value="1" id="quantity" required />
 
                                             <label>Size:</label>
@@ -419,6 +331,10 @@ if (productId != null && !productId.trim().isEmpty()) {
                                                 <option value="L">L</option>
                                                 <option value="XL">XL</option>
                                             </select>
+                                             <label for="color">Color:</label>
+                                                                <select name="color" id="color" onchange="updateCartImage()">
+                                                                   
+                                                                </select>
                                             <br><br>
 
                                             <% if (user == null) { %>

@@ -110,6 +110,10 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
+                             <p class="slider-detail-text">
+                                <strong>Title</strong>
+                                <a target="_blank" class="text-primary">${slider.title}</a>
+                            </p>
                             <p class="slider-detail-text">
                                 <strong>Liên kết:</strong>
                                 <a href="${slider.link}" target="_blank" class="text-primary">${slider.link}</a>

@@ -377,6 +377,21 @@
 
                 <!-- BLOG DETAIL CONTENT -->
                 <div class="col-sm-9">
+                      <div class="search-bar">
+                        <form action="blogList" method="GET">
+                            <input type="text" name="keyword" value="${keyword}" placeholder="Search by category, title, content, or author..." style="width: 70%; padding: 8px;">
+                            <button type="submit" class="btn btn-primary" style="margin: 0;padding: 8px 16px;">Search</button>
+                            <c:if test="${not empty categoryParam}">
+                                <input type="hidden" name="category" value="${categoryParam}">
+                            </c:if>
+                            <c:if test="${not empty sortBy}">
+                                <input type="hidden" name="sortBy" value="${sortBy}">
+                            </c:if>
+                            <c:if test="${not empty sortOrder}">
+                                <input type="hidden" name="sortOrder" value="${sortOrder}">
+                            </c:if>
+                        </form>
+                    </div>
                     <div class="blog-detail">
                         <h1><%= blog.getTitle() %></h1>
                         <p class="meta">
@@ -398,7 +413,7 @@
                             String backCategory = request.getParameter("category");
                             String backUrl = "blogList.jsp?page=" + backPage + (backCategory != null ? "&category=" + backCategory : "");
                         %>
-                        <a href="<%= backUrl %>" class="btn btn-primary btn-sm">Back to Blog List</a>
+                        <a href="blogList" class="btn btn-primary btn-sm">Back to Blog List</a>
                     </div>
                 </div>
             </div>

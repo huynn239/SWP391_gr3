@@ -8,14 +8,14 @@ import java.util.List;
 
 public class BlogDAO extends DBContext {
 
-    // Lấy tất cả bài viết có phân trang
-    public List<Blog> getAllBlogs(int page, int limit) {
+    // Lấy tất cả bài viết với phân trang và sắp xếp
+    public List<Blog> getAllBlogs(int page, int limit, String sortBy, String sortOrder) {
         List<Blog> blogList = new ArrayList<>();
         String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
                      "FROM [shopOnline].[dbo].[blog] b " +
                      "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
-                     "ORDER BY b.UploadDate DESC " +
-                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY;";
+                     "ORDER BY " + (sortBy != null ? sortBy : "b.UploadDate") + " " + (sortOrder != null ? sortOrder : "DESC") + " " +
+                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int offset = (page - 1) * limit;
@@ -79,15 +79,15 @@ public class BlogDAO extends DBContext {
         return categories;
     }
 
-    // Lấy blog theo danh mục
-    public List<Blog> getBlogsByCategory(int categoryId, int page, int limit) {
+    // Lấy blog theo danh mục với phân trang và sắp xếp
+    public List<Blog> getBlogsByCategory(int categoryId, int page, int limit, String sortBy, String sortOrder) {
         List<Blog> blogList = new ArrayList<>();
         String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
                      "FROM [shopOnline].[dbo].[blog] b " +
                      "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
                      "WHERE b.CateID = ? " +
-                     "ORDER BY b.UploadDate DESC " +
-                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY;";
+                     "ORDER BY " + (sortBy != null ? sortBy : "b.UploadDate") + " " + (sortOrder != null ? sortOrder : "DESC") + " " +
+                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int offset = (page - 1) * limit;
@@ -130,6 +130,72 @@ public class BlogDAO extends DBContext {
             e.printStackTrace();
         }
 
+        return (int) Math.ceil((double) totalRows / limit);
+    }
+
+    // Tìm kiếm blog với phân trang và sắp xếp
+    public List<Blog> searchBlogs(String keyword, int page, int limit, String sortBy, String sortOrder) {
+        List<Blog> blogList = new ArrayList<>();
+        String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
+                     "FROM [shopOnline].[dbo].[blog] b " +
+                     "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "JOIN [shopOnline].[dbo].[categoryblog] c ON b.CateID = c.ID " +
+                     "WHERE c.Name LIKE ? OR b.Title LIKE ? OR b.Content LIKE ? OR u.uName LIKE ? " +
+                     "ORDER BY " + (sortBy != null ? sortBy : "b.UploadDate") + " " + (sortOrder != null ? sortOrder : "DESC") + " " +
+                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            String searchPattern = "%" + keyword + "%";
+            int offset = (page - 1) * limit;
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            stmt.setString(3, searchPattern);
+            stmt.setString(4, searchPattern);
+            stmt.setInt(5, offset);
+            stmt.setInt(6, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    blogList.add(new Blog(
+                        rs.getString("ID"),
+                        rs.getString("Title"),
+                        rs.getString("Content"),
+                        rs.getString("BlogImage"),
+                        rs.getDate("UploadDate"),
+                        rs.getString("Author"),
+                        rs.getInt("CateID")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return blogList;
+    }
+
+    // Lấy tổng số trang khi tìm kiếm
+    public int getTotalPagesBySearch(String keyword, int limit) {
+        String sql = "SELECT COUNT(*) " +
+                     "FROM [shopOnline].[dbo].[blog] b " +
+                     "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "JOIN [shopOnline].[dbo].[categoryblog] c ON b.CateID = c.ID " +
+                     "WHERE c.Name LIKE ? OR b.Title LIKE ? OR b.Content LIKE ? OR u.uName LIKE ?";
+        int totalRows = 0;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            stmt.setString(3, searchPattern);
+            stmt.setString(4, searchPattern);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    totalRows = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return (int) Math.ceil((double) totalRows / limit);
     }
 
@@ -181,6 +247,7 @@ public class BlogDAO extends DBContext {
 
     public static void main(String[] args) {
         BlogDAO blogDAO = new BlogDAO();
-        blogDAO.getBlogsByCategory(1, 1, 3);
+        List<Blog> blogs = blogDAO.getAllBlogs(1, 3, "Title", "ASC");
+        System.out.println("Blogs sorted by Title ASC: " + blogs.size());
     }
 }

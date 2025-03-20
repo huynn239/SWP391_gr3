@@ -10,8 +10,8 @@ public class Blog {
     private String blogImage;
     private Date uploadDate;
     private String author;  // Thêm trường author cho tên tác giả
-// Trong Blog.java
 private int cateID; // Thêm trường CateID
+private String categoryName;
 
 public Blog(String id, String title, String content, String blogImage, Date uploadDate, String author, int cateID) {
     this.id = id;
@@ -25,6 +25,8 @@ public Blog(String id, String title, String content, String blogImage, Date uplo
 
 public int getCateID() { return cateID; }
 public void setCateID(int cateID) { this.cateID = cateID; }
+public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
     // Getters and Setters
     public String getId() {
         return id;

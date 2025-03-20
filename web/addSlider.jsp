@@ -13,17 +13,21 @@
 <div class="container">
     <h2 class="text-center mt-4">Thêm Slider Mới</h2>
 
-    <!-- Hiển thị thông báo thành công -->
+ 
     <c:if test="${not empty message}">
         <div class="alert alert-success">${message}</div>
     </c:if>
 
-    <!-- Hiển thị thông báo lỗi -->
+ 
     <c:if test="${not empty errorMessage}">
         <div class="alert alert-danger">${errorMessage}</div>
     </c:if>
 
     <form action="addSlider" method="post">
+          <div class="form-group">
+            <label>Title:</label>
+            <input type="text" name="title" class="form-control" required placeholder="Nhập title">
+        </div>
         <div class="form-group">
             <label>Hình ảnh Slider (URL):</label>
             <input type="text" name="imageUrl" class="form-control" required placeholder="Nhập URL của hình ảnh">
