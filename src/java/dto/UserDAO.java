@@ -234,45 +234,54 @@ public class UserDAO extends DBContext {
         return userList;
     }
 
-    // Thêm người dùng mới vào database
-    public void addUser(Account user) {
-        String sql = "INSERT INTO users (uName, Username, Password, Avatar, Gender, Email, Mobile, uAddress, RoleID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, user.getuName());
-            ps.setString(2, user.getUsername());
-            ps.setString(3, user.getPassword());
-            ps.setString(4, user.getGender());
-            ps.setString(5, user.getEmail());
-            ps.setString(6, user.getMobile());
-            ps.setString(7, user.getuAddress());
-            ps.setInt(8, user.getRoleID());
-            ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // Chỉnh sửa thông tin người dùng trong database
-    public boolean editUser(int id, Account updatedUser) {
-        String sql = "UPDATE users SET uName=?, Username=?, Password=?, Avatar=?, Gender=?, Email=?, Mobile=?, uAddress=?, RoleID=? WHERE ID=?";
-        try (
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, updatedUser.getuName());
-            ps.setString(2, updatedUser.getUsername());
-            ps.setString(3, updatedUser.getPassword());
-            ps.setString(4, updatedUser.getGender());
-            ps.setString(5, updatedUser.getEmail());
-            ps.setString(6, updatedUser.getMobile());
-            ps.setString(7, updatedUser.getuAddress());
-            ps.setInt(8, updatedUser.getRoleID());
-            ps.setInt(9, id);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+  public boolean addUser(Account user) {
+    String sql = "INSERT INTO users (uName, Username, Password, Gender, Email, Mobile, uAddress, RoleID, Avatar) " +
+                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    try {
+        Connection conn = getConnection();  // Sử dụng phương thức getConnection từ DBContext
+        PreparedStatement ps = conn.prepareStatement(sql);
+        
+        ps.setString(1, user.getuName());
+        ps.setString(2, user.getUsername());
+        ps.setString(3, user.getPassword());
+        ps.setString(4, user.getGender() != null ? user.getGender() : "0"); // Xử lý null cho gender
+        ps.setString(5, user.getEmail());
+        ps.setString(6, user.getMobile());
+        ps.setString(7, user.getuAddress());
+        ps.setInt(8, user.getRoleID());
+        ps.setString(9, "0");  // Giá trị mặc định cho Avatar
+        
+        int rowsAffected = ps.executeUpdate();
+        ps.close();
+        conn.close();
+        return rowsAffected > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
         return false;
     }
+}
+
+  public boolean editUser(int id, Account updatedUser) {
+    String sql = "UPDATE users SET uName = ?, Username = ?, Password = ?, Gender = ?, Email = ?, Mobile = ?, uAddress = ?, RoleID = ? WHERE ID = ?";
+    try (Connection conn = getConnection(); // Sử dụng getConnection từ DBContext
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, updatedUser.getuName());
+        ps.setString(2, updatedUser.getUsername());
+        ps.setString(3, updatedUser.getPassword());
+        ps.setString(4, updatedUser.getGender());
+        ps.setString(5, updatedUser.getEmail());
+        ps.setString(6, updatedUser.getMobile());
+        ps.setString(7, updatedUser.getuAddress());
+        ps.setInt(8, updatedUser.getRoleID());
+        ps.setInt(9, id);
+
+        int rowsAffected = ps.executeUpdate();
+        return rowsAffected > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
 
     // Tìm kiếm người dùng theo tên hoặc email từ database
     public List<Account> searchUser(String keyword) {

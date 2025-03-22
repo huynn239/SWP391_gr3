@@ -48,9 +48,13 @@
                                 <td><b>Address:</b></td>
                                 <td>${uaddress}</td>
                             </tr>
+                            <tr>
+                                <td><b>Role ID:</b></td> 
+                                <td>${roleID}</td> <!-- Đảm bảo attribute tên là "roleID" -->
+                            </tr>
                         </table>
                         <br>
-                        <a class="btn btn-primary" href="UserControllerServlet?action=editPage">Edit User</a>
+                        <a class="btn btn-primary" href="UserControllerServlet?action=editPage&id=${id}">Edit User</a>
                         <a class="btn btn-primary" href="UserControllerServlet">Back to User List</a>
                     </div>
                 </div>

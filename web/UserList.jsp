@@ -13,6 +13,7 @@
 
     <div class="container mt-4">
         <h2 class="text-center">UserList</h2>
+        <a class="btn btn-primary" href="UserControllerServlet?action=addPage">Add User</a>
         <div class="table-responsive">
             <table id="userTable" class="table table-bordered table-hover">
                 <thead class="thead-dark">
@@ -33,7 +34,7 @@
                             <td>${i.uAddress}</td>
                             <td>${i.mobile}</td>
                             <td>
-                                <a href="UserDetailServlet?id=${i.id}" class="btn btn-info btn-sm">Xem chi ti?t</a>
+                                <a href="UserControllerServlet?action=viewDetail&id=${i.id}" class="btn btn-info btn-sm">Detail</a>
                             </td>
                             <td>
                                 <a href="#" onclick="confirmRedirect('UserControllerServlet?action=delete&id=${i.id}')" class="btn btn-danger btn-sm">Xóa</a>

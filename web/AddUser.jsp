@@ -11,6 +11,11 @@
 
     <div class="container mt-5">
         <h2>Add New User</h2>
+        <% String message = request.getParameter("message"); 
+           if (message != null) { %>
+            <div class="alert alert-info"><%= message %></div>
+        <% } %>
+        
         <form action="UserControllerServlet" method="post">
             <input type="hidden" name="action" value="add">
 
@@ -27,6 +32,15 @@
             <div class="mb-3">
                 <label>Password:</label>
                 <input type="password" name="password" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Gender:</label>
+                <select name="gender" class="form-control">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
             </div>
 
             <div class="mb-3">

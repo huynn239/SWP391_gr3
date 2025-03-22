@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dto.UserDAO;
@@ -12,163 +8,133 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
-/**
- *
- * @author thang
- */
 @WebServlet(name = "UserControllerServlet", urlPatterns = {"/UserControllerServlet"})
 public class UserControllerServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet UserControllerServlet</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet UserControllerServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-    UserDAO userDAO = new UserDAO();
-    String action = request.getParameter("action");
+        UserDAO userDAO = new UserDAO();
+        String action = request.getParameter("action");
 
-    if ("delete".equals(action)) {
-        int userId = Integer.parseInt(request.getParameter("id")); 
-        boolean success = userDAO.deleteUserByID(userId);
-
-        if (success) {
-            request.setAttribute("message", "Xóa người dùng thành công!");
+       try {
+        if ("viewDetail".equals(action)) {
+            int userId = Integer.parseInt(request.getParameter("id"));
+            Account user = userDAO.getUserById(userId);
+            if (user != null) {
+                // Truyền các thuộc tính riêng lẻ vào request
+                request.setAttribute("id", user.getId());
+                request.setAttribute("uname", user.getuName());
+                request.setAttribute("email", user.getEmail());
+                request.setAttribute("mobile", user.getMobile());
+                request.setAttribute("gender", user.getGender());
+                request.setAttribute("uaddress", user.getuAddress());
+                request.setAttribute("roleID", user.getRoleID()); // Đảm bảo set roleID
+                request.getRequestDispatcher("UserDetail.jsp").forward(request, response);
+            } else {
+                response.sendRedirect("error.jsp?message=User+not+found");
+            }
+        } else if ("viewProfile".equals(action)) {
+            int userId = Integer.parseInt(request.getParameter("id"));
+            Account user = userDAO.getUserById(userId);
+            if (user != null) {
+                request.setAttribute("user", user);
+                request.getRequestDispatcher("Profile.jsp").forward(request, response);
+            } else {
+                response.sendRedirect("error.jsp");
+            }
+        } else if ("delete".equals(action)) {
+            int userId = Integer.parseInt(request.getParameter("id"));
+            boolean success = userDAO.deleteUserByID(userId);
+            request.setAttribute("message", success ? "Xóa người dùng thành công!" : "Xóa người dùng thất bại!");
+            response.sendRedirect("UserControllerServlet");
+        } else if ("addPage".equals(action)) {
+            request.getRequestDispatcher("AddUser.jsp").forward(request, response);
+        } else if ("editPage".equals(action)) {
+            int userId = Integer.parseInt(request.getParameter("id"));
+            Account user = userDAO.getUserById(userId);
+            if (user != null) {
+                request.setAttribute("user", user);
+                request.getRequestDispatcher("EditUser.jsp").forward(request, response);
+            } else {
+                response.sendRedirect("UserControllerServlet?message=User+not+found");
+            }
         } else {
-            request.setAttribute("message", "Xóa người dùng thất bại!");
+            List<Account> listU = userDAO.getUserList();
+            request.setAttribute("listU", listU);
+            request.getRequestDispatcher("UserList.jsp").forward(request, response);
         }
-
-        response.sendRedirect("UserControllerServlet");
-    } 
-    else if ("addPage".equals(action)) {
-        // Chuyển hướng đến AddUser.jsp
-        request.getRequestDispatcher("AddUser.jsp").forward(request, response);
-    } 
-    else if ("editPage".equals(action)) {
-        // Lấy ID từ request để chỉnh sửa
-        int id = Integer.parseInt(request.getParameter("id"));
-        Account user = userDAO.getUserById(id);
-
-        if (user != null) {
-            request.setAttribute("user", user);
-            request.getRequestDispatcher("EditUser.jsp").forward(request, response);
-        } else {
-            response.sendRedirect("UserControllerServlet"); // Quay lại danh sách nếu không tìm thấy user
-        }
-    } 
-    else {
-        // Hiển thị danh sách người dùng
-        List<Account> listU = userDAO.getUserList();
-        request.setAttribute("listU", listU);
-        request.getRequestDispatcher("UserList.jsp").forward(request, response);
+    } catch (NumberFormatException e) {
+        response.sendRedirect("error.jsp?message=Invalid+user+ID");
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.sendRedirect("error.jsp?message=Error+processing+request");
     }
 }
-
     
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
-         UserDAO userDAO = new UserDAO();
-    String action = request.getParameter("action");
+        UserDAO userDAO = new UserDAO();
+        String action = request.getParameter("action");
 
-    if ("add".equals(action)) {
-        // Lấy dữ liệu từ form
-        String uName = request.getParameter("uName");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        String gender = request.getParameter("gender");
-        String email = request.getParameter("email");
-        String mobile = request.getParameter("mobile");
-        String address = request.getParameter("uAddress");
-        int roleID = Integer.parseInt(request.getParameter("roleID"));
-
-        // Tạo đối tượng Account
-         Account newUser = new Account(uName, username, password, gender, email, mobile, address, roleID);
-        // Gọi DAO để thêm user
-        userDAO.addUser(newUser);
-        response.sendRedirect("UserControllerServlet"); // Load lại danh sách
-    } else if ("edit".equals(action)) {
-        int id = Integer.parseInt(request.getParameter("id"));
-        String uName = request.getParameter("uName");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        String gender = request.getParameter("gender");
-        String email = request.getParameter("email");
-        String mobile = request.getParameter("mobile");
-        String address = request.getParameter("uAddress");
-        int roleID = Integer.parseInt(request.getParameter("roleID"));
-
-        // Tạo đối tượng Account
-        Account updatedUser = new Account(id, uName, username, password, gender, email, mobile, address, roleID);
-
-        
-        boolean success = userDAO.editUser(id, updatedUser);
-
-        if (success) {
-            request.setAttribute("message", "Cập nhật người dùng thành công!");
-        } else {
-            request.setAttribute("message", "Cập nhật người dùng thất bại!");
+        try {
+            if ("add".equals(action)) {
+                Account newUser = new Account(
+                    request.getParameter("uName"),
+                    request.getParameter("username"),
+                    request.getParameter("password"),
+                    request.getParameter("gender") != null ? request.getParameter("gender") : "0",
+                    request.getParameter("email"),
+                    request.getParameter("mobile"),
+                    request.getParameter("uAddress"),
+                    Integer.parseInt(request.getParameter("roleID"))
+                );
+                boolean success = userDAO.addUser(newUser);
+                response.sendRedirect("UserControllerServlet?message=" + (success ? "User+added+successfully" : "Failed+to+add+user"));
+            } else if ("updateProfile".equals(action)) {
+                int userId = Integer.parseInt(request.getParameter("id"));
+                Account updatedUser = new Account(
+                    userId,
+                    request.getParameter("uName"),
+                    request.getParameter("username"),
+                    request.getParameter("password"),
+                    request.getParameter("gender"),
+                    request.getParameter("email"),
+                    request.getParameter("mobile"),
+                    request.getParameter("uAddress"),
+                    Integer.parseInt(request.getParameter("roleID"))
+                );
+                boolean success = userDAO.editUser(userId, updatedUser);
+                request.setAttribute("message", success ? "Cập nhật thông tin thành công!" : "Cập nhật thông tin thất bại!");
+                response.sendRedirect("UserControllerServlet?action=viewProfile&id=" + userId);
+            } else if ("edit".equals(action)) { // Xử lý submit form từ EditUser.jsp
+                int userId = Integer.parseInt(request.getParameter("id"));
+                Account updatedUser = new Account(
+                    userId,
+                    request.getParameter("uName"),
+                    request.getParameter("username"),
+                    request.getParameter("password"),
+                    request.getParameter("gender") != null ? request.getParameter("gender") : "0",
+                    request.getParameter("email"),
+                    request.getParameter("mobile"),
+                    request.getParameter("uAddress"),
+                    Integer.parseInt(request.getParameter("roleID"))
+                );
+                boolean success = userDAO.editUser(userId, updatedUser);
+                response.sendRedirect("UserControllerServlet?message=" + (success ? "User+updated+successfully" : "Failed+to+update+user"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("error.jsp?message=Error+processing+request");
         }
-
-        response.sendRedirect("UserControllerServlet");
-    } else {
-        processRequest(request, response);
-    }
-        
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
+        return "Servlet quản lý người dùng";
+    }
 }

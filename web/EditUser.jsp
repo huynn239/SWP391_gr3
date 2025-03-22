@@ -1,9 +1,3 @@
-<%-- 
-    Document   : EditUser
-    Created on : Feb 17, 2025, 11:20:40 AM
-    Author     : thang
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
@@ -18,6 +12,10 @@
 
     <div class="container mt-5">
         <h2>Edit User</h2>
+        <% String message = request.getParameter("message"); 
+           if (message != null) { %>
+            <div class="alert alert-info"><%= message %></div>
+        <% } %>
         <form action="UserControllerServlet" method="post">
             <input type="hidden" name="action" value="edit">
             <input type="hidden" name="id" value="${user.id}">
@@ -35,6 +33,15 @@
             <div class="mb-3">
                 <label>Password:</label>
                 <input type="password" name="password" class="form-control" value="${user.password}" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Gender:</label>
+                <select name="gender" class="form-control">
+                    <option value="Male" ${user.gender == 'Male' ? 'selected' : ''}>Male</option>
+                    <option value="Female" ${user.gender == 'Female' ? 'selected' : ''}>Female</option>
+                    <option value="Other" ${user.gender == 'Other' ? 'selected' : ''}>Other</option>
+                </select>
             </div>
 
             <div class="mb-3">
@@ -70,4 +77,3 @@
     <jsp:include page="footer.jsp"></jsp:include>
 </body>
 </html>
-
