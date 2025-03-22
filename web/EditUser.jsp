@@ -40,7 +40,6 @@
                 <select name="gender" class="form-control">
                     <option value="Male" ${user.gender == 'Male' ? 'selected' : ''}>Male</option>
                     <option value="Female" ${user.gender == 'Female' ? 'selected' : ''}>Female</option>
-                    <option value="Other" ${user.gender == 'Other' ? 'selected' : ''}>Other</option>
                 </select>
             </div>
 
@@ -61,12 +60,20 @@
 
             <div class="mb-3">
                 <label>Role:</label>
-                <select name="roleID" class="form-control">
-                    <option value="1" ${user.roleID == 1 ? 'selected' : ''}>Admin</option>
-                    <option value="2" ${user.roleID == 2 ? 'selected' : ''}>Marketing</option>
-                    <option value="3" ${user.roleID == 3 ? 'selected' : ''}>Sale</option>
-                    <option value="4" ${user.roleID == 4 ? 'selected' : ''}>Customer</option>
-                </select>
+                <c:choose>
+                    <c:when test="${sessionScope.u.roleID == 1}">
+                        <select name="roleID" class="form-control">
+                            <option value="1" ${user.roleID == 1 ? 'selected' : ''}>Admin</option>
+                            <option value="2" ${user.roleID == 2 ? 'selected' : ''}>Marketing</option>
+                            <option value="3" ${user.roleID == 3 ? 'selected' : ''}>Sale</option>
+                            <option value="4" ${user.roleID == 4 ? 'selected' : ''}>Customer</option>
+                        </select>
+                    </c:when>
+                    <c:otherwise>
+                        <input type="text" class="form-control" value="${user.roleID == 1 ? 'Admin' : user.roleID == 2 ? 'Marketing' : user.roleID == 3 ? 'Sale' : 'Customer'}" readonly>
+                        <input type="hidden" name="roleID" value="${user.roleID}">
+                    </c:otherwise>
+                </c:choose>
             </div>
 
             <button type="submit" class="btn btn-success">Update User</button>
