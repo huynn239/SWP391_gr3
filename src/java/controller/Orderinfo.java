@@ -121,7 +121,6 @@
          }
        //  int orderId = o.getorderID(user.getId());
        String orderId = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + VNPayConfig.getRandomNumber(4);
-         int orderId = o.getorderID(user.getId());
          if (checkbox != null) {
              o.addAddress(fullname, phone, email, province + "-" + district + "-"
                      + ward + "-" + address, userID);
@@ -144,8 +143,6 @@
      }
      private Integer generateOrderId() {
          return (int) (System.currentTimeMillis() % 1000000);
- 
-         request.getRequestDispatcher("payment.jsp").forward(request, response);
      }
  
      /**
@@ -159,3 +156,4 @@
      }// </editor-fold>
  
  }
+    
