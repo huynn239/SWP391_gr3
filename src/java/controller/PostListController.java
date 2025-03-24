@@ -16,7 +16,7 @@ package controller;
  @WebServlet(name = "PostListController", urlPatterns = {"/postList"})
  public class PostListController extends HttpServlet {
  
-     private static final int LIMIT = 10; // Số bài viết mỗi trang
+     private static final int LIMIT = 5; // Số bài viết mỗi trang
  
      @Override
      protected void doGet(HttpServletRequest request, HttpServletResponse response)

@@ -42,6 +42,24 @@ public class BlogDAO extends DBContext {
         System.out.println("Total blogs retrieved: " + blogList.size()); // Debug
         return blogList;
     }
+    public boolean addBlog(Blog blog, String userId) {
+        String sql = "INSERT INTO [shopOnline].[dbo].[blog] (Title, Content, BlogImage, UploadDate, UsersID, CateID) " +
+                     "VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, blog.getTitle());
+            stmt.setString(2, blog.getContent());
+            stmt.setString(3, blog.getBlogImage());
+            stmt.setDate(4, blog.getUploadDate());
+            stmt.setString(5, userId);
+            stmt.setInt(6, blog.getCateID());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     // Lấy tổng số trang của blog
     public int getTotalPages(int limit) {
@@ -200,11 +218,12 @@ public class BlogDAO extends DBContext {
     }
 
     // Lấy chi tiết blog theo ID
-    public Blog getBlogById(String id) {
+ public Blog getBlogById(String id) {
         Blog blog = null;
-        String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
+        String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID, c.Name AS CategoryName " +
                      "FROM [shopOnline].[dbo].[blog] b " +
                      "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "LEFT JOIN [shopOnline].[dbo].[categoryblog] c ON b.CateID = c.ID " + // LEFT JOIN để lấy categoryName
                      "WHERE b.ID = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -220,6 +239,7 @@ public class BlogDAO extends DBContext {
                         rs.getString("Author"),
                         rs.getInt("CateID")
                     );
+                    blog.setCategoryName(rs.getString("CategoryName")); // Gán categoryName
                 }
             }
         } catch (SQLException e) {
@@ -227,7 +247,6 @@ public class BlogDAO extends DBContext {
         }
         return blog;
     }
-
     // Lấy danh mục theo CateID
     public Category getCategoryByCateID(int cateID) {
         Category category = null;

@@ -18,6 +18,14 @@
         <servlet-class>controller.Productsearch</servlet-class>
     </servlet>
     <servlet>
+        <servlet-name>blogListController</servlet-name>
+        <servlet-class>controller.BlogListController</servlet-class> <!-- Sửa thành controller.BlogListController -->
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>blogListController</servlet-name>
+        <url-pattern>/blogList</url-pattern>
+    </servlet-mapping>
+    <servlet>
         <servlet-name>Order</servlet-name>
         <servlet-class>controller.Order</servlet-class>
     </servlet>

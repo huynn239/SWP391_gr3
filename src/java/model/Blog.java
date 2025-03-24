@@ -9,9 +9,12 @@ public class Blog {
     private String content;
     private String blogImage;
     private Date uploadDate;
-    private String author;  // Thêm trường author cho tên tác giả
-private int cateID; // Thêm trường CateID
+    private String author; 
+private int cateID; 
 private String categoryName;
+
+    public Blog() {
+    }
 
 public Blog(String id, String title, String content, String blogImage, Date uploadDate, String author, int cateID) {
     this.id = id;

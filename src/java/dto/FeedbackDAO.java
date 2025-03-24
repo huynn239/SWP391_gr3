@@ -81,6 +81,42 @@ public class FeedbackDAO extends DBContext {
             return stmt.executeUpdate() > 0;
         }
     }
+    public List<Feedback> getFeedbacksByProductId(int productId) throws SQLException {
+    List<Feedback> feedbackList = new ArrayList<>();
+    String query = """
+        SELECT f.ID, f.RatedStar, f.Comment, f.ProductID, f.UsersID, f.Status, 
+               f.FullName, f.Email, f.Mobile, p.Name AS ProductName
+        FROM feedback f
+        JOIN Product p ON f.ProductID = p.ID
+        WHERE f.ProductID = ?
+        ORDER BY f.ID DESC
+    """;
+
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        stmt.setInt(1, productId);
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Feedback feedback = new Feedback(
+                    rs.getInt("ID"),
+                    rs.getInt("RatedStar"),
+                    rs.getString("Comment"),
+                    rs.getInt("ProductID"),
+                    rs.getInt("UsersID"),
+                    rs.getString("ProductName"),
+                    rs.getString("FullName"),
+                    rs.getString("Email"),
+                    rs.getString("Mobile"),
+                    rs.getString("Status")
+                );
+                feedbackList.add(feedback);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        throw new SQLException("Lỗi khi lấy feedback: " + e.getMessage());
+    }
+    return feedbackList;
+}
 
     public static void main(String[] args) {
         try {
@@ -91,5 +127,6 @@ public class FeedbackDAO extends DBContext {
             e.printStackTrace();
         }
     }
+    
 
 }

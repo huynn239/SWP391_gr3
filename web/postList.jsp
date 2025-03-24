@@ -96,6 +96,15 @@
             height: auto;
             border-radius: 4px;
         }
+        /* CSS cho modal */
+        .modal-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .modal-body p {
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -126,7 +135,7 @@
 
             <!-- Nút thêm bài viết và sắp xếp -->
             <div class="action-bar">
-                <a href="addPost.jsp" class="btn btn-success action-btn"><i class="fa fa-plus"></i> Add new Post</a>
+                <a href="addPost" class="btn btn-success action-btn"><i class="fa fa-plus"></i> Add new Post</a>
                 <form action="postList" method="GET" style="display: inline;">
                     <button type="submit" class="btn btn-default action-btn">
                         <i class="fa fa-clock-o"></i> Sort newest
@@ -171,8 +180,11 @@
                                         <td><img src="${blog.blogImage}" alt="${blog.title}" class="thumbnail-img"></td>
                                         <td>${blog.author}</td>
                                         <td>${blog.uploadDate}</td>
-                                        <td>${blog.categoryName}</td> 
+                                        <td>${blog.categoryName}</td>
                                         <td>
+                                            <button class="btn btn-info btn-sm action-btn view-detail" data-id="${blog.id}" data-toggle="modal" data-target="#postDetailModal">
+                                                <i class="fa fa-eye"></i> Xem chi tiết
+                                            </button>
                                             <a href="editPost.jsp?id=${blog.id}" class="btn btn-warning btn-sm action-btn"><i class="fa fa-edit"></i> Chỉnh Sửa</a>
                                             <a href="deletePost?id=${blog.id}" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Bạn có chắc muốn xóa bài viết này?')"><i class="fa fa-trash"></i> Xóa</a>
                                         </td>
@@ -204,6 +216,32 @@
                 <c:if test="${currentPage < totalPages}">
                     <a class="page-link" href="postList?page=${currentPage + 1}<c:if test='${not empty sortBy}'>&sortBy=${sortBy}</c:if><c:if test='${not empty sortOrder}'>&sortOrder=${sortOrder}</c:if><c:if test='${not empty keyword}'>&keyword=${keyword}</c:if><c:if test='${not empty categoryParam}'>&category=${categoryParam}</c:if>">Tiếp</a>
                 </c:if>
+            </div>
+
+            <!-- Modal hiển thị chi tiết bài viết -->
+            <div class="modal fade" id="postDetailModal" tabindex="-1" role="dialog" aria-labelledby="postDetailModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="postDetailModalLabel">Chi tiết bài viết</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <h4 id="modal-title"></h4>
+                            <p><strong>Tác giả:</strong> <span id="modal-author"></span></p>
+                            <p><strong>Ngày đăng:</strong> <span id="modal-uploadDate"></span></p>
+                            <p><strong>Danh mục:</strong> <span id="modal-category"></span></p>
+                            <img id="modal-image" src="" alt="Hình ảnh bài viết">
+                            <p><strong>Nội dung:</strong></p>
+                            <div id="modal-content"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -338,5 +376,34 @@
     <script src="js/price-range.js"></script>
     <script src="js/jquery.prettyPhoto.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.view-detail').click(function() {
+                var postId = $(this).data('id');
+                
+                $.ajax({
+                    url: 'postDetail',
+                    type: 'GET',
+                    data: { id: postId },
+                    success: function(response) {
+                        if (response.error) {
+                            alert(response.error);
+                        } else {
+                            $('#modal-title').text(response.title);
+                            $('#modal-author').text(response.author);
+                            $('#modal-uploadDate').text(response.uploadDate);
+                            $('#modal-category').text(response.categoryName);
+                            $('#modal-image').attr('src', response.blogImage || 'images/default-placeholder.png'); 
+                            $('#modal-content').html(response.content);
+                            $('#postDetailModal').modal('show');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Không thể tải chi tiết bài viết. Vui lòng thử lại!');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
