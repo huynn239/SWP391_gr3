@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.Account;
 import model.Cart;
-
+import dto.OrderDAO;
 import java.io.IOException;
 import java.util.List;
 
@@ -39,24 +39,32 @@ public class ConfirmPaymentServlet extends HttpServlet {
         }
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        // Xử lý phản hồi từ VNPay (khi URL là /vnpay-return)
-        if (request.getServletPath().equals("/vnpay-return")) {
-            if (VNPayService.verifyPaymentResponse(request)) {
-                String responseCode = VNPayService.getResponseCode(request);
-                if ("00".equals(responseCode)) {
-                    request.setAttribute("message", "Thanh toán thành công! Mã giao dịch: " + VNPayService.getTransactionRef(request));
-                    request.getRequestDispatcher("order-success.jsp").forward(request, response);
-                } else {
-                    request.setAttribute("error", "Thanh toán thất bại! Mã lỗi: " + responseCode);
-                    request.getRequestDispatcher("order-failure.jsp").forward(request, response);
-                }
+@Override
+protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+        throws ServletException, IOException {
+    if (request.getServletPath().equals("/vnpay-return")) {
+        if (VNPayService.verifyPaymentResponse(request)) {
+            String responseCode = VNPayService.getResponseCode(request);
+            if ("00".equals(responseCode)) {
+                HttpSession session = request.getSession();
+                Account user = (Account) session.getAttribute("u");
+                OrderDAO o = new OrderDAO();
+                int orderId = o.getFirstOrderID(user.getId());
+                
+                // Cập nhật suborder gần nhất thành Paid
+                o.updateLatestSuborderStatusToPaid(orderId);
+                o.updateOrderTotalAndStatus(orderId); // Cập nhật TotalAmount và PaymentStatus trong orders
+                
+                request.setAttribute("message", "Thanh toán thành công! Mã giao dịch: " + VNPayService.getTransactionRef(request));
+                request.getRequestDispatcher("order-success.jsp").forward(request, response);
             } else {
-                request.setAttribute("error", "Chữ ký không hợp lệ!");
+                request.setAttribute("error", "Thanh toán thất bại! Mã lỗi: " + responseCode);
                 request.getRequestDispatcher("order-failure.jsp").forward(request, response);
             }
+        } else {
+            request.setAttribute("error", "Chữ ký không hợp lệ!");
+            request.getRequestDispatcher("order-failure.jsp").forward(request, response);
         }
     }
+}
 }

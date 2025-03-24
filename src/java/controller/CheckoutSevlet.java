@@ -72,39 +72,55 @@ public class CheckoutSevlet extends HttpServlet {
      * @throws ServletException if a servlet-specific error occurs
      * @throws IOException if an I/O error occurs
      */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        List<Cart> cartList = (List<Cart>) session.getAttribute("cartList");
-        Account user = (Account) session.getAttribute("u");
-        double total = Double.parseDouble(request.getParameter("total"));
-        OrderDAO o = new OrderDAO();
-        OrderdetailDAO od = new OrderdetailDAO();
-        if (cartList == null || cartList.isEmpty()) {
-            response.sendRedirect("cartdetail.jsp");
-            return;
-        }
-        List<Cart> selectedItems = cartList.stream()
-                .filter(c -> "checked".equals(c.getCheckboxStatus()))
-                .collect(Collectors.toList());
-        if (selectedItems.isEmpty()) {
-            session.setAttribute("cartMessage", "Vui lòng chọn sản phẩm để đặt hàng!");
-            response.sendRedirect("cartdetail.jsp");
-            return;
-        }
-        if (o.checkCreateNewSubOrder(user.getId())) {
-            o.insertsubOrder(user.getId(), total);
-            od.updatesuborder(user.getId(), selectedItems);
-            od.updateToTalamountSuborder(user.getId(), selectedItems);
-        } else {
-            od.updatesuborder(user.getId(), selectedItems);
-            od.updateToTalamountSuborder(user.getId(), selectedItems);
-        }
-        session.setAttribute("selectedItems", selectedItems);
-        response.sendRedirect("cartcontact.jsp");
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    HttpSession session = request.getSession();
+    List<Cart> cartList = (List<Cart>) session.getAttribute("cartList");
+    Account user = (Account) session.getAttribute("u");
+    double total = Double.parseDouble(request.getParameter("total"));
+    OrderDAO o = new OrderDAO();
+    OrderdetailDAO od = new OrderdetailDAO();
+    
+    if (cartList == null || cartList.isEmpty()) {
+        response.sendRedirect("cartdetail.jsp");
+        return;
     }
-
+    
+    List<Cart> selectedItems = cartList.stream()
+            .filter(c -> "checked".equals(c.getCheckboxStatus()))
+            .collect(Collectors.toList());
+    
+    if (selectedItems.isEmpty()) {
+        session.setAttribute("cartMessage", "Vui lòng chọn sản phẩm để đặt hàng!");
+        response.sendRedirect("cartdetail.jsp");
+        return;
+    }
+    
+    // Lấy orderId đầu tiên của user (chỉ tạo một lần duy nhất)
+    int orderId = o.getFirstOrderID(user.getId());
+    if (orderId == 0) {
+        o.insertOrder(user.getId()); // Tạo Order mới nếu chưa có
+        orderId = o.getFirstOrderID(user.getId());
+    }
+    
+    // Kiểm tra trạng thái suborder gần nhất
+    if (o.checkCreateNewSubOrder(orderId)) { // Truyền orderId thay vì userId
+        o.insertsubOrderWithOrderId(orderId, total);
+        od.updatesuborder(user.getId(), selectedItems);
+        od.updateToTalamountSuborder(user.getId(), selectedItems);
+    } else {
+        o.updateSuborder(user.getId(), total);
+        od.updatesuborder(user.getId(), selectedItems);
+        od.updateToTalamountSuborder(user.getId(), selectedItems);
+    }
+    
+    // Cập nhật TotalAmount và PaymentStatus trong bảng orders
+    o.updateOrderTotalAndStatus(orderId);
+    
+    session.setAttribute("selectedItems", selectedItems);
+    response.sendRedirect("cartcontact.jsp");
+}
     /**
      * Returns a short description of the servlet.
      *

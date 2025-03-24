@@ -22,21 +22,17 @@ import model.Order;
  */
 public class OrderDAO extends DBContext {
 
-    public void insertOrder(int userID) {
-        String sql = "INSERT INTO Orders (PaymentStatus, OrderDate, TotalAmount, UsersID) VALUES (?, ?, ?, ?);";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, "Unpaid");
-            stmt.setDate(2, java.sql.Date.valueOf(LocalDate.now()));
-            stmt.setInt(3, 0);
-            stmt.setInt(4, userID);
-
-            stmt.executeUpdate();
-            System.out.println("Order created successfully!");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+public void insertOrder(int userID) {
+    String sql = "INSERT INTO Orders (UsersID, OrderDate, TotalAmount, PaymentStatus) VALUES (?, ?, 0, 'Unpaid')";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, userID);
+        stmt.setTimestamp(2, new java.sql.Timestamp(new java.util.Date().getTime()));
+        stmt.executeUpdate();
+        System.out.println("Inserted new order for UserID: " + userID);
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
+}
 
     public boolean checkSize(int quantity, int productId, String sizeName, int colorID) {
         String sql = "SELECT ps.Quantity FROM ProductSize ps "
@@ -77,22 +73,36 @@ public class OrderDAO extends DBContext {
         return false;
     }
 
-    public void insertsubOrder(int userID, double totalAmount) {
-        OrderDAO od = new OrderDAO();
-        int orderID = od.getorderID(userID);
-        String sql = "INSERT INTO suborder (OrderID, TotalAmount, PaymentStatus) VALUES (?, ?, ?)";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, orderID);
-            stmt.setDouble(2, totalAmount);
-            stmt.setString(3, "Unpaid");
-            stmt.executeUpdate();
-            System.out.println("SubOrder created successfully!");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+public void insertsubOrderWithOrderId(int orderID, double totalAmount) {
+    String sql = "INSERT INTO suborder (OrderID, TotalAmount, PaymentStatus, CreatedDate) VALUES (?, ?, ?, ?)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, orderID);
+        stmt.setDouble(2, totalAmount);
+        stmt.setString(3, "Unpaid");
+        stmt.setTimestamp(4, new java.sql.Timestamp(new java.util.Date().getTime()));
+        stmt.executeUpdate();
+        System.out.println("SubOrder created successfully with OrderID: " + orderID);
+    } catch (SQLException e) {
+        e.printStackTrace();
     }
-
+}
+public int getFirstOrderID(int userID) {
+    String sql = "SELECT TOP 1 ID FROM Orders WHERE UsersID = ? ORDER BY ID ASC;";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, userID);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            int orderId = rs.getInt("ID");
+            System.out.println("Found first OrderID: " + orderId + " for UserID: " + userID);
+            return orderId;
+        } else {
+            System.out.println("No OrderID found for UserID: " + userID);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
     public int getsuborderID(int userID) {
         String sql = "SELECT TOP 1 s.ID \n"
                 + "FROM suborder s join orders o on s.OrderID = o.ID \n"
@@ -112,31 +122,21 @@ public class OrderDAO extends DBContext {
         return 0;
     }
 
-    public boolean checkCreateNewSubOrder(int userID) {
-        String sql = """
-        SELECT TOP 1 o.ID, s.PaymentStatus
-        FROM Orders o
-        LEFT JOIN suborder s ON o.ID = s.OrderID
-        WHERE o.UsersID = ?
-        ORDER BY s.ID DESC;
-    """;
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, userID);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String paymentStatus = rs.getString("PaymentStatus");
-                return paymentStatus == null || paymentStatus.trim().isEmpty() || paymentStatus.equalsIgnoreCase("Paid");
-            } else {
-                return true;
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+  public boolean checkCreateNewSubOrder(int orderId) {
+    String sql = "SELECT TOP 1 PaymentStatus FROM suborder WHERE OrderID = ? ORDER BY ID DESC";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, orderId);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            String status = rs.getString("PaymentStatus");
+            return "Paid".equals(status);
         }
-        return false;
+        return true; // Nếu không có suborder, cho phép tạo mới
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return true;
     }
-
+}
     public int getorderID(int userID) {
         String sql = "SELECT TOP 1 ID FROM Orders WHERE UsersID = ? ORDER BY ID DESC;";
 
@@ -153,7 +153,7 @@ public class OrderDAO extends DBContext {
         return 0;
     }
 
-    public void updateTotalAmount(int orderID) {
+   public void updateTotalAmount(int orderID) {
         String sql = "UPDATE orders \n"
                 + "Set TotalAmount = (\n"
                 + "SELECT SUM(od.Quantity * p.Price)\n"
@@ -271,6 +271,106 @@ public class OrderDAO extends DBContext {
         }
         return false;
     }
+   public void updateSuborder(int userId, double totalAmount) {
+    int suborderId = getsuborderID(userId);
+    if (suborderId == 0) return;
+    String sql = "UPDATE suborder SET TotalAmount = ? WHERE ID = ? AND PaymentStatus = 'Unpaid'";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setDouble(1, totalAmount);
+        stmt.setInt(2, suborderId);
+        stmt.executeUpdate();
+        System.out.println("SubOrder updated successfully with ID: " + suborderId);
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+    public void updateSuborderStatusToPaid(int userID) {
+    String sql = "UPDATE suborder SET PaymentStatus = 'Paid' WHERE ID = ("
+            + "SELECT TOP 1 ID FROM suborder WHERE OrderID = ("
+            + "SELECT TOP 1 ID FROM Orders WHERE UsersID = ? ORDER BY ID DESC) "
+            + "ORDER BY ID DESC)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, userID);
+        int rowsUpdated = stmt.executeUpdate();
+        if (rowsUpdated > 0) {
+            System.out.println("Suborder status updated to Paid!");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+    public void updateOrderStatusIfAllSubordersPaid(int userId) {
+    int orderId = getorderID(userId);
+    if (orderId == 0) return; // Không có OrderId để cập nhật
+
+    // Kiểm tra xem tất cả suborder đã Paid chưa
+    String checkSql = "SELECT COUNT(*) AS unpaidCount FROM suborder WHERE OrderID = ? AND PaymentStatus = 'Unpaid'";
+    String updateSql = "UPDATE orders SET PaymentStatus = 'Paid', TotalAmount = (SELECT SUM(TotalAmount) FROM suborder WHERE OrderID = ?) WHERE ID = ?";
+    
+    try (PreparedStatement checkStmt = connection.prepareStatement(checkSql);
+         PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
+        
+        // Đếm số suborder chưa Paid
+        checkStmt.setInt(1, orderId);
+        ResultSet rs = checkStmt.executeQuery();
+        
+        if (rs.next() && rs.getInt("unpaidCount") == 0) {
+            // Nếu không còn suborder nào Unpaid, cập nhật orders
+            updateStmt.setInt(1, orderId); // Tổng TotalAmount từ suborder
+            updateStmt.setInt(2, orderId); // OrderId cần cập nhật
+            int rowsUpdated = updateStmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Order updated to Paid with TotalAmount for OrderID: " + orderId);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+  public void updateOrderTotalAndStatus(int orderId) {
+    // Cập nhật TotalAmount bằng tổng TotalAmount của tất cả suborder
+    String updateTotalSql = "UPDATE orders SET TotalAmount = (SELECT SUM(TotalAmount) FROM suborder WHERE OrderID = ?) WHERE ID = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(updateTotalSql)) {
+        stmt.setInt(1, orderId);
+        stmt.setInt(2, orderId);
+        stmt.executeUpdate();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+
+    // Kiểm tra xem tất cả suborder đã Paid chưa
+    String checkPaidSql = "SELECT COUNT(*) AS unpaidCount FROM suborder WHERE OrderID = ? AND PaymentStatus = 'Unpaid'";
+    String updateStatusSql = "UPDATE orders SET PaymentStatus = ? WHERE ID = ?";
+    try (PreparedStatement checkStmt = connection.prepareStatement(checkPaidSql);
+         PreparedStatement updateStmt = connection.prepareStatement(updateStatusSql)) {
+        
+        checkStmt.setInt(1, orderId);
+        ResultSet rs = checkStmt.executeQuery();
+        
+        if (rs.next()) {
+            int unpaidCount = rs.getInt("unpaidCount");
+            updateStmt.setString(1, unpaidCount == 0 ? "Paid" : "Unpaid");
+            updateStmt.setInt(2, orderId);
+            updateStmt.executeUpdate();
+            System.out.println("Order updated: TotalAmount and PaymentStatus for OrderID: " + orderId);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+    public void updateLatestSuborderStatusToPaid(int orderId) {
+    String sql = "UPDATE suborder SET PaymentStatus = 'Paid' WHERE ID = (SELECT TOP 1 ID FROM suborder WHERE OrderID = ? ORDER BY ID DESC)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, orderId);
+        int rowsUpdated = stmt.executeUpdate();
+        if (rowsUpdated > 0) {
+            System.out.println("Latest Suborder status updated to Paid for OrderID: " + orderId);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
 
     public static void main(String[] args) {
         OrderDAO o = new OrderDAO();
