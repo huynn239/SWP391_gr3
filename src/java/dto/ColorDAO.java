@@ -33,6 +33,22 @@ public class ColorDAO extends DBContext {
 
         return colors;
     }
+    public Color getColorById(int id) {
+        String sql = "SELECT * FROM Color WHERE ID_Color = ?";
+        Color color = null;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    color = new Color(rs.getInt("ID_Color"), rs.getString("ColorName"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return color;
+    }
     
     public static void main(String[] args) {
         ColorDAO c = new ColorDAO();

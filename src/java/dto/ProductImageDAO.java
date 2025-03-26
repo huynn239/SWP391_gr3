@@ -32,4 +32,20 @@ public class ProductImageDAO extends DBContext {
         }
         return images;
     }
+    public List<ProductImage> getImagesByProductId(int productId) {
+        List<ProductImage> images = new ArrayList<>();
+        String sql = "SELECT * FROM ProductImage WHERE ProductID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, productId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                images.add(new ProductImage(rs.getInt("ID"), rs.getInt("ProductID"),
+                        rs.getInt("ColorID"), rs.getString("ImageURL")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return images;
+    }
 }
