@@ -38,7 +38,7 @@ public class AuthenticationFilter implements Filter {
 
         // Kiểm tra quyền truy cập từng trang
         if ((uri.contains("admin.jsp") && user.getRoleID() != 1)
-                || (uri.contains("UserControllerServlet") && user.getRoleID() != 1)
+                || (uri.contains("admin.jsp") && user.getRoleID() != 1)
                 || (uri.contains("mkt.jsp") && user.getRoleID() != 2)
                 || (uri.contains("sliderList") && user.getRoleID() != 2)
                 || (uri.contains("sale.jsp") && user.getRoleID() != 3)) {

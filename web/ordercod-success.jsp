@@ -172,7 +172,7 @@
             </div>
         <% } %>
         <a href="home.jsp" class="btn-home">Quay về trang chủ</a>
-        <div class="footer-text" >Nếu có thắc mắc, vui lòng liên hệ : <strong>0982 154 784</strong></div>
+        <div class="footer-text" >Nếu có thắc mắc, vui lòng liên hệ : <strong>0123 456 789</strong></div>
     </div>
 
     <!-- Hiệu ứng confetti -->

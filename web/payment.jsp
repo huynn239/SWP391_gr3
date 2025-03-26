@@ -423,7 +423,7 @@
             <input type="hidden" name="orderId" value="<%= request.getAttribute("orderId") %>">
             <div class="button-group">
                 <button type="submit" class="btn btn-success">Xác nhận và thanh toán</button>
-                <a href="cart.jsp" class="btn btn-back-cart">Quay lại giỏ hàng</a>
+                <a href="cartcontact.jsp" class="btn btn-back-cart">Quay lại giỏ hàng</a>
             </div>
         </form>
         <%

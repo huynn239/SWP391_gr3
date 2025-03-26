@@ -361,6 +361,133 @@ public class OrderdetailDAO extends DBContext {
 
         return false;
     }
+    public boolean checkProductSizeAvailability(int subOrderID) {
+    String sql = "SELECT od.ProductID, od.Quantity, od.Size, od.Color, ps.Quantity AS AvailableQty " +
+                 "FROM orderdetails od " +
+                 "JOIN ProductSize ps ON od.ProductID = ps.ProductID " +
+                 "AND ps.SizeID = (SELECT ID_Size FROM Size WHERE SizeName = od.Size) " +
+                 "AND ps.ColorID = (SELECT ID_Color FROM Color WHERE ColorName = od.Color) " +
+                 "WHERE od.SubOrderID = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, subOrderID);
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            int orderedQty = rs.getInt("Quantity");
+            int availableQty = rs.getInt("AvailableQty");
+            if (orderedQty > availableQty) {
+                return false; // Không đủ số lượng
+            }
+        }
+        return true;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+
+public void updateProductSizeAfterPayment(int subOrderID) {
+    String sqlSelect = "SELECT ProductID, Quantity, Size, Color " +
+                      "FROM orderdetails WHERE SubOrderID = ?";
+    String sqlUpdate = "UPDATE ProductSize " +
+                       "SET Quantity = Quantity - ? " +
+                       "WHERE ProductID = ? " +
+                       "AND SizeID = (SELECT ID_Size FROM Size WHERE SizeName = ?) " +
+                       "AND ColorID = ?"; // Dùng Color trực tiếp làm ColorID
+
+    try {
+        connection.setAutoCommit(false); // Bắt đầu transaction
+        try (PreparedStatement selectStmt = connection.prepareStatement(sqlSelect)) {
+            selectStmt.setInt(1, subOrderID);
+            ResultSet rs = selectStmt.executeQuery();
+
+            if (!rs.isBeforeFirst()) {
+                System.out.println("No items found in orderdetails for SubOrderID: " + subOrderID);
+                connection.commit();
+                return;
+            }
+
+            int totalUpdatedRows = 0;
+            try (PreparedStatement updateStmt = connection.prepareStatement(sqlUpdate)) {
+                while (rs.next()) {
+                    int productId = rs.getInt("ProductID");
+                    int quantity = rs.getInt("Quantity");
+                    String sizeName = rs.getString("Size");
+                    String colorId = rs.getString("Color"); // Color là ID_Color
+
+                    System.out.println("Updating ProductSize: ProductID=" + productId + 
+                                      ", Quantity=" + quantity + ", Size='" + sizeName + 
+                                      "', ColorID='" + colorId + "'");
+
+                    updateStmt.setInt(1, quantity);
+                    updateStmt.setInt(2, productId);
+                    updateStmt.setString(3, sizeName);
+                    updateStmt.setString(4, colorId); // Truyền Color trực tiếp làm ColorID
+                    int updatedRows = updateStmt.executeUpdate();
+                    totalUpdatedRows += updatedRows;
+
+                    System.out.println("Rows updated for ProductID=" + productId + ": " + updatedRows);
+                }
+            }
+            connection.commit();
+            System.out.println("Total rows updated in ProductSize for SubOrderID: " + subOrderID + ": " + totalUpdatedRows);
+        }
+    } catch (SQLException e) {
+        System.out.println("Error updating ProductSize for SubOrderID: " + subOrderID + ": " + e.getMessage());
+        e.printStackTrace();
+        try {
+            connection.rollback();
+        } catch (SQLException rollbackEx) {
+            rollbackEx.printStackTrace();
+        }
+    } finally {
+        try {
+            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+public String getReceiverName(int subOrderId) {
+        String sql = "SELECT ReceiverName FROM suborder WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, subOrderId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("ReceiverName");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Khách hàng";
+    }
+
+    public String getReceiverAddress(int subOrderId) {
+        String sql = "SELECT ReceiverAddress FROM suborder WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, subOrderId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("ReceiverAddress");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "Không xác định";
+    }
+  public String getReceiverEmail(int subOrderId) {
+        String sql = "SELECT ReceiverEmail FROM suborder WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, subOrderId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String email = rs.getString("ReceiverEmail");
+                return email != null ? email : ""; // Trả về chuỗi rỗng nếu null
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ""; // Trả về chuỗi rỗng nếu không tìm thấy
+    }
 
     public static void main(String[] args) {
         OrderdetailDAO od = new OrderdetailDAO();

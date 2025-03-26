@@ -155,7 +155,7 @@
                 <i class="fas fa-check-circle"></i>
             </h3>
             <p>Vui lòng để ý số điện thoại của nhân viên tư vấn:</p>
-            <strong class="phone-number">0982 154 784</strong>
+            <strong class="phone-number">0123 456 789</strong>
         </div>
 
         <a href="home.jsp" class="btn-back">Quay về trang chủ</a>

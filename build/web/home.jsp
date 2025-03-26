@@ -64,7 +64,7 @@
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
                                     <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
-                                        <li><a href="changepassword"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
+                                        <li><a href="changepassword"><i class="fa fa-key"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 1}">
                                         <li><a href="admin.jsp"><i class="fa fa-star"></i> Admin</a></li>
@@ -76,7 +76,9 @@
                                         <li><a href="sale.jsp"><i class="fa fa-star"></i> Sale</a></li>
                                         </c:if>       
                                     <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
+                                    <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
                                     <li><a href="UserControllerServlet?action=viewProfile&id=${sessionScope.u.id}"><i class="fa fa-user"></i> ${not empty sessionScope.u ? sessionScope.u.username : "Account"}</a></li>
+                                    </c:if>
                                     <li><a href="${not empty sessionScope.u? "logout" : "login"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
                                 </ul>
                             </div>
