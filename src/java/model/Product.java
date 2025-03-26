@@ -13,6 +13,8 @@ public class Product {
     private boolean status;
     private String brandName;
     private String typeName;
+    private int is_deleted;
+    private int deleted_by;
 
     public Product() {
     }
@@ -29,7 +31,33 @@ public class Product {
         this.status = status;
     }
 
-    
+    public Product(int id, String name, int materialId, double price, String details, String brandId, int typeId, boolean status) {
+        this.id = id;
+        this.name = name;
+        this.materialId = materialId;
+        this.price = price;
+        this.details = details;
+        this.brandId = brandId;
+        this.typeId = typeId;
+        this.status = status;
+    }
+
+    public int getIs_deleted() {
+        return is_deleted;
+    }
+
+    public void setIs_deleted(int is_deleted) {
+        this.is_deleted = is_deleted;
+    }
+
+    public int getDeleted_by() {
+        return deleted_by;
+    }
+
+    public void setDeleted_by(int deleted_by) {
+        this.deleted_by = deleted_by;
+    }
+
     public String getBrandName() {
         return brandName;
     }

@@ -93,7 +93,7 @@ public class Order extends HttpServlet {
             OrderDAO o = new OrderDAO();
             OrderdetailDAO od = new OrderdetailDAO();
             int orderID = o.getorderID(user.getId());
-            if (o.checkSize(quantity, productID, size, colorID) == false) {
+            if (o.checkSize(orderID,quantity, productID, size, colorID) == false) {
                 response.getWriter().write("{\"status\": \"error\", \"message\": \"Sản phẩm không đủ số lượng, vui lòng giảm số lượng!\"}");
                 return;
             }

@@ -1,9 +1,10 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
-
-
+<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider,model.ProductImage,model.Color" %>
+<%
+ Account user = (Account) session.getAttribute("u");
+%>
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -200,30 +201,111 @@
                 border-radius: 5px;
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             }
+            .message-box {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 25px;
+                font-size: 18px;
+                background-color: rgba(0, 0, 0, 0.8);
+                color: white;
+                border-radius: 8px;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-width: 250px;
+                max-width: 400px;
+                box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .close-btn {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 20px;
+                margin-left: 15px;
+                cursor: pointer;
+            }
         </style>
     </head>
 
     <body>
+        <% if (user.getRoleID() == 1) { %>
+        <a href="admin.jsp" class="back-to-admin">Quay lại Admin</a>
+        <style>
+            .back-to-admin {
+                position: absolute;
+                left: 10px;
+                top: 10px;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                font-weight: bold;
+                box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+                transition: 0.3s;
+            }
+            .back-to-admin:hover {
+                background-color: #0056b3;
+                box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+            }
+        </style>
+        <% } else { %>
         <jsp:include page="header.jsp"></jsp:include>
+        <% } %>
 
-            <div class="container">
-                <div class="page-header">
-                    <h2 class="text-center">Danh sách sản phẩm</h2>
-                </div>
+        <div id="message-box" class="message-box" style="display: none;">
+            <span id="message-text"></span>
+            <button class="close-btn" onclick="closeMessage()">✖</button>
+        </div>
 
-                <div class="control-panel">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <form action="productlistsevlet" method="get" class="form-inline d-flex">
-                                <label for="keyword" class="mr-2">Tìm kiếm:</label>
-                                <input type="text" class="form-control mr-2" id="keyword" name="keyword"
-                                       placeholder="Nhập từ khóa..." value="${selectedKeyword}">
+        <script>
+            function showMessage(message) {
+                document.getElementById("message-text").innerText = message;
+                document.getElementById("message-box").style.display = "flex";
+
+
+                setTimeout(closeMessage, 3000);
+            }
+
+            function closeMessage() {
+                document.getElementById("message-box").style.display = "none";
+            }
+
+        </script>
+        <% 
+        String message = (String) session.getAttribute("message");
+        if (message != null) { 
+        %>
+        <script>
+            showMessage("<%= message %>");
+        </script>
+        <% 
+                session.removeAttribute("message"); // Xóa thông báo sau khi hiển thị
+            } 
+        %>
+
+
+        <div class="container">
+            <div class="page-header">
+                <h2 class="text-center">Danh sách sản phẩm</h2>
+            </div>
+
+            <div class="control-panel">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <form action="productlistsevlet" method="get" class="form-inline d-flex">
+                            <label for="keyword" class="mr-2">Tìm kiếm:</label>
+                            <input type="text" class="form-control mr-2" id="keyword" name="keyword"
+                                   placeholder="Nhập từ khóa..." value="${selectedKeyword}">
                             <button type="button" class="btn btn-search" onclick="applyFilters()"><i class="fa fa-search"></i> Tìm</button>
                         </form>
                     </div>
 
                     <div class="col-md-6 text-right">
-                        <a href="productlistsevlet?action=addproduct" class="btn btn-add"><i class="fa fa-plus"></i> Thêm Slider</a>
+                        <a href="productlistsevlet?action=addproduct" class="btn btn-add"><i class="fa fa-plus"></i> Thêm sản phẩm</a>
                     </div>
                 </div>
 
@@ -325,13 +407,19 @@
                                             </td>
 
                                             <td class="text-center align-middle">
-                                                <a href="productlistsevlet?action=editProduct&id=${product.getId()}" class="btn btn-warning btn-sm action-btn">
+
+                                                <a href="Productdetailmkt.jsp?id=${product.getId()}" class="btn btn-warning btn-sm action-btn">
                                                     <i class="fa fa-edit"></i> Sửa
                                                 </a>
-                                                <a href="sliderList?action=deleteProduct&id=${product.getId()}" class="btn btn-danger btn-sm action-btn"
-                                                   onclick="return confirm('Bạn có chắc muốn xóa product này?');">
-                                                    <i class="fa fa-trash"></i> Xóa
-                                                </a>
+
+                                                <form action="productlistsevlet?action=deleteProduct" method="post" style="display:inline;" 
+                                                      onsubmit="return confirm('Bạn có chắc muốn xóa product này?');">
+                                                    <input type="hidden" name="id" value="${product.getId()}">
+                                                    <button type="submit" class="btn btn-danger btn-sm action-btn">
+                                                        <i class="fa fa-trash"></i> Xóa
+                                                    </button>
+                                                </form>
+
                                             </td>
                                         </tr>
                                     </c:forEach>

@@ -32,6 +32,24 @@ public class ProductImageDAO extends DBContext {
         }
         return images;
     }
+
+    public List<ProductImage> getImagesByProduct(int id) {
+        List<ProductImage> images = new ArrayList<>();
+        String sql = "Select * from ProductImage where ProductID = ? ";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                images.add(new ProductImage(rs.getInt("ID"), rs.getInt("ProductID"),
+                        rs.getInt("ColorID"), rs.getString("ImageURL")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return images;
+    }
+
     public List<ProductImage> getImagesByProductId(int productId) {
         List<ProductImage> images = new ArrayList<>();
         String sql = "SELECT * FROM ProductImage WHERE ProductID = ?";
@@ -47,5 +65,22 @@ public class ProductImageDAO extends DBContext {
             e.printStackTrace();
         }
         return images;
+    }
+
+    public ProductImage getImageByProductColoe(int pid, int cid) {
+        String sql = "Select * from ProductImage where ProductID = ? and ColorID = ? ";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, pid);
+            stmt.setInt(2, cid);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new ProductImage(rs.getInt("ID"), rs.getInt("ProductID"),
+                        rs.getInt("ColorID"), rs.getString("ImageURL"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -9,10 +9,10 @@ package model;
  * @author BAO CHAU
  */
 public class ProductImage {
-     private int id;
-    private int productId;
-    private int colorId;
-    private String imageUrl;
+    public int id;
+    public int productId;
+    public int colorId;
+    public String imageUrl;
 
     public ProductImage() {}
 

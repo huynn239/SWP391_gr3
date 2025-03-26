@@ -17,7 +17,10 @@
  import jakarta.servlet.http.HttpSession;
  import java.util.ArrayList;
  import java.util.Comparator;
+import java.util.HashMap;
  import java.util.List;
+import java.util.Map;
+import model.Account;
  import model.Brand;
  import model.Category;
  import model.Product;
@@ -61,125 +64,243 @@
       * @throws IOException if an I/O error occurs
       */
      protected void doGet(HttpServletRequest request, HttpServletResponse response)
-             throws ServletException, IOException {
- 
-         BrandDAO brandDAO = new BrandDAO();
-         CategoryDAO categoryDAO = new CategoryDAO();
-         ProductDAO productDAO = new ProductDAO();
- 
-         List<Brand> brandList = brandDAO.getAllBrands();
-         List<Category> categoryList = categoryDAO.getAllCategories();
-         List<Product> allProducts = productDAO.getAllProductmkt();
- 
-         // Lấy các tham số từ request
-         String keyword = request.getParameter("keyword");
-         String brandId = request.getParameter("brand");
-         String status = request.getParameter("status");
-         String typeId = request.getParameter("type");
-         String sortBy = request.getParameter("sortBy");
- 
-         String filterParams = "keyword=" + (keyword != null ? keyword : "")
-                 + "&brand=" + (brandId != null ? brandId : "")
-                 + "&status=" + (status != null ? status : "")
-                 + "&type=" + (typeId != null ? typeId : "")
-                 + "&sortBy=" + (sortBy != null ? sortBy : "");
-         HttpSession session = request.getSession();
-         String previousFilters = (String) session.getAttribute("previousFilters");
- 
-         boolean isFiltering = previousFilters != null && !previousFilters.equals(filterParams);
-         session.setAttribute("previousFilters", filterParams); // Cập nhật bộ lọc mới vào session
-         // Lọc sản phẩm
-         List<Product> filteredProducts = new ArrayList<>(allProducts);
- 
-         if (keyword != null && !keyword.trim().isEmpty()) {
-             filteredProducts.removeIf(p -> !p.getName().toLowerCase().contains(keyword.toLowerCase()));
-         }
- 
-         if (brandId != null && !brandId.isEmpty()) {
-             filteredProducts.removeIf(p -> !p.getBrandId().equals(brandId));
-         }
- 
-         if (status != null && !status.isEmpty()) {
-             filteredProducts.removeIf(p -> !String.valueOf(p.isStatus()).equals(status));
-         }
- 
-         if (typeId != null && !typeId.isEmpty()) {
-             filteredProducts.removeIf(p -> !String.valueOf(p.getTypeId()).equals(typeId));
-         }
- 
-         // Sắp xếp danh sách
-         if (sortBy != null) {
-             switch (sortBy) {
-                 case "price_asc":
-                     filteredProducts.sort(Comparator.comparingDouble(Product::getPrice));
-                     break;
-                 case "price_desc":
-                     filteredProducts.sort(Comparator.comparingDouble(Product::getPrice).reversed());
-                     break;
-                 case "created_at":
-                     filteredProducts.sort(Comparator.comparingInt(Product::getId).reversed());
-                     break;
-             }
-         }
- 
-         int page = 1;
-         int pageSize = 8;
-         String pageParam = request.getParameter("page");
- 
-         if (!isFiltering) {
-             if (pageParam != null) {
-                 try {
-                     page = Integer.parseInt(pageParam);
-                 } catch (NumberFormatException e) {
-                     page = 1;
-                 }
-             }
-         }
- 
-         int totalProducts = filteredProducts.size();
-         int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
-         int start = (page - 1) * pageSize;
-         int end = Math.min(start + pageSize, totalProducts);
- 
-         if (start >= totalProducts) {
-             start = Math.max(0, totalProducts - pageSize);
-         }
-         List<Product> paginatedList = filteredProducts.subList(start, end);
- 
-         for (Product product : paginatedList) {
-             product.setBrandName(brandDAO.getBrandById(product.getBrandId()).getName());
-             product.setTypeName(categoryDAO.getCategoryById(product.getTypeId()).getName());
-         }
- 
-         // Gửi dữ liệu sang JSP
-         request.setAttribute("brandList", brandList);
-         request.setAttribute("categoryList", categoryList);
-         request.setAttribute("productlist", paginatedList);
-         request.setAttribute("currentPage", page);
-         request.setAttribute("totalPages", totalPages);
- 
-         // Lưu lại các giá trị lọc vào request
-         request.setAttribute("selectedKeyword", keyword);
-         request.setAttribute("selectedBrand", brandId);
-         request.setAttribute("selectedStatus", status);
-         request.setAttribute("selectedType", typeId);
-         request.setAttribute("selectedSortBy", sortBy);
- 
-         request.getRequestDispatcher("Productlistmkt.jsp").forward(request, response);
-     }
- 
-     /** 
-      * Handles the HTTP <code>POST</code> method.
-      * @param request servlet request
-      * @param response servlet response
-      * @throws ServletException if a servlet-specific error occurs
-      * @throws IOException if an I/O error occurs
-      */
-     @Override
-     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-     throws ServletException, IOException {
-         processRequest(request, response);
-     }
+            throws ServletException, IOException {
+
+        BrandDAO brandDAO = new BrandDAO();
+        CategoryDAO categoryDAO = new CategoryDAO();
+        ProductDAO productDAO = new ProductDAO();
+
+        List<Brand> brandList = brandDAO.getAllBrands();
+        List<Category> categoryList = categoryDAO.getAllCategories();
+        List<Product> allProducts = productDAO.getAllProductmkt();
+
+        // Lấy các tham số từ request
+        String keyword = request.getParameter("keyword");
+        String brandId = request.getParameter("brand");
+        String status = request.getParameter("status");
+        String typeId = request.getParameter("type");
+        String sortBy = request.getParameter("sortBy");
+
+        String filterParams = "keyword=" + (keyword != null ? keyword : "")
+                + "&brand=" + (brandId != null ? brandId : "")
+                + "&status=" + (status != null ? status : "")
+                + "&type=" + (typeId != null ? typeId : "")
+                + "&sortBy=" + (sortBy != null ? sortBy : "");
+        HttpSession session = request.getSession();
+        String previousFilters = (String) session.getAttribute("previousFilters");
+
+        boolean isFiltering = previousFilters != null && !previousFilters.equals(filterParams);
+        session.setAttribute("previousFilters", filterParams); // Cập nhật bộ lọc mới vào session
+        // Lọc sản phẩm
+        List<Product> filteredProducts = new ArrayList<>(allProducts);
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            filteredProducts.removeIf(p -> !p.getName().toLowerCase().contains(keyword.toLowerCase()));
+        }
+
+        if (brandId != null && !brandId.isEmpty()) {
+            filteredProducts.removeIf(p -> !p.getBrandId().equals(brandId));
+        }
+
+        if (status != null && !status.isEmpty()) {
+            filteredProducts.removeIf(p -> !String.valueOf(p.isStatus()).equals(status));
+        }
+
+        if (typeId != null && !typeId.isEmpty()) {
+            filteredProducts.removeIf(p -> !String.valueOf(p.getTypeId()).equals(typeId));
+        }
+
+        // Sắp xếp danh sách
+        if (sortBy != null) {
+            switch (sortBy) {
+                case "price_asc":
+                    filteredProducts.sort(Comparator.comparingDouble(Product::getPrice));
+                    break;
+                case "price_desc":
+                    filteredProducts.sort(Comparator.comparingDouble(Product::getPrice).reversed());
+                    break;
+                case "created_at":
+                    filteredProducts.sort(Comparator.comparingInt(Product::getId).reversed());
+                    break;
+            }
+        }
+
+        int page = 1;
+        int pageSize = 8;
+        String pageParam = request.getParameter("page");
+
+        if (!isFiltering) {
+            if (pageParam != null) {
+                try {
+                    page = Integer.parseInt(pageParam);
+                } catch (NumberFormatException e) {
+                    page = 1;
+                }
+            }
+        }
+
+        int totalProducts = filteredProducts.size();
+        int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, totalProducts);
+
+        if (start >= totalProducts) {
+            start = Math.max(0, totalProducts - pageSize);
+        }
+        List<Product> paginatedList = filteredProducts.subList(start, end);
+
+        for (Product product : paginatedList) {
+            product.setBrandName(brandDAO.getBrandById(product.getBrandId()).getName());
+            product.setTypeName(categoryDAO.getCategoryById(product.getTypeId()).getName());
+        }
+
+        // Gửi dữ liệu sang JSP
+        request.setAttribute("brandList", brandList);
+        request.setAttribute("categoryList", categoryList);
+        request.setAttribute("productlist", paginatedList);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+
+        // Lưu lại các giá trị lọc vào request
+        request.setAttribute("selectedKeyword", keyword);
+        request.setAttribute("selectedBrand", brandId);
+        request.setAttribute("selectedStatus", status);
+        request.setAttribute("selectedType", typeId);
+        request.setAttribute("selectedSortBy", sortBy);
+
+        request.getRequestDispatcher("Productlistmkt.jsp").forward(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        String action = request.getParameter("action");
+        HttpSession session = request.getSession();
+        Account user = (Account) session.getAttribute("u");
+
+        try {
+            ProductDAO productDAO = new ProductDAO();
+            if ("update".equals(action)) {
+                int productId = Integer.parseInt(request.getParameter("product_id"));
+                int selectedColorId = Integer.parseInt(request.getParameter("selectedColorId"));
+                String name = request.getParameter("name");
+                int categoryId = Integer.parseInt(request.getParameter("category"));
+                String brandId = request.getParameter("brand");
+                double price = Double.parseDouble(request.getParameter("price"));
+                boolean status = Boolean.parseBoolean(request.getParameter("status"));
+                int materialID = Integer.parseInt(request.getParameter("material"));
+                String detail = request.getParameter("detail");
+                String url = request.getParameter("img");
+                String urlm = request.getParameter("imgm");
+
+                Product product = new Product(productId, name, materialID, price, detail, brandId, categoryId, status);
+                if (user.getRoleID() == 1) {
+                    productDAO.updateProduct(product);
+                    productDAO.updateProductImage(url, urlm, productId, selectedColorId);
+                }
+
+                Map<String, Object> changes = new HashMap<>();
+                changes.put("name", name);
+                changes.put("categoryId", categoryId);
+                changes.put("brandId", brandId);
+                changes.put("price", price);
+                changes.put("status", status);
+                changes.put("materialID", materialID);
+                changes.put("detail", detail);
+                changes.put("url", url);
+                changes.put("urlm", urlm);
+                changes.put("color", selectedColorId);
+                List<Map<String, Integer>> sizesList = new ArrayList<>();
+                String[] sizeIds = request.getParameterValues("sizeIds");
+                String[] quantities = request.getParameterValues("quantities");
+
+                if (sizeIds != null && quantities != null) {
+                    for (int i = 0; i < sizeIds.length; i++) {
+                        int sizeId = Integer.parseInt(sizeIds[i]);
+                        int quantity = Integer.parseInt(quantities[i]);
+                        if (user.getRoleID() == 1) {
+                            productDAO.updateProductSize(productId, selectedColorId, sizeId, quantity);
+                            session.setAttribute("message", "Cập nhật thành công!");
+                        }
+                        if (user.getRoleID() == 2) {
+                            Map<String, Integer> sizeObj = new HashMap<>();
+                            sizeObj.put("sizeId", Integer.parseInt(sizeIds[i]));
+                            sizeObj.put("quantity", Integer.parseInt(quantities[i]));
+                            sizesList.add(sizeObj);
+                        }
+                    }
+                }
+                changes.put("sizes", sizesList);
+                if (user.getRoleID() == 2) {
+                    productDAO.savePendingUpdate(action, productId, user.getId(), (HashMap<String, Object>) changes);
+                    session.setAttribute("message", "Gửi đơn thành công!");
+                }
+                response.sendRedirect("Productdetailmkt.jsp?id=" + productId);
+            } else if ("addcolor".equals(action)) {
+                int productId = Integer.parseInt(request.getParameter("product_id"));
+                int colorName = Integer.parseInt(request.getParameter("colorName"));
+                String imageLink = request.getParameter("imageLink");
+
+                if (user.getRoleID() == 1) {
+                    productDAO.addProductColor(productId, colorName, imageLink);
+                }
+                int[] sizeIds = {1, 2, 3, 4}; // Danh sách size có thể chọn
+                Map<String, Object> changes = new HashMap<>();
+                changes.put("color", colorName);
+                changes.put("urlm", imageLink);
+                List<Map<String, Integer>> sizesList = new ArrayList<>();
+                for (int sizeId : sizeIds) {
+                    String quantityStr = request.getParameter("sizeQuantities[" + sizeId + "]");
+
+                    if (quantityStr != null && !quantityStr.isEmpty()) {
+                        int quantity = Integer.parseInt(quantityStr);
+                        if (quantity > 0) {
+                            if (user.getRoleID() == 1) {
+                                // Nếu là Admin, cập nhật trực tiếp vào DB
+                                productDAO.addProductSize(productId, colorName, sizeId, quantity);
+                            } else if (user.getRoleID() == 2) {
+                                // Nếu là nhân viên marketing, lưu thay đổi để duyệt sau
+                                Map<String, Integer> sizeObj = new HashMap<>();
+                                sizeObj.put("sizeId", sizeId);
+                                sizeObj.put("quantity", quantity);
+                                sizesList.add(sizeObj);
+                            }
+                        }
+                    }
+                }
+                if (user.getRoleID() == 2) {
+                    changes.put("sizes", sizesList);
+                    productDAO.savePendingUpdate("addColor", productId, user.getId(), (HashMap<String, Object>) changes);
+                    session.setAttribute("message", "Gửi đơn thành công!");
+                } else {
+                    session.setAttribute("message", "Cập nhật thành công!");
+                }
+                response.sendRedirect("Productdetailmkt.jsp?id=" + productId);
+            } else if (action.equals("deleteProduct")) {
+                int productId = Integer.parseInt(request.getParameter("id"));
+                int userId = user.getId();
+                if (user.getRoleID() == 1) {
+                    productDAO.deleteProduct(productId, userId);
+                    session.setAttribute("message", "Xoa thành công!");
+                } else if (user.getRoleID() == 2) {
+                    productDAO.savePendingUpdate("delete", productId, userId, null);
+                    session.setAttribute("message", "Gửi đơn thành công!");
+                }
+                 response.sendRedirect("productlistsevlet");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu.");
+        }
+    }
  
      /** 
       * Returns a short description of the servlet.

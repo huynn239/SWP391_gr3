@@ -19,7 +19,16 @@
     </servlet>
     <servlet>
         <servlet-name>blogListController</servlet-name>
-        <servlet-class>controller.BlogListController</servlet-class> <!-- Sửa thành controller.BlogListController -->
+        <servlet-class>controller.BlogListController</servlet-class>
+        <!-- Sửa thành controller.BlogListController -->
+    </servlet>
+    <servlet>
+        <servlet-name>Approverequest</servlet-name>
+        <servlet-class>controller.Approverequest</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ApproveRequest</servlet-name>
+        <servlet-class>controller.ApproveRequest</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>blogListController</servlet-name>
@@ -117,6 +126,10 @@
     <servlet-mapping>
         <servlet-name>ProductlistSevlet</servlet-name>
         <url-pattern>/productlistsevlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ApproveRequest</servlet-name>
+        <url-pattern>/approverequest</url-pattern>
     </servlet-mapping>
     <error-page>
         <error-code>404</error-code>
