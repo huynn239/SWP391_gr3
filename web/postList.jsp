@@ -1,12 +1,5 @@
-<%-- 
-    Document   : postList
-    Created on : 20 tháng 3, 2025
-    Author     : Grok 3 (hỗ trợ)
---%>
-
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +30,7 @@
             border-collapse: collapse;
             background: #fff;
             border-radius: 8px;
+            margin-bottom: 30px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .management-table th, .management-table td {
@@ -96,7 +90,6 @@
             height: auto;
             border-radius: 4px;
         }
-        /* CSS cho modal */
         .modal-body img {
             max-width: 100%;
             height: auto;
@@ -120,7 +113,8 @@
             <div class="search-bar">
                 <form action="postList" method="GET" style="flex-grow: 1; display: flex; gap: 10px;">
                     <input type="text" name="keyword" value="${keyword}" placeholder="Tìm kiếm theo tiêu đề, nội dung hoặc tác giả..." class="form-control" style="flex-grow: 1;">
-                    <button type="submit" class="btn btn-primary action-btn"><i class="fa fa-search"></i> Search</button>
+                    <button type="submit" class="btn btn-primary action-btn" style="
+    margin-top: 0"><i class="fa fa-search"></i> Search</button>
                     <c:if test="${not empty categoryParam}">
                         <input type="hidden" name="category" value="${categoryParam}">
                     </c:if>
@@ -176,16 +170,16 @@
                                 <c:forEach var="blog" items="${blogs}">
                                     <tr>
                                         <td>${blog.id}</td>
-                                        <td>${blog.title}</td>
+                                        <td><a href="postList?filterTitle=${blog.title}">${blog.title}</a></td>
                                         <td><img src="${blog.blogImage}" alt="${blog.title}" class="thumbnail-img"></td>
-                                        <td>${blog.author}</td>
+                                        <td><a href="postList?filterAuthor=${blog.author}">${blog.author}</a></td>
                                         <td>${blog.uploadDate}</td>
-                                        <td>${blog.categoryName}</td>
+                                        <td><a href="postList?category=${blog.cateID}">${blog.categoryName}</a></td>
                                         <td>
                                             <button class="btn btn-info btn-sm action-btn view-detail" data-id="${blog.id}" data-toggle="modal" data-target="#postDetailModal">
                                                 <i class="fa fa-eye"></i> Xem chi tiết
                                             </button>
-                                            <a href="editPost.jsp?id=${blog.id}" class="btn btn-warning btn-sm action-btn"><i class="fa fa-edit"></i> Chỉnh Sửa</a>
+                                            <a href="editPost?id=${blog.id}" class="btn btn-warning btn-sm action-btn"><i class="fa fa-edit"></i> Chỉnh Sửa</a>
                                             <a href="deletePost?id=${blog.id}" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Bạn có chắc muốn xóa bài viết này?')"><i class="fa fa-trash"></i> Xóa</a>
                                         </td>
                                     </tr>
@@ -199,7 +193,7 @@
             <!-- Pagination -->
             <div class="pagination">
                 <c:if test="${currentPage > 1}">
-                    <a class="page-link" href="postList?page=${currentPage - 1}<c:if test='${not empty sortBy}'>&sortBy=${sortBy}</c:if><c:if test='${not empty sortOrder}'>&sortOrder=${sortOrder}</c:if><c:if test='${not empty keyword}'>&keyword=${keyword}</c:if><c:if test='${not empty categoryParam}'>&category=${categoryParam}</c:if>">Trước</a>
+                    <a class="page-link" href="postList?page=${currentPage - 1}&sortBy=${sortBy}&sortOrder=${sortOrder}<c:if test='${not empty keyword}'>&keyword=${keyword}</c:if><c:if test='${not empty categoryParam}'>&category=${categoryParam}</c:if><c:if test='${not empty filterTitle}'>&filterTitle=${filterTitle}</c:if><c:if test='${not empty filterAuthor}'>&filterAuthor=${filterAuthor}</c:if>">Back</a>
                 </c:if>
 
                 <c:forEach var="i" begin="1" end="${totalPages}">
@@ -208,13 +202,13 @@
                             <span class="page-link active">${i}</span>
                         </c:when>
                         <c:otherwise>
-                            <a class="page-link" href="postList?page=${i}<c:if test='${not empty sortBy}'>&sortBy=${sortBy}</c:if><c:if test='${not empty sortOrder}'>&sortOrder=${sortOrder}</c:if><c:if test='${not empty keyword}'>&keyword=${keyword}</c:if><c:if test='${not empty categoryParam}'>&category=${categoryParam}</c:if>">${i}</a>
+                            <a class="page-link" href="postList?page=${i}&sortBy=${sortBy}&sortOrder=${sortOrder}<c:if test='${not empty keyword}'>&keyword=${keyword}</c:if><c:if test='${not empty categoryParam}'>&category=${categoryParam}</c:if><c:if test='${not empty filterTitle}'>&filterTitle=${filterTitle}</c:if><c:if test='${not empty filterAuthor}'>&filterAuthor=${filterAuthor}</c:if>">${i}</a>
                         </c:otherwise>
                     </c:choose>
                 </c:forEach>
 
                 <c:if test="${currentPage < totalPages}">
-                    <a class="page-link" href="postList?page=${currentPage + 1}<c:if test='${not empty sortBy}'>&sortBy=${sortBy}</c:if><c:if test='${not empty sortOrder}'>&sortOrder=${sortOrder}</c:if><c:if test='${not empty keyword}'>&keyword=${keyword}</c:if><c:if test='${not empty categoryParam}'>&category=${categoryParam}</c:if>">Tiếp</a>
+                    <a class="page-link" href="postList?page=${currentPage + 1}&sortBy=${sortBy}&sortOrder=${sortOrder}<c:if test='${not empty keyword}'>&keyword=${keyword}</c:if><c:if test='${not empty categoryParam}'>&category=${categoryParam}</c:if><c:if test='${not empty filterTitle}'>&filterTitle=${filterTitle}</c:if><c:if test='${not empty filterAuthor}'>&filterAuthor=${filterAuthor}</c:if>">Next</a>
                 </c:if>
             </div>
 
@@ -225,7 +219,7 @@
                         <div class="modal-header">
                             <h5 class="modal-title" id="postDetailModalLabel">Chi tiết bài viết</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                                <span aria-hidden="true">×</span>
                             </button>
                         </div>
                         <div class="modal-body">

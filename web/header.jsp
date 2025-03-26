@@ -63,6 +63,7 @@
                                     <li><a href="FeedbackListControllerServlet" class="active">Feedback List</a></li>
                                     <li><a href="productlistsevlet" class="active">ProductList</a></li>
                                      <li><a href="mkt.jsp">Marketing Dashboards</a></li>
+                                        <li><a href="sliderList">Slider List</a></li>
                                       <li><a href="postList">Post Manager</a></li>
                                     <li><a href="contact-us.html">Contact</a></li>
                                 </ul>

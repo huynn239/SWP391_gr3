@@ -164,6 +164,19 @@ public class SliderDAO {
         }
         return false;
     }
+    public int getCountByDate(String date) {
+    String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[slider] WHERE CONVERT(date, created_at) = ?";
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, date);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 
     public boolean deleteSlider(int id) {
         String sql = "DELETE FROM Slider WHERE id = ?";

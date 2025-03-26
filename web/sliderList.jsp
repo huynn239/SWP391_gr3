@@ -487,31 +487,7 @@
                     </div>
                 </div>
             </div>
-            <script>
-                function openCartModal(id, name, price) {
-                    console.log("Opening Modal for Product:", id, name, price); // Debug để kiểm tra dữ liệu
-                    document.getElementById("productId").value = id;
-                    document.getElementById("productName").innerText = name;
-                    document.getElementById("productPrice").innerText = price;
-
-                    document.querySelector("input[name='price']").value = price;
-
-                    document.getElementById("cartModal").style.display = "flex";
-                }
-
-                function closeCartModal() {
-                    document.getElementById("cartModal").style.display = "none";
-                }
-
-
-                window.onclick = function (event) {
-                    let modal = document.getElementById("cartModal");
-                    if (event.target === modal) {
-                        closeCartModal();
-                    }
-                };
-
-            </script>
+           
         </footer><!--/Footer-->
 
         <script src="js/jquery.js"></script>

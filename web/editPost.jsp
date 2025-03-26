@@ -2,11 +2,18 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
-    <title>Thêm Bài Viết Mới</title>
+    <title>Chỉnh Sửa Bài Viết</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <link href="css/responsive.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            background-color: #f4f7fa;
         }
         .form-container {
             max-width: 600px;
@@ -14,6 +21,8 @@
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .form-group {
             margin-bottom: 15px;
@@ -21,64 +30,82 @@
         label {
             display: block;
             margin-bottom: 5px;
+            font-weight: bold;
         }
         input, textarea, select {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         .error {
             color: red;
             margin-bottom: 10px;
+            text-align: center;
         }
         button {
             padding: 10px 20px;
-            background-color: #4CAF50;
+            background-color: #007bff;
             color: white;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
+        }
+        .back-btn {
+            background-color: #dc3545;
+        }
+        .back-btn:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 <body>
-     <jsp:include page="header.jsp"></jsp:include>
+        <jsp:include page="header.jsp"></jsp:include>
     <div class="form-container">
-        <h2>Add new post</h2>
+        <h2>Edit Post</h2>
 
         <c:if test="${not empty error}">
             <div class="error">${error}</div>
         </c:if>
 
-        <form action="addPost" method="post" enctype="multipart/form-data">
+        <form action="editPost" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="${blog.id}">
+            
             <div class="form-group">
                 <label for="title">Title:</label>
-                <input type="text" id="title" name="title" required>
+                <input type="text" id="title" name="title" value="${blog.title}" required>
             </div>
             <div class="form-group">
                 <label for="content">Content:</label>
-                <textarea id="content" name="content" rows="5" required></textarea>
+                <textarea id="content" name="content" rows="5" required>${blog.content}</textarea>
             </div>
             <div class="form-group">
                 <label for="blogImage">Image:</label>
+                <c:if test="${not empty blog.blogImage}">
+                    <img src="${blog.blogImage}" alt="${blog.title}" style="max-width: 100px; height: auto; border-radius: 4px;">
+                </c:if>
                 <input type="file" id="blogImage" name="blogImage" accept="image/*">
             </div>
             <div class="form-group">
                 <label for="category">Categories:</label>
                 <select id="category" name="category" required>
-                    <option value="">Select categories</option>
+                    <option value="">Select Categories</option>
                     <c:forEach var="category" items="${blogCategories}">
-                        <option value="${category.id}">${category.name}</option>
+                        <option value="${category.id}" <c:if test="${category.id == blog.cateID}">selected</c:if>>${category.name}</option>
                     </c:forEach>
                 </select>
             </div>
-            <button type="submit">Add new Post</button>
-            <a href="postList">Back</a>
+            <div style="display: flex; justify-content: space-between;">
+                <button type="submit">Update</button>
+                <a href="postList" class="btn back-btn">Back</a>
+            </div>
         </form>
     </div>
-      <footer id="footer">
+              <footer id="footer">
         <div class="footer-top">
             <div class="container">
                 <div class="row">
@@ -209,5 +236,8 @@
             filebrowserUploadMethod: 'form'
         });
     </script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

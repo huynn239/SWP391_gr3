@@ -2,7 +2,6 @@ package controller;
 
 import dto.BlogDAO;
 import model.Blog;
-import model.Category;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -15,12 +14,13 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
+import model.Category;
 
-@WebServlet(name = "AddPostController", urlPatterns = {"/addPost"})
+@WebServlet(name = "UpdatePostController", urlPatterns = {"/editPost"})
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
                  maxFileSize = 1024 * 1024 * 10,      // 10MB
                  maxRequestSize = 1024 * 1024 * 50)   // 50MB
-public class AddPostController extends HttpServlet {
+public class UpdatePostController extends HttpServlet {
 
     private BlogDAO blogDAO;
 
@@ -32,21 +32,31 @@ public class AddPostController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy danh sách danh mục để hiển thị trong form
-        List<Category> blogCategories = blogDAO.getAllBlogCategories();
-        request.setAttribute("blogCategories", blogCategories);
+        String id = request.getParameter("id");
+        if (id == null || id.trim().isEmpty()) {
+            response.sendRedirect("postList");
+            return;
+        }
 
-        request.getRequestDispatcher("addPost.jsp").forward(request, response);
+        Blog blog = blogDAO.getBlogById(id);
+        if (blog == null) {
+            response.sendRedirect("postList");
+            return;
+        }
+
+        List<Category> blogCategories = blogDAO.getAllBlogCategories();
+        request.setAttribute("blog", blog);
+        request.setAttribute("blogCategories", blogCategories);
+        request.getRequestDispatcher("editPost.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy thông tin từ form
+        String id = request.getParameter("id");
         String title = request.getParameter("title");
         String content = request.getParameter("content");
         String categoryStr = request.getParameter("category");
-        String userId = "1"; // Giả sử userId mặc định là 1
 
         // Xử lý file ảnh
         Part filePart = request.getPart("blogImage");
@@ -62,7 +72,7 @@ public class AddPostController extends HttpServlet {
         }
 
         // Kiểm tra dữ liệu đầu vào
-        if (title == null || title.trim().isEmpty() || content == null || content.trim().isEmpty() || categoryStr == null) {
+        if (id == null || title == null || title.trim().isEmpty() || content == null || content.trim().isEmpty() || categoryStr == null) {
             request.setAttribute("error", "Vui lòng điền đầy đủ các trường bắt buộc.");
             doGet(request, response);
             return;
@@ -70,23 +80,28 @@ public class AddPostController extends HttpServlet {
 
         try {
             int categoryId = Integer.parseInt(categoryStr);
+            Blog blog = blogDAO.getBlogById(id);
+            if (blog == null) {
+                response.sendRedirect("postList");
+                return;
+            }
 
-            // Tạo đối tượng Blog mới
-            Blog newBlog = new Blog();
-            newBlog.setTitle(title);
-            newBlog.setContent(content);
-            newBlog.setBlogImage(fileName); // Lưu đường dẫn ảnh
-            newBlog.setUploadDate(new Date(System.currentTimeMillis())); // Ngày hiện tại
-            newBlog.setAuthor("admin"); // Giả sử author mặc định
-            newBlog.setCateID(categoryId);
+            // Cập nhật thông tin blog
+            blog.setTitle(title);
+            blog.setContent(content);
+            blog.setCateID(categoryId);
+            if (fileName != null) {
+                blog.setBlogImage(fileName); // Chỉ cập nhật ảnh nếu có file mới
+            }
 
-            // Thêm blog vào database
-            boolean success = blogDAO.addBlog(newBlog, userId);
+            boolean success = blogDAO.updateBlog(blog);
             if (success) {
                 response.sendRedirect("postList");
             } else {
-                request.setAttribute("error", "Có lỗi xảy ra khi thêm bài viết.");
-                doGet(request, response);
+                request.setAttribute("error", "Có lỗi xảy ra khi cập nhật bài viết.");
+                request.setAttribute("blog", blog);
+                request.setAttribute("blogCategories", blogDAO.getAllBlogCategories());
+                request.getRequestDispatcher("editPost.jsp").forward(request, response);
             }
         } catch (NumberFormatException e) {
             request.setAttribute("error", "Danh mục không hợp lệ.");

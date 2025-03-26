@@ -1,8 +1,4 @@
-<%-- 
-    Document   : mkt_dashboard
-    Created on : 19 tháng 3, 2025
-    Author     : Grok 3 (hỗ trợ)
---%>
+
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="dto.SliderDAO, dto.ProductDAO, dto.BlogDAO, dto.FeedbackDAO"%>
@@ -12,7 +8,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Bảng Điều Khiển Marketing - Thống Kê</title>
+    <title>Marketing Dashboard</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome cho biểu tượng -->
@@ -101,24 +97,7 @@
 </head>
 <body>
     <div class="dashboard-container">
-        <h1><i class="fas fa-chart-line me-2"></i> Bảng Điều Khiển Marketing - Thống Kê</h1>
-
-       
-        <div class="date-form">
-            <form method="get" action="mkt_dashboard.jsp" class="d-flex gap-3 align-items-center">
-                <div>
-                    <label for="startDate" class="form-label">Ngày Bắt Đầu:</label>
-                    <input type="date" id="startDate" name="startDate" class="form-control" 
-                           value="<%= request.getParameter("startDate") != null ? request.getParameter("startDate") : getDefaultStartDate() %>">
-                </div>
-                <div>
-                    <label for="endDate" class="form-label">Ngày Kết Thúc:</label>
-                    <input type="date" id="endDate" name="endDate" class="form-control" 
-                           value="<%= request.getParameter("endDate") != null ? request.getParameter("endDate") : getDefaultEndDate() %>">
-                </div>
-                <button type="submit" class="btn btn-primary">Cập Nhật</button>
-            </form>
-        </div>
+        <h1><i class="fas fa-chart-line me-2"></i>Marketing Dashboard</h1>
 
         <%-- Phần Thống Kê --%>
         <div class="stats-section">
@@ -168,10 +147,10 @@
             </div>
         </div>
 
-        <%-- Xu Hướng Khách Hàng Mới --%>
+        <%-- Xu Hướng Số Lượng Tăng Giảm --%>
         <div class="trend-section">
-            <h2><i class="fas fa-users me-2"></i> Xu Hướng Khách Hàng Mới Theo Ngày</h2>
-            <canvas id="customerTrendChart" height="100"></canvas>
+            <h2><i class="fas fa-chart-area me-2"></i> Xu Hướng Số Lượng Tăng Giảm Theo Ngày</h2>
+            <canvas id="trendChart" height="100"></canvas>
             <%
                 String startDateStr = request.getParameter("startDate");
                 String endDateStr = request.getParameter("endDate");
@@ -179,7 +158,7 @@
                 Calendar startCal = Calendar.getInstance();
                 Calendar endCal = Calendar.getInstance();
 
-                // Mặc định 7 ngày qua
+                
                 if (startDateStr == null || endDateStr == null) {
                     endCal.setTime(new java.util.Date());
                     startCal.setTime(new java.util.Date());
@@ -190,29 +169,64 @@
                 }
 
                 List<String> dates = new ArrayList<>();
-                List<Integer> customerCounts = new ArrayList<>();
+                List<Integer> productCounts = new ArrayList<>();
+                List<Integer> blogCounts = new ArrayList<>();
+                List<Integer> feedbackCounts = new ArrayList<>();
+                List<Integer> sliderCounts = new ArrayList<>();
+
                 while (!startCal.after(endCal)) {
                     String currentDate = sdf.format(startCal.getTime());
-                    int newCustomers = getNewCustomersByDate(currentDate);
                     dates.add(currentDate);
-                    customerCounts.add(newCustomers);
+                    
+                    // Lấy số lượng theo ngày
+                    productCounts.add(getCountByDate(productDAO, currentDate, "product"));
+                    blogCounts.add(getCountByDate(blogDAO, currentDate, "blog"));
+                    feedbackCounts.add(getCountByDate(feedbackDAO, currentDate, "feedback"));
+                    sliderCounts.add(getCountByDate(sliderDAO, currentDate, "slider"));
+                    
                     startCal.add(Calendar.DAY_OF_MONTH, 1);
                 }
             %>
             <script>
-                const ctx = document.getElementById('customerTrendChart').getContext('2d');
-                const customerTrendChart = new Chart(ctx, {
+                const ctx = document.getElementById('trendChart').getContext('2d');
+                const trendChart = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: <%= new com.google.gson.Gson().toJson(dates) %>,
-                        datasets: [{
-                            label: 'Khách Hàng Mới',
-                            data: <%= new com.google.gson.Gson().toJson(customerCounts) %>,
-                            borderColor: '#007bff',
-                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        }]
+                        datasets: [
+                            {
+                                label: 'Sản Phẩm',
+                                data: <%= new com.google.gson.Gson().toJson(productCounts) %>,
+                                borderColor: '#007bff',
+                                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Bài Viết',
+                                data: <%= new com.google.gson.Gson().toJson(blogCounts) %>,
+                                borderColor: '#28a745',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Phản Hồi',
+                                data: <%= new com.google.gson.Gson().toJson(feedbackCounts) %>,
+                                borderColor: '#dc3545',
+                                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Slider',
+                                data: <%= new com.google.gson.Gson().toJson(sliderCounts) %>,
+                                borderColor: '#ffc107',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
                     },
                     options: {
                         scales: {
@@ -242,9 +256,18 @@
             return sdf.format(new java.util.Date());
         }
 
-        private int getNewCustomersByDate(String date) {
-            // Giả lập - thay bằng CustomerDAO thực tế
-            return (int) (Math.random() * 10);
+        private int getCountByDate(Object dao, String date, String type) {
+            // Thay bằng logic thực tế từ DAO
+            if ("product".equals(type)) {
+                return ((ProductDAO) dao).getCountByDate(date); // Cần thêm phương thức này trong ProductDAO
+            } else if ("blog".equals(type)) {
+                return ((BlogDAO) dao).getCountByDate(date);    // Cần thêm phương thức này trong BlogDAO
+            } else if ("feedback".equals(type)) {
+                return ((FeedbackDAO) dao).getCountByDate(date); // Cần thêm phương thức này trong FeedbackDAO
+            } else if ("slider".equals(type)) {
+                return ((SliderDAO) dao).getCountByDate(date);  // Cần thêm phương thức này trong SliderDAO
+            }
+            return 0; // Mặc định
         }
     %>
     <!-- Bootstrap JS -->

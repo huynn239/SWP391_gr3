@@ -263,6 +263,49 @@ public class BlogDAO extends DBContext {
         }
         return category;
     }
+    public boolean updateBlog(Blog blog) {
+        String sql = "UPDATE [shopOnline].[dbo].[blog] SET Title = ?, Content = ?, BlogImage = ?, CateID = ? WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, blog.getTitle());
+            stmt.setString(2, blog.getContent());
+            stmt.setString(3, blog.getBlogImage());
+            stmt.setInt(4, blog.getCateID());
+            stmt.setString(5, blog.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Xóa bài viết
+    public boolean deleteBlog(String id) {
+        String sql = "DELETE FROM [shopOnline].[dbo].[blog] WHERE ID = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, id);
+
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public int getCountByDate(String date) {
+    String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[blog] WHERE CONVERT(date, UploadDate) = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, date);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 
     public static void main(String[] args) {
         BlogDAO blogDAO = new BlogDAO();

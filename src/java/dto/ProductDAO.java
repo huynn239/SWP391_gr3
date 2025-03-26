@@ -534,4 +534,17 @@ public class ProductDAO extends DBContext {
             e.printStackTrace();
         }
     }
+     public int getCountByDate(String date) {
+    String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[product] WHERE CONVERT(date, created_date) = ?";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setString(1, date);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return 0;
+}
 }
