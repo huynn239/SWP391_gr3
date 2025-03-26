@@ -32,8 +32,7 @@ public class FeedbackDAO extends DBContext {
                         rs.getInt("RatedStar"),
                         rs.getString("Comment"),
                         rs.getInt("ProductID"),
-                        rs.getInt("UsersID"),
-                        rs.getString("ProductName")
+                        rs.getInt("UsersID")
                 );
                 feedbackList.add(feedback);
             }
@@ -46,7 +45,7 @@ public class FeedbackDAO extends DBContext {
 
     public Feedback getFeedbackById(int feedbackId) throws SQLException {
         String query = """
-        SELECT f.ID, f.RatedStar, f.Comment, f.ProductID, f.UsersID, f.Status, 
+        SELECT f.ID, f.RatedStar, f.Comment, f.ProductID, f.UsersID, 
                f.FullName, f.Email, f.Mobile, p.Name AS ProductName
         FROM feedback f
         JOIN Product p ON f.ProductID = p.ID
@@ -62,11 +61,9 @@ public class FeedbackDAO extends DBContext {
                         rs.getString("Comment"),
                         rs.getInt("ProductID"),
                         rs.getInt("UsersID"),
-                        rs.getString("ProductName"),
                         rs.getString("FullName"),
                         rs.getString("Email"),
-                        rs.getString("Mobile"),
-                        rs.getString("Status")
+                        rs.getString("Mobile")
                 );
             }
         }
@@ -84,7 +81,7 @@ public class FeedbackDAO extends DBContext {
     public List<Feedback> getFeedbacksByProductId(int productId) throws SQLException {
     List<Feedback> feedbackList = new ArrayList<>();
     String query = """
-        SELECT f.ID, f.RatedStar, f.Comment, f.ProductID, f.UsersID, f.Status, 
+        SELECT f.ID, f.RatedStar, f.Comment, f.ProductID, f.UsersID, 
                f.FullName, f.Email, f.Mobile, p.Name AS ProductName
         FROM feedback f
         JOIN Product p ON f.ProductID = p.ID
@@ -102,11 +99,9 @@ public class FeedbackDAO extends DBContext {
                     rs.getString("Comment"),
                     rs.getInt("ProductID"),
                     rs.getInt("UsersID"),
-                    rs.getString("ProductName"),
                     rs.getString("FullName"),
                     rs.getString("Email"),
-                    rs.getString("Mobile"),
-                    rs.getString("Status")
+                    rs.getString("Mobile")
                 );
                 feedbackList.add(feedback);
             }
@@ -117,14 +112,30 @@ public class FeedbackDAO extends DBContext {
     }
     return feedbackList;
 }
-
-    public static void main(String[] args) {
-        try {
-            FeedbackDAO dao = new FeedbackDAO();
-            boolean feedbacks = dao.updateFeedbackStatus(13, "Đã duyệt");
-
-        } catch (Exception e) {
+    public boolean addFeedback(Feedback feedback) {
+        String sql = "INSERT INTO Feedback (ProductID, UsersID, FullName, Email, Mobile, Comment, RatedStar) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, feedback.getProductId());
+            stmt.setInt(2, feedback.getUserId());
+            stmt.setString(3, feedback.getFullName());
+            stmt.setString(4, feedback.getEmail());
+            stmt.setString(5, feedback.getMobile());
+            stmt.setString(6, feedback.getComment());
+            stmt.setInt(7, feedback.getRatedStar());
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Feedback inserted successfully for productId: " + feedback.getProductId());
+                return true;
+            } else {
+                System.out.println("No rows affected when inserting feedback for productId: " + feedback.getProductId());
+                return false;
+            }
+        } catch (SQLException e) {
+            System.err.println("Error in addFeedback: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
     }
     

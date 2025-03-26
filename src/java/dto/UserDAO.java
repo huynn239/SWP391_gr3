@@ -342,5 +342,18 @@ public class UserDAO extends DBContext {
     }
     return false;
     }
+    
+    public boolean userExists(int userId) {
+        String sql = "SELECT ID FROM [shopOnline].[dbo].[users] WHERE ID = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next(); // Trả về true nếu userId tồn tại
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 }

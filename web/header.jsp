@@ -36,7 +36,7 @@
                                         <li><a href="changepassword"><i class="fa fa-user"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 1}">
-                                        <li><a href="UserControllerServlet"><i class="fa fa-star"></i> Admin</a></li>
+                                        <li><a href="admin.jsp"><i class="fa fa-star"></i> Admin</a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 2}">
                                         <li><a href="sliderList"><i class="fa fa-star"></i> Marketing </a></li>

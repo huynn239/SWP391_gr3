@@ -34,6 +34,9 @@
             product = productDAO.getProductById(productId);
             feedbacks = feedbackDAO.getFeedbacksByProductId(productId);
             productImages = productimageDAO.getImagesByProductId(productId); // Lấy ảnh theo productId
+            if (product != null) {
+                    session.setAttribute("product", product); // Lưu vào session để sử dụng lại sau này
+                }
             request.setAttribute("feedbacks", feedbacks);
         } catch (NumberFormatException e) {
             out.println("<p>Invalid product ID format!</p>");
@@ -44,24 +47,32 @@
             return;
         }
     }
+            
+        if (product == null) {
+       product = (Product) session.getAttribute("product");
+   }
 
-    if (product == null) {
-        out.println("<p>Product not found!</p>");
-        return;
-    }
-
+   if (product == null) {
+       out.println("<p style='color: red;'>Product not found!</p>");
+       return;
+   } else {
+       session.setAttribute("product", product); 
+   }
+    
     Brand brand = brandDAO.getBrandById(product.getBrandId());
     List<Color> colors = colorDAO.getAllColors();
     Category category = categoryDAO.getCategoryById(product.getTypeId());
     List<Category> categories = categoryDAO.getAllCategories();
     Material material = materialDAO.getMaterialById(product.getMaterialId());
     Account user = (Account) session.getAttribute("u");
-
+        if (user == null) {
+                out.println("<p style='color: red;'>Bạn chưa đăng nhập!</p>");
+                return;
+}
     Gson gson = new Gson();
     String productImagesJson = gson.toJson(productImages);
     String colorsJson = gson.toJson(colors);
 %>
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -367,7 +378,6 @@
                                                     <div class="feedback-item" style="margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
                                                         <ul>
                                                             <li><a href="#"><i class="fa fa-user"></i>${feedback.fullName != null ? feedback.fullName : 'Ẩn danh'}</a></li>
-                                                            <li><a href="#"><i class="fa fa-clock-o"></i>${feedback.status}</a></li>
                                                             <li><a href="#"><i class="fa fa-calendar-o"></i>N/A</a></li>
                                                         </ul>
                                                         <p><b>Đánh giá: </b>${feedback.ratedStar} <i class="fa fa-star" style="color: #f39c12;"></i></p>
@@ -379,7 +389,7 @@
 
                                         <p><b>Viết đánh giá của bạn</b></p>
                                         <form action="submitFeedback" method="POST">
-                                            <input type="hidden" name="productId" value="<%= product.getId() %>">
+                                            <input type="hidden" name="productId" value="${product != null ? product.id : ''}">
                                             <span>
                                                 <input type="text" name="fullName" placeholder="Tên của bạn" class="form-control" style="width: 45%; margin-right: 5%;" required/>
                                                 <input type="email" name="email" placeholder="Địa chỉ email" class="form-control" style="width: 45%;" required/>
