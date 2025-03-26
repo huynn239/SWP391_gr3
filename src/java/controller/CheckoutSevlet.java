@@ -97,15 +97,12 @@ protected void doPost(HttpServletRequest request, HttpServletResponse response)
         return;
     }
     
-    // Lấy orderId đầu tiên của user (chỉ tạo một lần duy nhất)
-    int orderId = o.getFirstOrderID(user.getId());
-    if (orderId == 0) {
-        o.insertOrder(user.getId()); // Tạo Order mới nếu chưa có
-        orderId = o.getFirstOrderID(user.getId());
-    }
+    // Gọi insertOrder để tạo hoặc cập nhật Order
+    o.insertOrder(user.getId());
+    int orderId = o.getFirstOrderID(user.getId()); // Lấy OrderID sau khi insert/update
     
     // Kiểm tra trạng thái suborder gần nhất
-    if (o.checkCreateNewSubOrder(orderId)) { // Truyền orderId thay vì userId
+    if (o.checkCreateNewSubOrder(orderId)) {
         o.insertsubOrderWithOrderId(orderId, total);
         od.updatesuborder(user.getId(), selectedItems);
         od.updateToTalamountSuborder(user.getId(), selectedItems);

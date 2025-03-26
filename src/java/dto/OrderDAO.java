@@ -23,12 +23,43 @@ import model.Order;
 public class OrderDAO extends DBContext {
 
 public void insertOrder(int userID) {
-    String sql = "INSERT INTO Orders (UsersID, OrderDate, TotalAmount, PaymentStatus) VALUES (?, ?, 0, 'Unpaid')";
-    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-        stmt.setInt(1, userID);
-        stmt.setTimestamp(2, new java.sql.Timestamp(new java.util.Date().getTime()));
-        stmt.executeUpdate();
-        System.out.println("Inserted new order for UserID: " + userID);
+    // Kiểm tra xem UsersID đã tồn tại trong bảng orders chưa
+    String checkSql = "SELECT COUNT(*) FROM orders WHERE UsersID = ?";
+    try (PreparedStatement checkStmt = connection.prepareStatement(checkSql)) {
+        checkStmt.setInt(1, userID);
+        ResultSet rs = checkStmt.executeQuery();
+        rs.next();
+        int count = rs.getInt(1);
+
+        if (count > 0) {
+            // Nếu đã tồn tại, cập nhật PaymentStatus và TotalAmount
+            String updateSql = "UPDATE orders SET PaymentStatus = ?, TotalAmount = (SELECT SUM(TotalAmount) FROM suborder WHERE OrderID = orders.ID), OrderDate = ? WHERE UsersID = ?";
+            try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
+                // Kiểm tra trạng thái của tất cả suborder để cập nhật PaymentStatus
+                String statusSql = "SELECT COUNT(*) AS unpaidCount FROM suborder WHERE OrderID = (SELECT ID FROM orders WHERE UsersID = ?)";
+                try (PreparedStatement statusStmt = connection.prepareStatement(statusSql)) {
+                    statusStmt.setInt(1, userID);
+                    ResultSet statusRs = statusStmt.executeQuery();
+                    statusRs.next();
+                    String paymentStatus = (statusRs.getInt("unpaidCount") > 0) ? "Unpaid" : "Paid";
+                    
+                    updateStmt.setString(1, paymentStatus);
+                    updateStmt.setTimestamp(2, new java.sql.Timestamp(new java.util.Date().getTime()));
+                    updateStmt.setInt(3, userID);
+                    updateStmt.executeUpdate();
+                    System.out.println("Updated order for UserID: " + userID);
+                }
+            }
+        } else {
+            // Nếu chưa tồn tại, tạo mới
+            String insertSql = "INSERT INTO Orders (UsersID, OrderDate, TotalAmount, PaymentStatus) VALUES (?, ?, 0, 'Unpaid')";
+            try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+                insertStmt.setInt(1, userID);
+                insertStmt.setTimestamp(2, new java.sql.Timestamp(new java.util.Date().getTime()));
+                insertStmt.executeUpdate();
+                System.out.println("Inserted new order for UserID: " + userID);
+            }
+        }
     } catch (SQLException e) {
         e.printStackTrace();
     }
@@ -122,14 +153,14 @@ public int getFirstOrderID(int userID) {
         return 0;
     }
 
-  public boolean checkCreateNewSubOrder(int orderId) {
+ public boolean checkCreateNewSubOrder(int orderId) {
     String sql = "SELECT TOP 1 PaymentStatus FROM suborder WHERE OrderID = ? ORDER BY ID DESC";
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
         stmt.setInt(1, orderId);
         ResultSet rs = stmt.executeQuery();
         if (rs.next()) {
             String status = rs.getString("PaymentStatus");
-            return "Paid".equals(status);
+            return "Paid".equals(status) || "Pending".equals(status);
         }
         return true; // Nếu không có suborder, cho phép tạo mới
     } catch (SQLException e) {
@@ -328,7 +359,7 @@ public int getFirstOrderID(int userID) {
         e.printStackTrace();
     }
 }
-  public void updateOrderTotalAndStatus(int orderId) {
+public void updateOrderTotalAndStatus(int orderId) {
     // Cập nhật TotalAmount bằng tổng TotalAmount của tất cả suborder
     String updateTotalSql = "UPDATE orders SET TotalAmount = (SELECT SUM(TotalAmount) FROM suborder WHERE OrderID = ?) WHERE ID = ?";
     try (PreparedStatement stmt = connection.prepareStatement(updateTotalSql)) {
@@ -339,8 +370,8 @@ public int getFirstOrderID(int userID) {
         e.printStackTrace();
     }
 
-    // Kiểm tra xem tất cả suborder đã Paid chưa
-    String checkPaidSql = "SELECT COUNT(*) AS unpaidCount FROM suborder WHERE OrderID = ? AND PaymentStatus = 'Unpaid'";
+    // Kiểm tra trạng thái của tất cả suborder
+    String checkPaidSql = "SELECT COUNT(*) AS notPaidCount FROM suborder WHERE OrderID = ? AND PaymentStatus != 'Paid'";
     String updateStatusSql = "UPDATE orders SET PaymentStatus = ? WHERE ID = ?";
     try (PreparedStatement checkStmt = connection.prepareStatement(checkPaidSql);
          PreparedStatement updateStmt = connection.prepareStatement(updateStatusSql)) {
@@ -349,8 +380,8 @@ public int getFirstOrderID(int userID) {
         ResultSet rs = checkStmt.executeQuery();
         
         if (rs.next()) {
-            int unpaidCount = rs.getInt("unpaidCount");
-            updateStmt.setString(1, unpaidCount == 0 ? "Paid" : "Unpaid");
+            int notPaidCount = rs.getInt("notPaidCount");
+            updateStmt.setString(1, notPaidCount == 0 ? "Paid" : "Unpaid");
             updateStmt.setInt(2, orderId);
             updateStmt.executeUpdate();
             System.out.println("Order updated: TotalAmount and PaymentStatus for OrderID: " + orderId);
@@ -366,6 +397,18 @@ public int getFirstOrderID(int userID) {
         int rowsUpdated = stmt.executeUpdate();
         if (rowsUpdated > 0) {
             System.out.println("Latest Suborder status updated to Paid for OrderID: " + orderId);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+    public void updateLatestSuborderStatusToPending(int orderId) {
+    String sql = "UPDATE suborder SET PaymentStatus = 'Pending' WHERE ID = (SELECT TOP 1 ID FROM suborder WHERE OrderID = ? ORDER BY ID DESC)";
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, orderId);
+        int rowsUpdated = stmt.executeUpdate();
+        if (rowsUpdated > 0) {
+            System.out.println("Latest Suborder status updated to Pending for OrderID: " + orderId);
         }
     } catch (SQLException e) {
         e.printStackTrace();
