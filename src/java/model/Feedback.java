@@ -29,7 +29,14 @@ public class Feedback {
         this.productId = productId;
         this.userId = userId;
     }
-    
+    public Feedback(int id, int ratedStar, String comment, int productId, int userId, String productName) {
+        this.id = id;
+        this.ratedStar = ratedStar;
+        this.comment = comment;
+        this.productId = productId;
+        this.userId = userId;
+        this.productName = productName;
+    }
 
     public Feedback(int id, int ratedStar, String comment, int productId, int userId, 
                     String fullName, String email, String mobile) {
@@ -41,6 +48,18 @@ public class Feedback {
         this.fullName = fullName;
         this.email = email;
         this.mobile = mobile;
+    }
+    public Feedback(int id, int ratedStar, String comment, int productId, int userId, 
+                    String fullName, String email, String mobile, String productName) {
+        this.id = id;
+        this.ratedStar = ratedStar;
+        this.comment = comment;
+        this.productId = productId;
+        this.userId = userId;
+        this.fullName = fullName;
+        this.email = email;
+        this.mobile = mobile;
+        this.productName = productName;
     }
 
     // Getters
@@ -70,5 +89,4 @@ public class Feedback {
         this.productName = productName;
     }
 }
-
 

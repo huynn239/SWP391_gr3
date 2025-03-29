@@ -547,4 +547,46 @@ public class ProductDAO extends DBContext {
     }
     return 0;
 }
+      public List<String> getAllCategories() {
+    List<String> categories = new ArrayList<>();
+    String sql = "SELECT Name FROM Category";
+    try (PreparedStatement stmt = connection.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+            String categoryName = rs.getString("Name");
+            if (categoryName != null && !categoryName.trim().isEmpty()) {
+                categories.add(categoryName);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return categories;
+}
+
+
+    public List<Product> getLatestProducts() {
+    List<Product> productList = new ArrayList<>();
+    String sql = "SELECT TOP 10 * FROM Product WHERE Status = 1 AND is_deleted = 0 ORDER BY ID DESC";
+    try (PreparedStatement stmt = connection.prepareStatement(sql);
+         ResultSet rs = stmt.executeQuery()) {
+        while (rs.next()) {
+            Product product = new Product(
+                rs.getInt("ID"),
+                rs.getString("Name"),
+                rs.getString("Image"),
+                rs.getInt("MaterialID"),
+                rs.getDouble("Price"),
+                rs.getString("Details"),
+                rs.getString("BrandID"),
+                rs.getInt("TypeID"),
+                rs.getBoolean("Status")
+            );
+            productList.add(product);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return productList;
+}
 }

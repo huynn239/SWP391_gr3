@@ -18,8 +18,66 @@ public class Account {
     private String Mobile;
     private String uAddress;
     private int RoleID;
+    private String Avatar; 
+    private int status;
 
     public Account() {
+    }
+        public Account(int id, String uName, String Username, String Password, String Gender, 
+                   String Email, String Mobile, String uAddress, int RoleID, String Avatar, int status) {
+        this.id = id;
+        this.uName = uName;
+        this.Username = Username;
+        this.Password = Password;
+        this.Gender = Gender;
+        this.Email = Email;
+        this.Mobile = Mobile;
+        this.uAddress = uAddress;
+        this.RoleID = RoleID;
+        this.Avatar = Avatar;
+        this.status = status;
+    }
+
+    // Constructor cho addUser (không có id, status mặc định là 1)
+    public Account(String uName, String Username, String Password, String Gender, 
+                   String Email, String Mobile, String uAddress, int RoleID) {
+        this.uName = uName;
+        this.Username = Username;
+        this.Password = Password;
+        this.Gender = Gender;
+        this.Email = Email;
+        this.Mobile = Mobile;
+        this.uAddress = uAddress;
+        this.RoleID = RoleID;
+        this.status = 1; // Mặc định Active
+    }
+
+    // Constructor cho addUser với Avatar
+    public Account(String uName, String Username, String Password, String Gender, 
+                   String Email, String Mobile, String uAddress, int RoleID, String Avatar) {
+        this.uName = uName;
+        this.Username = Username;
+        this.Password = Password;
+        this.Gender = Gender;
+        this.Email = Email;
+        this.Mobile = Mobile;
+        this.uAddress = uAddress;
+        this.RoleID = RoleID;
+        this.Avatar = Avatar;
+        this.status = 1; // Mặc định Active
+    }
+
+    // Constructor không có Mobile, uAddress
+    public Account(int id, String uName, String Username, String Password, String Gender, 
+                   String Email, int RoleID) {
+        this.id = id;
+        this.uName = uName;
+        this.Username = Username;
+        this.Password = Password;
+        this.Gender = Gender;
+        this.Email = Email;
+        this.RoleID = RoleID;
+        this.status = 1; // Mặc định Active
     }
     public Account(int id, String uName, String Username, String Password, String Gender, String Email, String Mobile, String uAddress, int RoleID) {
     this.id = id;
@@ -32,7 +90,8 @@ public class Account {
     this.uAddress = uAddress;
     this.RoleID = RoleID;
 }
-       public Account(String uName, String Username, String Password, String Gender, String Email, String Mobile, String uAddress, int roleID) {
+        public Account(int id, String uName, String Username, String Password, String Gender, String Email, String Mobile, String uAddress, int RoleID, String Avatar) {
+        this.id = id;
         this.uName = uName;
         this.Username = Username;
         this.Password = Password;
@@ -40,18 +99,10 @@ public class Account {
         this.Email = Email;
         this.Mobile = Mobile;
         this.uAddress = uAddress;
-        this.RoleID = roleID;
-    }
-
-    public Account(int id, String uName, String Username, String Password, String Gender, String Email, int RoleID) {
-        this.id = id;
-        this.uName = uName;
-        this.Username = Username;
-        this.Password = Password;
-        this.Gender = Gender;
-        this.Email = Email;
         this.RoleID = RoleID;
+        this.Avatar = Avatar;
     }
+        
 
     public int getId() {
         return id;
@@ -122,12 +173,26 @@ public class Account {
         this.RoleID = RoleID;
     }
 
-    @Override
-    public String toString() {
-        return "Account{" + "id=" + id + ", uName=" + uName + ", Username=" + Username + ", Password=" + Password + ", Gender=" + Gender + ", Email=" + Email + ", Mobile=" + Mobile + ", uAddress=" + uAddress + ", RoleID=" + RoleID + '}';
+  public String getAvatar() {
+        return Avatar;
     }
 
-     
+    public void setAvatar(String Avatar) {
+        this.Avatar = Avatar;
+    }
+     public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status ) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Account{" + "id=" + id + ", uName=" + uName + ", Username=" + Username + ", Password=" + Password + ", Gender=" + Gender + ", Email=" + Email + ", Mobile=" + Mobile + ", uAddress=" + uAddress + ", RoleID=" + RoleID + ", Avatar=" + Avatar + ", status=" + status + '}';
+    }
+
     
     
     

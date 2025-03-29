@@ -23,17 +23,44 @@ public class FeedbackListControllerServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             FeedbackDAO feedbackDAO = new FeedbackDAO();
-            List<Feedback> feedbackList = feedbackDAO.getAllFeedbacks();
-            
-            // Set the feedbackList attribute to pass it to the JSP
-            request.setAttribute("feedbackList", feedbackList);
-            
-            // Forward the request to FeedbackList.jsp
+
+            // Lấy các tham số lọc từ request
+            String keyword = request.getParameter("keyword");
+            String ratedStarStr = request.getParameter("ratedStar");
+            Integer ratedStar = (ratedStarStr != null && !ratedStarStr.isEmpty()) ? Integer.parseInt(ratedStarStr) : null;
+
+            // Lấy danh sách phản hồi đã lọc
+            List<Feedback> feedbackList = feedbackDAO.getFilteredFeedbacks(keyword, ratedStar);
+
+            // Phân trang
+            int page = 1;
+            int pageSize = 10;
+            String pageParam = request.getParameter("page");
+            if (pageParam != null) {
+                try {
+                    page = Integer.parseInt(pageParam);
+                } catch (NumberFormatException e) {
+                    page = 1;
+                }
+            }
+
+            int totalFeedbacks = feedbackList.size();
+            int totalPages = (int) Math.ceil((double) totalFeedbacks / pageSize);
+            int start = (page - 1) * pageSize;
+            int end = Math.min(start + pageSize, totalFeedbacks);
+
+            List<Feedback> paginatedList = feedbackList.subList(start, end);
+
+            // Gửi dữ liệu sang JSP
+            request.setAttribute("feedbackList", paginatedList);
+            request.setAttribute("currentPage", page);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("selectedKeyword", keyword);
+            request.setAttribute("selectedRatedStar", ratedStarStr);
+
+            // Forward tới JSP
             RequestDispatcher dispatcher = request.getRequestDispatcher("FeedbackList.jsp");
             dispatcher.forward(request, response);
-        } catch (SQLException e) {
-            e.printStackTrace();  // Log the SQL error
-            response.getWriter().println("Lỗi khi tải danh sách phản hồi: " + e.getMessage());
         } catch (Exception ex) {
             Logger.getLogger(FeedbackListControllerServlet.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -14,11 +14,12 @@ public class Orderdetail {
     String size;
     String CheckboxStatus;
     String color;
+    double Price;
 
     public Orderdetail() {
     }
 
-    public Orderdetail(int orderDetail, int orderID, int productID, int quantity, String size, String CheckboxStatus, String color) {
+    public Orderdetail(int orderDetail, int orderID, int productID, int quantity, String size, String CheckboxStatus, String color, double Price) {
         this.orderDetail = orderDetail;
         this.orderID = orderID;
         this.productID = productID;
@@ -26,6 +27,7 @@ public class Orderdetail {
         this.size = size;
         this.CheckboxStatus = CheckboxStatus;
         this.color = color;
+        this.Price = Price;
     }
 
     public String getCheckboxStatus() {
@@ -84,6 +86,13 @@ public class Orderdetail {
 
     public void setSize(String size) {
         this.size = size;
+    }
+    public double getPrice() {
+        return Price;
+    }
+
+    public void setPrice(Double Price) {
+        this.Price = Price;
     }
 
 }

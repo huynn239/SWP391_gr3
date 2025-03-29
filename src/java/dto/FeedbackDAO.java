@@ -32,7 +32,8 @@ public class FeedbackDAO extends DBContext {
                         rs.getInt("RatedStar"),
                         rs.getString("Comment"),
                         rs.getInt("ProductID"),
-                        rs.getInt("UsersID")
+                        rs.getInt("UsersID"),
+                        rs.getString("ProductName")
                 );
                 feedbackList.add(feedback);
             }
@@ -63,7 +64,8 @@ public class FeedbackDAO extends DBContext {
                         rs.getInt("UsersID"),
                         rs.getString("FullName"),
                         rs.getString("Email"),
-                        rs.getString("Mobile")
+                        rs.getString("Mobile"),
+                        rs.getString("ProductName")
                 );
             }
         }
@@ -151,6 +153,50 @@ public class FeedbackDAO extends DBContext {
     }
     return 0;
 }
-    
+    public List<Feedback> getFilteredFeedbacks(String keyword, Integer ratedStar) throws SQLException {
+        List<Feedback> feedbackList = new ArrayList<>();
+        StringBuilder query = new StringBuilder(
+            "SELECT f.ID, f.RatedStar, f.Comment, f.ProductID, f.UsersID, p.Name AS ProductName " +
+            "FROM feedback f " +
+            "JOIN Product p ON f.ProductID = p.ID " +
+            "WHERE 1=1"
+        );
+
+        // Thêm điều kiện lọc
+        List<Object> params = new ArrayList<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            query.append(" AND (p.Name LIKE ? OR f.Comment LIKE ?)");
+            params.add("%" + keyword + "%");
+            params.add("%" + keyword + "%");
+        }
+        if (ratedStar != null) {
+            query.append(" AND f.RatedStar = ?");
+            params.add(ratedStar);
+        }
+        query.append(" ORDER BY f.ID DESC");
+
+        try (PreparedStatement stmt = connection.prepareStatement(query.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Feedback feedback = new Feedback(
+                        rs.getInt("ID"),
+                        rs.getInt("RatedStar"),
+                        rs.getString("Comment"),
+                        rs.getInt("ProductID"),
+                        rs.getInt("UsersID"),
+                        rs.getString("ProductName")
+                    );
+                    feedbackList.add(feedback);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new SQLException("Lỗi khi lấy danh sách phản hồi: " + e.getMessage());
+        }
+        return feedbackList;
+    }
 
 }

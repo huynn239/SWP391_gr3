@@ -5,6 +5,8 @@
 package model;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 /**
  *
@@ -17,6 +19,8 @@ public class Order {
     private LocalDate orderDate;
     private double totalAmount, userID;
     private String ReceiverName, ReceiverPhone, ReceiverEmail, ReciverAddress;
+    private String firstProductName;
+    private int otherProductsCount;
 
     public Order(int orderID, String PaymentStatus, LocalDate orderDate, double totalAmount, int userID) {
         this.orderID = orderID;
@@ -36,6 +40,12 @@ public class Order {
     
 
     public Order() {
+    }
+    public Date getOrderDateAsDate() {
+        if (orderDate == null) {
+            return null;
+        }
+        return Date.from(orderDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
     public String getReceiverName() {
@@ -99,7 +109,7 @@ public class Order {
         return totalAmount;
     }
 
-    public void setTotalAmount(int totalAmount) {
+    public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
     }
 
@@ -110,5 +120,19 @@ public class Order {
     public void setUserID(int userID) {
         this.userID = userID;
     }
+    public String getFirstProductName() {
+        return firstProductName;
+    }
 
+    public void setFirstProductName(String firstProductName) {
+        this.firstProductName = firstProductName;
+    }
+
+    public int getOtherProductsCount() {
+        return otherProductsCount;
+    }
+
+    public void setOtherProductsCount(int otherProductsCount) {
+        this.otherProductsCount = otherProductsCount;
+    }
 }

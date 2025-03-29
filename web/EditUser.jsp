@@ -24,17 +24,6 @@
                 <label>Name:</label>
                 <input type="text" name="uName" class="form-control" value="${user.uName}" required>
             </div>
-
-            <div class="mb-3">
-                <label>Username:</label>
-                <input type="text" name="username" class="form-control" value="${user.username}" required>
-            </div>
-
-            <div class="mb-3">
-                <label>Password:</label>
-                <input type="password" name="password" class="form-control" value="${user.password}" required>
-            </div>
-
             <div class="mb-3">
                 <label>Gender:</label>
                 <select name="gender" class="form-control">
@@ -58,7 +47,7 @@
                 <input type="text" name="uAddress" class="form-control" value="${user.uAddress}" required>
             </div>
 
-            <div class="mb-3">
+<!--            <div class="mb-3">
                 <label>Role:</label>
                 <c:choose>
                     <c:when test="${sessionScope.u.roleID == 1}">
@@ -74,7 +63,7 @@
                         <input type="hidden" name="roleID" value="${user.roleID}">
                     </c:otherwise>
                 </c:choose>
-            </div>
+            </div>-->
 
             <button type="submit" class="btn btn-success">Update User</button>
             <a href="UserControllerServlet" class="btn btn-secondary">Cancel</a>

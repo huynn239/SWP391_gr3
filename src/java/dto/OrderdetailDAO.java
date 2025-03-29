@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 import model.Cart;
 import model.Order;
+import model.Orderdetail;
 import model.Product;
 
 /**
@@ -487,6 +488,31 @@ public String getReceiverName(int subOrderId) {
             e.printStackTrace();
         }
         return ""; // Trả về chuỗi rỗng nếu không tìm thấy
+    }
+  public List<Orderdetail> getOrderDetailsByOrderId(int orderId) {
+        List<Orderdetail> orderDetails = new ArrayList<>();
+        String sql = "SELECT od.ProductID, od.Quantity, od.Size, od.Color, p.Price " +
+                     "FROM orderdetails od " +
+                     "JOIN Product p ON od.ProductID = p.ID " +
+                     "WHERE od.OrderID = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Orderdetail detail = new Orderdetail();
+                    detail.setProductID(rs.getInt("ProductID"));
+                    detail.setQuantity(rs.getInt("Quantity"));
+                    detail.setSize(rs.getString("Size"));
+                    detail.setColor(rs.getString("Color"));
+                    detail.setPrice(rs.getDouble("Price"));
+                    orderDetails.add(detail);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orderDetails;
     }
 
     public static void main(String[] args) {

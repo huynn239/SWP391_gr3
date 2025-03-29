@@ -1,0 +1,70 @@
+package dto;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import model.SubOrder;
+
+public class SubOrderDAO extends DBContext {
+
+    public List<SubOrder> getSubOrdersByOrderId(int orderId) {
+        List<SubOrder> subOrders = new ArrayList<>();
+        String sql = "SELECT ID, OrderID, TotalAmount, PaymentStatus, ReceiverName, ReceiverPhone, " +
+                    "ReceiverEmail, ReceiverAddress, CreatedDate FROM suborder WHERE OrderID = ? " +
+                    "ORDER BY ID DESC";
+        
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                SubOrder subOrder = new SubOrder();
+                subOrder.setId(rs.getInt("ID"));
+                subOrder.setOrderId(rs.getInt("OrderID"));
+                subOrder.setTotalAmount(rs.getDouble("TotalAmount"));
+                subOrder.setPaymentStatus(rs.getString("PaymentStatus"));
+                subOrder.setReceiverName(rs.getString("ReceiverName"));
+                subOrder.setReceiverPhone(rs.getString("ReceiverPhone"));
+                subOrder.setReceiverEmail(rs.getString("ReceiverEmail"));
+                subOrder.setReceiverAddress(rs.getString("ReceiverAddress"));
+                subOrder.setCreatedDate(rs.getTimestamp("CreatedDate"));
+                subOrders.add(subOrder);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return subOrders;
+    }
+
+    public boolean deleteSubOrder(int subOrderId) {
+        String sql = "DELETE FROM suborder WHERE ID = ? AND PaymentStatus != 'Paid'";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, subOrderId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateSubOrder(int subOrderId, String receiverName, String receiverPhone, 
+                                String receiverEmail, String receiverAddress) {
+        String sql = "UPDATE suborder SET ReceiverName = ?, ReceiverPhone = ?, ReceiverEmail = ?, " +
+                    "ReceiverAddress = ? WHERE ID = ? AND PaymentStatus != 'Paid'";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, receiverName);
+            stmt.setString(2, receiverPhone);
+            stmt.setString(3, receiverEmail);
+            stmt.setString(4, receiverAddress);
+            stmt.setInt(5, subOrderId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+}
