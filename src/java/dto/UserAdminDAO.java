@@ -169,26 +169,21 @@ PreparedStatement ps = conn.prepareStatement(sql)) {
     }
 
 public boolean editUser(int id, Account updatedUser) {
-        String sql = "UPDATE users SET uName = ?, Username = ?, Password = ?, Gender = ?, Email = ?, Mobile = ?, uAddress = ?, RoleID = ?, Avatar = ?, status = ? WHERE ID = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, updatedUser.getuName());
-            ps.setString(2, updatedUser.getUsername());
-            ps.setString(3, updatedUser.getPassword());
-            ps.setString(4, updatedUser.getGender());
-            ps.setString(5, updatedUser.getEmail());
-            ps.setString(6, updatedUser.getMobile());
-            ps.setString(7, updatedUser.getuAddress());
-            ps.setInt(8, updatedUser.getRoleID());
-            ps.setString(9, updatedUser.getAvatar());
-            ps.setInt(10, updatedUser.getStatus());
-            ps.setInt(11, id);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+    String sql = "UPDATE users SET uName = ?, Gender = ?, Email = ?, Mobile = ?, uAddress = ? WHERE ID = ?";
+    try (Connection conn = getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, updatedUser.getuName());  // Cập nhật uName
+        ps.setString(2, updatedUser.getGender());  // Cập nhật gender
+        ps.setString(3, updatedUser.getEmail());  // Cập nhật email
+        ps.setString(4, updatedUser.getMobile());  // Cập nhật mobile
+        ps.setString(5, updatedUser.getuAddress());  // Cập nhật uAddress
+        ps.setInt(6, id);  // ID của người dùng cần sửa
+        return ps.executeUpdate() > 0;  // Thực thi và trả về kết quả
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
     }
+}
 public boolean editProfile(int userId, Account user) {
         String sql = "UPDATE users SET uName = ?, Gender = ?, Email = ?, Mobile = ?, uAddress = ?, Avatar = ? WHERE ID = ?";
         try (Connection conn = getConnection();
@@ -231,4 +226,5 @@ public boolean editProfile(int userId, Account user) {
             return false;
         }
     }
+    
 }

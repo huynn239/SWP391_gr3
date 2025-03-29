@@ -190,7 +190,7 @@
     </head>
     <body>
         <div class="container">
-            <a href="UserProfile.jsp" class="back-button">
+            <a href="ProfileController?action=viewProfile&id=${sessionScope.u.id}" class="back-button">
                 <i class="fas fa-arrow-left" ></i> Back to User Profile
             </a>
             <div class="panel">

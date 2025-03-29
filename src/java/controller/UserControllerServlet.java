@@ -1,6 +1,6 @@
 package controller;
 
-import dto.UserDAO;
+import dto.UserAdminDAO;
 import model.Account;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
-import dto.UserAdminDAO;
 
 @WebServlet(name = "UserControllerServlet", urlPatterns = {"/UserControllerServlet"})
 public class UserControllerServlet extends HttpServlet {
@@ -18,9 +17,7 @@ public class UserControllerServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-                UserDAO userDAO = new UserDAO();
-
-        UserAdminDAO useradmindao = new UserAdminDAO();
+        UserAdminDAO userDAO = new UserAdminDAO();
         String action = request.getParameter("action");
         HttpSession session = request.getSession();
         Account loggedInUser = (Account) session.getAttribute("u");
@@ -94,7 +91,7 @@ public class UserControllerServlet extends HttpServlet {
                     if (roleId != null && roleId != 2 && roleId != 3) {
                         roleId = null;
                     }
-                    listU = useradmindao.getFilteredUserList(gender, roleId, status);
+                    listU = userDAO.getFilteredUserList(gender, roleId, status);
                     // Đảm bảo chỉ lấy Marketing và Sale
                     listU.removeIf(user -> user.getRoleID() != 2 && user.getRoleID() != 3);
                 }
@@ -114,70 +111,51 @@ public class UserControllerServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-                UserAdminDAO useradmindao = new UserAdminDAO();
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+    UserAdminDAO userDAO = new UserAdminDAO();
+    String action = request.getParameter("action");
+    HttpSession session = request.getSession();
+    Account loggedInUser = (Account) session.getAttribute("u");
 
-        UserDAO userDAO = new UserDAO();
-        String action = request.getParameter("action");
-        HttpSession session = request.getSession();
-        Account loggedInUser = (Account) session.getAttribute("u");
-
-        try {
-            if ("add".equals(action)) {
-                Account newUser = new Account(
-                    request.getParameter("uName"),
-                    request.getParameter("username"),
-                    request.getParameter("password"),
-                    request.getParameter("gender"),
-                    request.getParameter("email"),
-                    request.getParameter("mobile"),
-                    request.getParameter("uAddress"),
-                    Integer.parseInt(request.getParameter("roleID")),
-                    request.getParameter("avatar")
-                );
-                boolean success = useradmindao.addUser(newUser);
-                response.sendRedirect("UserControllerServlet?message=" + (success ? "User+added+successfully" : "Failed+to+add+user"));
-            } else if ("edit".equals(action)) {
-                if (loggedInUser == null) {
-                    response.sendRedirect("login.jsp?message=Please+login+to+perform+this+action");
-                    return;
-                }
-                int userId = Integer.parseInt(request.getParameter("id"));
-                if (loggedInUser.getRoleID() != 1 && userId != loggedInUser.getId()) {
-                    response.sendRedirect("error.jsp?message=You+can+only+edit+your+own+profile");
-                    return;
-                }
-
-                int newRoleID = Integer.parseInt(request.getParameter("roleID"));
-                Account userToEdit = userDAO.getUserById(userId);
-                if (loggedInUser.getRoleID() != 1) {
-                    newRoleID = userToEdit.getRoleID();
-                }
-
-                Account updatedUser = new Account(
-                    userId,
-                    request.getParameter("uName"),
-                    request.getParameter("username"),
-                    request.getParameter("password"),
-                    request.getParameter("gender"),
-                    request.getParameter("email"),
-                    request.getParameter("mobile"),
-                    request.getParameter("uAddress"),
-                    newRoleID,
-                    request.getParameter("avatar"),
-                    1 // Status mặc định, có thể cần thêm field trong form để chỉnh sửa
-                );
-                boolean success = userDAO.editUser(userId, updatedUser);
-                response.sendRedirect("UserControllerServlet?action=viewDetail&id=" + userId + "&message=" + 
-                    (success ? "User+updated+successfully" : "Failed+to+update+user"));
+    try {
+        if ("edit".equals(action)) {
+            if (loggedInUser == null) {
+                response.sendRedirect("login.jsp?message=Please+login+to+perform+this+action");
+                return;
             }
-        } catch (Exception e) {
-            System.out.println("Exception in UserControllerServlet doPost: " + e.getMessage());
-            e.printStackTrace();
-            response.sendRedirect("error.jsp?message=Error+processing+request");
+            int userId = Integer.parseInt(request.getParameter("id"));
+            if (loggedInUser.getRoleID() != 1 && userId != loggedInUser.getId()) {
+                response.sendRedirect("error.jsp?message=You+can+only+edit+your+own+profile");
+                return;
+            }
+
+            // Lấy thông tin từ form, không lấy username và password
+            Account updatedUser = new Account(
+                userId,
+                request.getParameter("uName"),  // Lấy uName
+                null,  // Không lấy username
+                null,  // Không lấy password
+                request.getParameter("gender"),  // Lấy gender
+                request.getParameter("email"),  // Lấy email
+                request.getParameter("mobile"),  // Lấy mobile
+                request.getParameter("uAddress"),  // Lấy address
+                loggedInUser.getRoleID(),  // Giữ nguyên roleID
+                null,  // Không thay đổi avatar
+                1 // Giữ nguyên status hoặc thêm một trường trong form để thay đổi nếu cần
+            );
+
+            boolean success = userDAO.editUser(userId, updatedUser);
+            response.sendRedirect("UserControllerServlet?action=viewDetail&id=" + userId + "&message=" + 
+                (success ? "User+updated+successfully" : "Failed+to+update+user"));
         }
+    } catch (Exception e) {
+        System.out.println("Exception in UserControllerServlet doPost: " + e.getMessage());
+        e.printStackTrace();
+        response.sendRedirect("error.jsp?message=Error+processing+request");
     }
+}
+
 
     @Override
     public String getServletInfo() {

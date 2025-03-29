@@ -333,5 +333,19 @@ public class UserDAO extends DBContext {
     }
     return false;
     }
+    public boolean isAccountActive(String username) {
+    String sql = "SELECT status FROM settings WHERE value = ?";
+    try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, username);
+        ResultSet rs = ps.executeQuery();
+        if (rs.next()) {
+            return rs.getBoolean("status"); // Trả về true nếu status = 1, false nếu status = 0
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    // Nếu không tìm thấy trong settings, mặc định cho phép đăng nhập
+    return true;
+}
 
 }

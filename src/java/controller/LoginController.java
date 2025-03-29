@@ -61,7 +61,7 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+                request.getRequestDispatcher("login.jsp").forward(request, response);
 
     }
 
@@ -86,36 +86,45 @@ public class LoginController extends HttpServlet {
         if (a == null) {
             request.setAttribute("mess", "Wrong username or password !");
             request.getRequestDispatcher("login.jsp").forward(request, response);
-        } else {
+        }else {
+        // Kiểm tra trạng thái tài khoản từ bảng settings
+        if (!userdao.isAccountActive(username)) {
+            request.setAttribute("mess", "Your account is inactive. Please contact the administrator.");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        } else  {
             HttpSession session = request.getSession();
             session.setAttribute("u", a);
-            session.setMaxInactiveInterval(30 * 60);
+            session.setMaxInactiveInterval(30 * 60); 
             session.setAttribute("id", a.getId());
+            
 
+           
             Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
-            sessionCookie.setMaxAge(30 * 60);
-            sessionCookie.setPath("/");
+            sessionCookie.setMaxAge(30 * 60); 
+            sessionCookie.setPath("/"); 
             response.addCookie(sessionCookie);
 
-            //  response.sendRedirect("home");
-            switch (a.getRoleID()) {
-                case 1:
-                    response.sendRedirect("admin.jsp");
-                    break;
-                case 2:
-                    response.sendRedirect("mkt.jsp");
-                    break;
-                case 3:
-                    response.sendRedirect("salesevlet");
-                    break;
-                case 4:
-                    response.sendRedirect("home");
-                    break;
-                default:
-                    response.sendRedirect("home"); // Mặc định quay về trang chính nếu RoleID không hợp lệ
-                    break;
-            }
+          //  response.sendRedirect("home");
+              switch (a.getRoleID()) {
+            case 1:
+                response.sendRedirect("admin.jsp");
+                break;
+            case 2:
+                response.sendRedirect("mkt.jsp");
+                break;
+            case 3:
+                response.sendRedirect("sale.jsp");
+                break;
+            case 4:
+                response.sendRedirect("home");
+                break;
+            default:
+                response.sendRedirect("home"); // Mặc định quay về trang chính nếu RoleID không hợp lệ
+                break;
         }
+        }
+    }
     }
 
     /**

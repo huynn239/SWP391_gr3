@@ -141,6 +141,7 @@
                         <a href="changepassword.jsp" class="btn btn-primary">Change Password</a>
 
             <a href="MyOrderServlet" class="btn btn-primary">My Order</a>
+            <a href="home.jsp" class="btn btn-primary">Back to HomePage</a>
         </div>
     </div>
 

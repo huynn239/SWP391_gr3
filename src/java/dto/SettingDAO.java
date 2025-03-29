@@ -15,7 +15,7 @@ import java.util.List;
 public class SettingDAO extends DBContext {
     public List<Setting> getAllSettings() {
         List<Setting> settings = new ArrayList<>();
-        String sql = "SELECT * FROM settings";
+        String sql = "SELECT * FROM settings ";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -111,6 +111,79 @@ public class SettingDAO extends DBContext {
         return false;
     }
 }
+    public List<Setting> getFilteredSettings(String keyword, String type, String status, String sortBy) {
+        List<Setting> settings = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM settings WHERE 1=1");
+
+        // Thêm điều kiện lọc
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (type LIKE ? OR value LIKE ? OR description LIKE ?)");
+        }
+        if (type != null && !type.isEmpty()) {
+            sql.append(" AND type = ?");
+        }
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+        }
+
+        // Thêm sắp xếp
+        if (sortBy != null) {
+            if ("order_asc".equals(sortBy)) {
+                sql.append(" ORDER BY [order] ASC");
+            } else if ("order_desc".equals(sortBy)) {
+                sql.append(" ORDER BY [order] DESC");
+            }
+        }
+
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int paramIndex = 1;
+
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String searchPattern = "%" + keyword + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+            if (type != null && !type.isEmpty()) {
+                ps.setString(paramIndex++, type);
+            }
+            if (status != null && !status.isEmpty()) {
+                ps.setBoolean(paramIndex++, Boolean.parseBoolean(status));
+            }
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                settings.add(new Setting(
+                    rs.getInt("id"),
+                    rs.getString("type"),
+                    rs.getString("value"),
+                    rs.getInt("order"),
+                    rs.getString("description"),
+                    rs.getBoolean("status")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return settings;
+    }
+
+    // Phương thức lấy danh sách các type duy nhất
+    public List<String> getAllTypes() {
+        List<String> types = new ArrayList<>();
+        String sql = "SELECT DISTINCT type FROM settings";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                types.add(rs.getString("type"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return types;
+    }
 
     
 }
