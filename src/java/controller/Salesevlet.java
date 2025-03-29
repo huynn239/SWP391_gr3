@@ -4,25 +4,23 @@
  */
 package controller;
 
-import dto.UserDAO;
+import dto.OrderDAO;
+import dto.SubOrderDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import model.Account;
-import utils.EncryptPassword;
+import java.util.List;
+import model.Cart;
+import model.SubOrder;
 
 /**
  *
- * @author NBL
+ * @author BAO CHAU
  */
-@WebServlet(name = "LoginControl", urlPatterns = {"/login"})
-public class LoginController extends HttpServlet {
+public class Salesevlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -40,10 +38,10 @@ public class LoginController extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet NewServlet</title>");
+            out.println("<title>Servlet Salesevlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet NewServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet Salesevlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -61,8 +59,13 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.getRequestDispatcher("login.jsp").forward(request, response);
-
+        OrderDAO od = new OrderDAO();
+        List<model.Order> list = od.getAllOrder();
+        for (model.Order order : list) {
+            System.out.println("" + order.getOrderName());
+        }
+        request.setAttribute("productlist", list);
+        request.getRequestDispatcher("sale.jsp").forward(request, response);
     }
 
     /**
@@ -76,46 +79,18 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String username = request.getParameter("user").trim();
-        String password = request.getParameter("pass").trim();
-        password = EncryptPassword.toSHA1(password);
-
-        UserDAO userdao = new UserDAO();
-        Account a = userdao.login(username, password);
-
-        if (a == null) {
-            request.setAttribute("mess", "Wrong username or password !");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
-        } else {
-            HttpSession session = request.getSession();
-            session.setAttribute("u", a);
-            session.setMaxInactiveInterval(30 * 60);
-            session.setAttribute("id", a.getId());
-
-            Cookie sessionCookie = new Cookie("JSESSIONID", session.getId());
-            sessionCookie.setMaxAge(30 * 60);
-            sessionCookie.setPath("/");
-            response.addCookie(sessionCookie);
-
-            //  response.sendRedirect("home");
-            switch (a.getRoleID()) {
-                case 1:
-                    response.sendRedirect("admin.jsp");
-                    break;
-                case 2:
-                    response.sendRedirect("mkt.jsp");
-                    break;
-                case 3:
-                    response.sendRedirect("salesevlet");
-                    break;
-                case 4:
-                    response.sendRedirect("home");
-                    break;
-                default:
-                    response.sendRedirect("home"); // Mặc định quay về trang chính nếu RoleID không hợp lệ
-                    break;
-            }
+        String suborderIDParam = request.getParameter("suborderID");
+        SubOrderDAO sd = new SubOrderDAO();
+        if (suborderIDParam != null) {
+            int suborderID = Integer.parseInt(suborderIDParam);
+            List<Cart> cartList = sd.getOrderdetailbySuborder(suborderID);
+            SubOrder so = sd.getSubOrderBysubOrderId(suborderID);
+            request.setAttribute("suborder", so);
+            request.setAttribute("cart", cartList);
+            request.setAttribute("suborderID", suborderID);
         }
+
+        request.getRequestDispatcher("orderdetail.jsp").forward(request, response);
     }
 
     /**

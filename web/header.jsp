@@ -59,7 +59,6 @@
                         <div class="col-sm-9">
                             <div class="mainmenu pull-left">
                                 <ul class="nav navbar-nav">
-                                    <li><a href="home.jsp">Home</a></li>
                                     <li><a href="FeedbackListControllerServlet" class="active">Feedback List</a></li>
                                     <li><a href="productlistsevlet" class="active">ProductList</a></li>
                                      <li><a href="mkt.jsp">Marketing Dashboards</a></li>

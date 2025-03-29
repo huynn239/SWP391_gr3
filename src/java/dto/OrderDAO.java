@@ -15,6 +15,7 @@ import java.util.List;
 import model.Address;
 import model.Category;
 import model.Order;
+import model.SubOrder;
 
 /**
  *
@@ -474,62 +475,90 @@ public class OrderDAO extends DBContext {
             e.printStackTrace();
         }
     }
-     public Order getOrderById(int orderId) {
-                Order order = null;
-                String sql = "SELECT ID, PaymentStatus, OrderDate, TotalAmount, UsersID " +
-                            "FROM Orders " +
-                            "WHERE ID = ?";
 
-                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                    stmt.setInt(1, orderId);
-                    try (ResultSet rs = stmt.executeQuery()) {
-                        if (rs.next()) {
-                            order = new Order();
-                            order.setOrderID(rs.getInt("ID"));
-                            order.setPaymentStatus(rs.getString("PaymentStatus"));
-                            java.sql.Date sqlDate = rs.getDate("OrderDate");
-                            order.setOrderDate(sqlDate != null ? sqlDate.toLocalDate() : null);
-                            order.setTotalAmount(rs.getDouble("TotalAmount"));
-                            order.setUserID(rs.getInt("UsersID"));
-                        }
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    System.out.println("Error in getOrderById: " + e.getMessage());
-                }
-                return order;
-            }
-            public List<Order> getOrdersByUserId(int userId) {
-                List<Order> orders = new ArrayList<>();
-                String sql = "SELECT ID, PaymentStatus, OrderDate, TotalAmount, UsersID " +
-                            "FROM Orders " +
-                            "WHERE UsersID = ? " +
-                            "ORDER BY ID DESC";
+    public Order getOrderById(int orderId) {
+        Order order = null;
+        String sql = "SELECT ID, PaymentStatus, OrderDate, TotalAmount, UsersID "
+                + "FROM Orders "
+                + "WHERE ID = ?";
 
-                try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                    stmt.setInt(1, userId);
-                    try (ResultSet rs = stmt.executeQuery()) {
-                        while (rs.next()) {
-                            Order order = new Order();
-                            order.setOrderID(rs.getInt("ID"));
-                            order.setPaymentStatus(rs.getString("PaymentStatus"));
-                            java.sql.Date sqlDate = rs.getDate("OrderDate");
-                            order.setOrderDate(sqlDate != null ? sqlDate.toLocalDate() : null);
-                            order.setTotalAmount(rs.getDouble("TotalAmount"));
-                            order.setUserID(rs.getInt("UsersID"));
-                            orders.add(order);
-                        }
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    order = new Order();
+                    order.setOrderID(rs.getInt("ID"));
+                    order.setPaymentStatus(rs.getString("PaymentStatus"));
+                    java.sql.Date sqlDate = rs.getDate("OrderDate");
+                    order.setOrderDate(sqlDate != null ? sqlDate.toLocalDate() : null);
+                    order.setTotalAmount(rs.getDouble("TotalAmount"));
+                    order.setUserID(rs.getInt("UsersID"));
                 }
-                return orders;
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Error in getOrderById: " + e.getMessage());
+        }
+        return order;
+    }
+
+    public List<Order> getOrdersByUserId(int userId) {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT ID, PaymentStatus, OrderDate, TotalAmount, UsersID "
+                + "FROM Orders "
+                + "WHERE UsersID = ? "
+                + "ORDER BY ID DESC";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order();
+                    order.setOrderID(rs.getInt("ID"));
+                    order.setPaymentStatus(rs.getString("PaymentStatus"));
+                    java.sql.Date sqlDate = rs.getDate("OrderDate");
+                    order.setOrderDate(sqlDate != null ? sqlDate.toLocalDate() : null);
+                    order.setTotalAmount(rs.getDouble("TotalAmount"));
+                    order.setUserID(rs.getInt("UsersID"));
+                    orders.add(order);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
+
+    public List<Order> getAllOrder() {
+        List<Order> orders = new ArrayList<>();
+        String sql = "SELECT o.ID,u.Username, PaymentStatus, OrderDate, TotalAmount\n"
+                + "  FROM Orders o join users u on o.UsersID = u.ID\n"
+                + "  ORDER BY o.ID DESC";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order();
+                    order.setOrderID(rs.getInt("ID"));
+                    order.setPaymentStatus(rs.getString("PaymentStatus").toLowerCase());
+                    java.sql.Date sqlDate = rs.getDate("OrderDate");
+                    order.setOrderDate(sqlDate != null ? sqlDate.toLocalDate() : null);
+                    order.setTotalAmount(rs.getDouble("TotalAmount"));
+                    order.setOrderName(rs.getString("Username"));
+                    List<SubOrder> list = new SubOrderDAO().getSubOrdersByOrderId(rs.getInt("ID"));
+                    order.setSuborder(list);
+                    orders.add(order);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return orders;
+    }
 
     public static void main(String[] args) {
         OrderDAO o = new OrderDAO();
-        System.out.println("" + o.checkCreateNewSubOrder(1));
-        o.addAddress("ad", "đá", "adasd", "đá", 1);
+        o.insertOrder(1);
 
     }
 

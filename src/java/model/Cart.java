@@ -11,6 +11,11 @@ public class Cart {
     private String CheckboxStatus;
     private String color;
 
+    public Cart() {
+    }
+    
+    
+
     public Cart(String image, String name, String size, int price, int quantity, int productID, String CheckboxStatus,String color) {
         this.image = image;
         this.name = name;

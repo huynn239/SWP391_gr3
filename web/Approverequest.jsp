@@ -65,7 +65,7 @@
             .search-container .btn-search:hover {
                 background-color: #218838;
             }
-          
+
             .table-custom {
                 width: 100%;
                 border-collapse: separate;
@@ -89,7 +89,7 @@
             .table-custom tbody tr:hover {
                 background-color: #f1f3f5;
             }
-            
+
             .pagination {
                 text-align: center;
                 margin-top: 10px;
@@ -148,33 +148,41 @@
             <div class="control-panel">
                 <div class="row align-items-center">
                     <div class="col-md-6">
-                        <form action="productlistsevlet" method="get" class="form-inline d-flex">
+                        <form  action="approverequest" method="get" class="form-inline d-flex">
                             <label for="keyword" class="mr-2">Tìm kiếm:</label>
                             <input type="text" class="form-control mr-2" id="keyword" name="keyword"
-                                   placeholder="Nhập từ khóa..." value="${selectedKeyword}">
-                            <button type="button" class="btn btn-search" onclick="applyFilters()"><i class="fa fa-search"></i> Tìm</button>
+                                   placeholder="Nhập employeeID" value="${selectedKeyword}">
+                            <button type="submit" class="btn btn-search">
+                                <i class="fa fa-search"></i> Tìm
+                            </button>
                         </form>
                     </div>
-
-
                 </div>
 
                 <div class="row filter-section mt-3">
                     <div class="col-md-12">
-                        <form class="form-inline d-flex flex-wrap gap-2">
-
-
+                        <form id="filterForm" action="approverequest" method="get" class="form-inline d-flex flex-wrap gap-2">
                             <label for="status" class="mr-2">Trạng thái:</label>
-                            <select name="status" id="status" class="form-control mr-3" onchange="applyFilters()">
+                            <select name="status" id="status" class="form-control mr-3">
                                 <option value="">Tất cả</option>
                                 <option value="pending" ${selectedStatus eq 'pending' ? 'selected' : ''}>pending</option>
                                 <option value="approved" ${selectedStatus eq 'approved' ? 'selected' : ''}>approved</option>
-                                <option value="approved" ${selectedStatus eq 'approved' ? 'selected' : ''}>Ẩn</option>
+                                <option value="rejected" ${selectedStatus eq 'rejected' ? 'selected' : ''}>rejected</option>
                             </select>
                         </form>
                     </div>
                 </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        document.getElementById("status").addEventListener("change", function () {
+                            document.getElementById("filterForm").submit();
+                        });
+                    });
+                </script>
+
+
             </div>
+
 
 
 
@@ -196,25 +204,25 @@
                                     <tbody>
 
                                         <c:forEach var="pending" items="${pendinglist}">
-                                            <input type="hidden" name="page" value="${currentPage}">
-                                            <tr>
-                                                <td class="text-center align-middle">${pending.productId}</td>
-                                                <td class="text-center align-middle">${pending.updatedBy}</td>
-                                                <td class="text-left align-middle">${pending.changes}</td>
-                                                <td class="text-center align-middle">${pending.createdAt}</td>
-                                                <td class="text-center align-middle">
-                                                    <select name="status_${pending.id}" class="status-select"style="width: 100px;">
-                                                        <option value="pending" ${pending.status == 'pending' ? 'selected' : ''} 
-                                                                ${pending.status != 'pending' ? 'disabled' : ''}>pending</option>
-                                                        <option value="approved" ${pending.status == 'approved' ? 'selected' : ''}>approved</option>
-                                                        <option value="rejected" ${pending.status == 'rejected' ? 'selected' : ''} 
-                                                                ${pending.status == 'approved' ? 'disabled' : ''}>rejected</option>
-                                                    </select>
-                                                    <input type="hidden" name="id_${pending.id}" value="${pending.id}">
-                                                    <input type="hidden" name="pid_${pending.id}" value="${pending.productId}">
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
+                                        <input type="hidden" name="page" value="${currentPage}">
+                                        <tr>
+                                            <td class="text-center align-middle">${pending.productId}</td>
+                                            <td class="text-center align-middle">${pending.updatedBy}</td>
+                                            <td class="text-left align-middle">${pending.changes}</td>
+                                            <td class="text-center align-middle">${pending.createdAt}</td>
+                                            <td class="text-center align-middle">
+                                                <select name="status_${pending.id}" class="status-select"style="width: 100px;">
+                                                    <option value="pending" ${pending.status == 'pending' ? 'selected' : ''} 
+                                                            ${pending.status != 'pending' ? 'disabled' : ''}>pending</option>
+                                                    <option value="approved" ${pending.status == 'approved' ? 'selected' : ''}>approved</option>
+                                                    <option value="rejected" ${pending.status == 'rejected' ? 'selected' : ''} 
+                                                            ${pending.status == 'approved' ? 'disabled' : ''}>rejected</option>
+                                                </select>
+                                                <input type="hidden" name="id_${pending.id}" value="${pending.id}">
+                                                <input type="hidden" name="pid_${pending.id}" value="${pending.productId}">
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
                                     </tbody>
                                 </table>
                             </div>

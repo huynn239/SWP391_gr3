@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import model.Pending;
 import model.Product;
 
@@ -66,12 +67,33 @@ public class ApproveRequest extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         PendingUpdateDAO dao = new PendingUpdateDAO();
-        List<Pending> pendingList = dao.getAllPendingUpdates(); // Lấy tất cả đơn hàng
-        int pageSize = 5; // Mỗi trang hiển thị 5 đơn
+
+        // Lấy giá trị tìm kiếm và bộ lọc từ request
+        String keyword = request.getParameter("keyword");
+        String statusFilter = request.getParameter("status");
+        System.out.println("" + statusFilter);
+        // Lấy danh sách tất cả đơn hàng
+        List<Pending> pendingList = dao.getAllPendingUpdates();
+
+        // Lọc theo employeeID nếu có nhập từ khóa tìm kiếm
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            pendingList = pendingList.stream()
+                    .filter(p ->String.valueOf(p.getUpdatedBy()).toLowerCase().equals(keyword.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        // Lọc theo trạng thái nếu có chọn trạng thái cụ thể
+        if (statusFilter != null && !statusFilter.isEmpty()) {
+            pendingList = pendingList.stream()
+                    .filter(p -> p.getStatus().equalsIgnoreCase(statusFilter))
+                    .collect(Collectors.toList());
+        }
+
+        // Phân trang
+        int pageSize = 5;
         int totalItems = pendingList.size();
         int totalPages = (int) Math.ceil((double) totalItems / pageSize);
 
-        // Lấy trang hiện tại từ request (mặc định là trang 1)
         int currentPage = 1;
         String pageParam = request.getParameter("page");
         if (pageParam != null) {
@@ -84,21 +106,21 @@ public class ApproveRequest extends HttpServlet {
                     currentPage = totalPages;
                 }
             } catch (NumberFormatException e) {
-                currentPage = 1; // Nếu có lỗi, mặc định về trang 1
+                currentPage = 1;
             }
         }
 
-        // Xác định index bắt đầu và kết thúc
         int startIndex = (currentPage - 1) * pageSize;
         int endIndex = Math.min(startIndex + pageSize, totalItems);
-
-        // Cắt danh sách theo trang
         List<Pending> paginatedList = pendingList.subList(startIndex, endIndex);
 
-        // Gửi danh sách đã cắt đến JSP
+        // Gửi dữ liệu đến JSP
         request.setAttribute("pendinglist", paginatedList);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("currentPage", currentPage);
+        request.setAttribute("selectedKeyword", keyword);
+        request.setAttribute("selectedStatus", statusFilter);
+
         request.getRequestDispatcher("Approverequest.jsp").forward(request, response);
     }
 

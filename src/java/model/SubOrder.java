@@ -13,6 +13,22 @@ public class SubOrder {
     private String receiverAddress;
     private Timestamp createdDate;
 
+    public SubOrder(int id, int orderId, double totalAmount, String paymentStatus, String receiverName, String receiverPhone, String receiverEmail, String receiverAddress, Timestamp createdDate) {
+        this.id = id;
+        this.orderId = orderId;
+        this.totalAmount = totalAmount;
+        this.paymentStatus = paymentStatus;
+        this.receiverName = receiverName;
+        this.receiverPhone = receiverPhone;
+        this.receiverEmail = receiverEmail;
+        this.receiverAddress = receiverAddress;
+        this.createdDate = createdDate;
+    }
+
+    public SubOrder() {
+    }
+
+    
     // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }

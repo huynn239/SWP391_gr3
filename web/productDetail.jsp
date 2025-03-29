@@ -16,6 +16,7 @@
 <jsp:useBean id="sliderDAO" class="dto.SliderDAO" scope="session"/>
 
 <%
+     List<Category> cate = categoryDAO.getAllCategories();
     String productIdStr = request.getParameter("productId");
     Product product = null;
     List<Feedback> feedbacks = null;
@@ -146,21 +147,32 @@
                             <div class="mainmenu pull-left">
                                 <ul class="nav navbar-nav collapse navbar-collapse">
                                     <li><a href="home.jsp">Home</a></li>
-                                    <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
-                                        <ul role="menu" class="sub-menu">
-                                            <li><a href="productlist?category=<%= product.getTypeId() %>">Products</a></li>
-                                            <li><a href="productDetail.jsp?productId=<%= product.getId() %>" class="active">Product Details</a></li>
-                                            <li><a href="checkout.html">Checkout</a></li>
-                                            <li><a href="cart.html">Cart</a></li>
-                                            <li><a href="login.html">Login</a></li>
-                                        </ul>
+                                    <li class="menu-item">
+                                        <a href="#">Product</a>
+                                        <div class="sub-menu">
+                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
+                                                <% int count1 = 0; %>
+                                                <% for (Category cates : cate) { %>
+                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
+                                                <div class="category-column">
+                                                    <% } %>
+                                                    <a href="productlist?category=<%= cates.getId() %>">
+                                                        <%= cates.getName() %>
+                                                    </a>
+                                                    <% count1++; %>
+                                                    <% if (count1 % 6 == 0 || count1 == cate.size()) { %>
+                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
+                                                <% } %>
+                                                <% } %>
+                                            </div> <!-- Kết thúc category-container -->
+                                        </div>
                                     </li>
-                                    <li class="dropdown"><a href="#">Blog<i class="fa fa-angle-down"></i></a>
-                                        <ul role="menu" class="sub-menu">
-                                            <li><a href="blogList.jsp">Blog List</a></li>
-                                            <li><a href="blogDetail.jsp">Blog Single</a></li>
-                                        </ul>
-                                    </li>
+
+
+
+
+
+                                    <li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
                                     <li><a href="404.html">404</a></li>
                                     <li><a href="contact-us.html">Contact</a></li>
                                 </ul>
@@ -579,20 +591,20 @@
         <script src="js/jquery.prettyPhoto.js"></script>
         <script src="js/main.js"></script>
         <script>
-                                            var productImages = <%= productImagesJson %>;
-                                            var colors = <%= colorsJson %>;
+                                                var productImages = <%= productImagesJson %>;
+                                                var colors = <%= colorsJson %>;
 
-                                            function updateCartImage() {
-                                                let selectedColor = document.getElementById("color").value;
-                                                let imageElement = document.getElementById("productMainImage");
+                                                function updateCartImage() {
+                                                    let selectedColor = document.getElementById("color").value;
+                                                    let imageElement = document.getElementById("productMainImage");
 
-                                                let image = productImages.find(img => img.colorId == selectedColor);
-                                                imageElement.src = image ? image.imageUrl : "<%= product.getImage() %>";
-                                            }
+                                                    let image = productImages.find(img => img.colorId == selectedColor);
+                                                    imageElement.src = image ? image.imageUrl : "<%= product.getImage() %>";
+                                                }
 
-                                            window.onload = function () {
-                                                updateCartImage();
-                                            };
+                                                window.onload = function () {
+                                                    updateCartImage();
+                                                };
         </script>
     </body>
 </html>

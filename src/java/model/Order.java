@@ -7,6 +7,7 @@ package model;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -21,7 +22,18 @@ public class Order {
     private String ReceiverName, ReceiverPhone, ReceiverEmail, ReciverAddress;
     private String firstProductName;
     private int otherProductsCount;
+    private String orderName;
+    private List<SubOrder> suborder;
 
+    public Order(int orderID, String PaymentStatus, LocalDate orderDate, double totalAmount, String orderName) {
+        this.orderID = orderID;
+        this.PaymentStatus = PaymentStatus;
+        this.orderDate = orderDate;
+        this.totalAmount = totalAmount;
+        this.orderName = orderName;
+    }
+    
+    
     public Order(int orderID, String PaymentStatus, LocalDate orderDate, double totalAmount, int userID) {
         this.orderID = orderID;
         this.PaymentStatus = PaymentStatus;
@@ -47,6 +59,26 @@ public class Order {
         }
         return Date.from(orderDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
+
+    public List<SubOrder> getSuborder() {
+        return suborder;
+    }
+
+    public void setSuborder(List<SubOrder> suborder) {
+        this.suborder = suborder;
+    }
+    
+    
+
+    public String getOrderName() {
+        return orderName;
+    }
+
+    public void setOrderName(String orderName) {
+        this.orderName = orderName;
+    }
+    
+    
 
     public String getReceiverName() {
         return ReceiverName;

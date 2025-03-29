@@ -84,7 +84,10 @@
                 background: #f9f9f9;
             }
 
-
+            .quantity{
+                justify-content: center;
+                text-align: center;
+            }
         </style>
     </head>
     <body>
@@ -182,6 +185,7 @@
                     <table class="table table-condensed">
                         <thead>
                             <tr class="cart_menu" style="background: black">
+                                <td class="image"></td>
                                 <td class="image">Item</td>
                                 <td class="description"></td>
                                 <td class="price">Price</td>
