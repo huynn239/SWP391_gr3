@@ -114,7 +114,7 @@ public class LoginController extends HttpServlet {
                 response.sendRedirect("mkt.jsp");
                 break;
             case 3:
-                response.sendRedirect("sale.jsp");
+                response.sendRedirect("salesevlet");
                 break;
             case 4:
                 response.sendRedirect("home");

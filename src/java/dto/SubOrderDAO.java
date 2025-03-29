@@ -132,6 +132,34 @@ public class SubOrderDAO extends DBContext {
             return false;
         }
     }
+    public List<SubOrder> getSubOrdersByUserId(int userId) {
+    List<SubOrder> subOrders = new ArrayList<>();
+    String sql = "SELECT so.* FROM suborder so " +
+                 "JOIN orders o ON so.OrderID = o.ID " +
+                 "WHERE o.UsersID = ? " +
+                 "ORDER BY so.CreatedDate DESC";
+
+    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        stmt.setInt(1, userId);
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            SubOrder subOrder = new SubOrder();
+            subOrder.setId(rs.getInt("ID"));
+            subOrder.setOrderId(rs.getInt("OrderID"));
+            subOrder.setTotalAmount(rs.getDouble("TotalAmount"));
+            subOrder.setPaymentStatus(rs.getString("PaymentStatus"));
+            subOrder.setReceiverName(rs.getString("ReceiverName"));
+            subOrder.setReceiverPhone(rs.getString("ReceiverPhone"));
+            subOrder.setReceiverEmail(rs.getString("ReceiverEmail"));
+            subOrder.setReceiverAddress(rs.getString("ReceiverAddress"));
+            subOrder.setCreatedDate(rs.getTimestamp("CreatedDate"));
+            subOrders.add(subOrder);
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return subOrders;
+}
 
     public static void main(String[] args) {
         SubOrderDAO sd = new SubOrderDAO();

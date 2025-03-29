@@ -1,7 +1,6 @@
 package controller;
 
-import dto.OrderDAO;
-import dto.OrderdetailDAO;
+import dto.SubOrderDAO;
 import dto.ProductDAO;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -10,18 +9,18 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import model.Account;
-import model.Order;
-import model.Orderdetail;
+import model.SubOrder;
+import model.Cart;
 import model.Product;
 
 @WebServlet(name = "MyOrderServlet", urlPatterns = {"/MyOrderServlet"})
 public class MyOrderServlet extends HttpServlet {
 
-    private static final int ORDERS_PER_PAGE = 5;
+    private static final int SUBORDERS_PER_PAGE = 5;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -33,40 +32,43 @@ public class MyOrderServlet extends HttpServlet {
         }
 
         int userId = user.getId();
-        OrderDAO orderDAO = new OrderDAO();
+        SubOrderDAO subOrderDAO = new SubOrderDAO();
         ProductDAO productDAO = new ProductDAO();
-        OrderdetailDAO orderDetailDAO = new OrderdetailDAO();
 
         // Get filter parameters
-        String orderIdParam = request.getParameter("orderId");
+        String subOrderIdParam = request.getParameter("subOrderId");
         String status = request.getParameter("status");
         String startDateStr = request.getParameter("startDate");
         String endDateStr = request.getParameter("endDate");
 
-        // Fetch all orders for the user
-        List<Order> allOrders = orderDAO.getOrdersByUserId(userId);
+        // Fetch suborders
+        List<SubOrder> allSubOrders = subOrderDAO.getSubOrdersByUserId(userId);
+        System.out.println("User ID: " + userId + ", All sub-orders: " + allSubOrders.size());
 
         // Apply filters
-        List<Order> filteredOrders = new ArrayList<>(allOrders);
-        if (orderIdParam != null && !orderIdParam.trim().isEmpty()) {
+        List<SubOrder> filteredSubOrders = new ArrayList<>(allSubOrders);
+        if (subOrderIdParam != null && !subOrderIdParam.trim().isEmpty()) {
             try {
-                int orderId = Integer.parseInt(orderIdParam);
-                filteredOrders.removeIf(order -> order.getOrderID() != orderId);
+                int subOrderId = Integer.parseInt(subOrderIdParam);
+                filteredSubOrders.removeIf(subOrder -> subOrder.getId() != subOrderId);
             } catch (NumberFormatException e) {
-                // Ignore invalid Order ID
+                // Ignore invalid SubOrder ID
             }
         }
         if (status != null && !status.isEmpty()) {
-            filteredOrders.removeIf(order -> !order.getPaymentStatus().equalsIgnoreCase(status));
+            filteredSubOrders.removeIf(subOrder -> !subOrder.getPaymentStatus().equalsIgnoreCase(status));
         }
         if (startDateStr != null && !startDateStr.isEmpty()) {
-            LocalDate startDate = LocalDate.parse(startDateStr);
-            filteredOrders.removeIf(order -> order.getOrderDate() == null || order.getOrderDate().isBefore(startDate));
+            Timestamp startDate = Timestamp.valueOf(startDateStr + " 00:00:00");
+            filteredSubOrders.removeIf(subOrder -> subOrder.getCreatedDate() == null || 
+                subOrder.getCreatedDate().before(startDate));
         }
         if (endDateStr != null && !endDateStr.isEmpty()) {
-            LocalDate endDate = LocalDate.parse(endDateStr);
-            filteredOrders.removeIf(order -> order.getOrderDate() == null || order.getOrderDate().isAfter(endDate));
+            Timestamp endDate = Timestamp.valueOf(endDateStr + " 23:59:59");
+            filteredSubOrders.removeIf(subOrder -> subOrder.getCreatedDate() == null || 
+                subOrder.getCreatedDate().after(endDate));
         }
+        System.out.println("Filtered sub-orders: " + filteredSubOrders.size());
 
         // Pagination
         int page = 1;
@@ -79,26 +81,36 @@ public class MyOrderServlet extends HttpServlet {
             }
         }
 
-        int totalOrders = filteredOrders.size();
-        int totalPages = (int) Math.ceil((double) totalOrders / ORDERS_PER_PAGE);
+        int totalSubOrders = filteredSubOrders.size();
+        int totalPages = totalSubOrders > 0 ? (int) Math.ceil((double) totalSubOrders / SUBORDERS_PER_PAGE) : 1;
         page = Math.max(1, Math.min(page, totalPages));
 
-        int startIndex = (page - 1) * ORDERS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ORDERS_PER_PAGE, totalOrders);
-        List<Order> paginatedOrders = filteredOrders.subList(startIndex, endIndex);
+        int startIndex = (page - 1) * SUBORDERS_PER_PAGE;
+        int endIndex = Math.min(startIndex + SUBORDERS_PER_PAGE, totalSubOrders);
 
-        // Enrich orders with product details
-        for (Order order : paginatedOrders) {
-            List<Orderdetail> orderDetails = orderDetailDAO.getOrderDetailsByOrderId(order.getOrderID());
+        if (totalSubOrders == 0) {
+            startIndex = 0;
+            endIndex = 0;
+        } else {
+            startIndex = Math.max(0, startIndex);
+            endIndex = Math.max(0, endIndex);
+        }
+
+        List<SubOrder> paginatedSubOrders = totalSubOrders > 0 ? 
+            filteredSubOrders.subList(startIndex, endIndex) : new ArrayList<>();
+        System.out.println("Paginated sub-orders: " + paginatedSubOrders.size());
+
+        // Enrich suborders with product details
+        for (SubOrder subOrder : paginatedSubOrders) {
+            List<Cart> orderDetails = subOrderDAO.getOrderdetailbySuborder(subOrder.getId());
             if (!orderDetails.isEmpty()) {
-                Orderdetail firstDetail = orderDetails.get(0);
-                Product firstProduct = productDAO.getProductById(firstDetail.getProductID());
-                order.setFirstProductName(firstProduct != null ? firstProduct.getName() : "Unknown Product");
+                Cart firstDetail = orderDetails.get(0);
+                subOrder.setReceiverName(firstDetail.getName());
                 int otherProductsCount = orderDetails.size() - 1;
-                order.setOtherProductsCount(otherProductsCount > 0 ? otherProductsCount : 0);
+                subOrder.setReceiverPhone(otherProductsCount > 0 ? "+" + otherProductsCount + " other products" : "");
             } else {
-                order.setFirstProductName("No Products");
-                order.setOtherProductsCount(0);
+                subOrder.setReceiverName("No Products");
+                subOrder.setReceiverPhone("");
             }
         }
 
@@ -107,7 +119,7 @@ public class MyOrderServlet extends HttpServlet {
         List<Product> latestProducts = productDAO.getLatestProducts();
 
         // Set attributes for JSP
-        request.setAttribute("orderList", paginatedOrders);
+        request.setAttribute("subOrderList", paginatedSubOrders);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("categories", categories != null ? categories : new ArrayList<>());
