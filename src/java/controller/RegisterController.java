@@ -61,7 +61,7 @@ public class RegisterController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+        request.getRequestDispatcher("register.jsp").forward(request, response);
     }
 
     /**
@@ -81,6 +81,7 @@ public class RegisterController extends HttpServlet {
         String uName = request.getParameter("fullname").trim();
         String mobile = request.getParameter("mobile").trim();
         String address = request.getParameter("address").trim();
+        String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
 
         SendEmail sm = new SendEmail();
         String code = sm.getRandom();
@@ -89,7 +90,11 @@ public class RegisterController extends HttpServlet {
         if (!pass.equals(re_pass)) {
             request.setAttribute("mess", "Passwords don't mactch !");
             request.getRequestDispatcher("register.jsp").forward(request, response);
-        } else {
+        } else if (!pass.matches(passwordPattern)) {
+            request.setAttribute("mess", "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number!");
+         request.getRequestDispatcher("register.jsp").forward(request, response);
+        }
+        else {
             UserDAO userdao = new UserDAO();
             Account a = userdao.checkAccountExist(user, email);
             if (a == null) {

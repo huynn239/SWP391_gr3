@@ -138,6 +138,8 @@
 
         <div class="action-buttons">
             <a href="ProfileController?action=editProfile" class="btn btn-primary">Edit Profile</a>
+                        <a href="changepassword.jsp" class="btn btn-primary">Change Password</a>
+
             <a href="MyOrderServlet" class="btn btn-primary">My Order</a>
         </div>
     </div>

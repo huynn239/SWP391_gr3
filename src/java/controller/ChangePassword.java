@@ -60,7 +60,7 @@ public class ChangePassword extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-                request.getRequestDispatcher("changepassword.jsp").forward(request, response);
+        request.getRequestDispatcher("changepassword.jsp").forward(request, response);
     }
 
     /**
@@ -72,38 +72,41 @@ public class ChangePassword extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
-    // Lấy userId từ session
-    Integer userId = (Integer) request.getSession().getAttribute("id");
-    
-    if (userId == null) {
-        request.setAttribute("error", "Bạn chưa đăng nhập!");
-        request.getRequestDispatcher("login.jsp").forward(request, response);
-        return;
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Lấy userId từ session
+        Integer userId = (Integer) request.getSession().getAttribute("id");
+
+        if (userId == null) {
+            request.setAttribute("error", "Bạn chưa đăng nhập!");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+            return;
+        }
+        String passwordPattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$";
+        String password = request.getParameter("pass").trim();
+        String newpass = request.getParameter("newpass").trim();
+        String re_newpass = request.getParameter("renewpass");
+        // Mã hóa mật khẩu cũ
+        password = EncryptPassword.toSHA1(password);
+
+        UserDAO userdao = new UserDAO();
+        Account user = userdao.getUserById(userId);
+
+        if (!newpass.equals(re_newpass)) {
+            request.setAttribute("error", "New passwords don't match!");
+        } else if (!newpass.matches(passwordPattern)) {
+            request.setAttribute("error", "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number!");
+        } else if (user == null || !user.getPassword().equals(password)) {
+            request.setAttribute("error", "Old password is incorrect!");
+        } else {
+            // Mã hóa mật khẩu mới trước khi lưu
+            newpass = EncryptPassword.toSHA1(newpass);
+            userdao.updatePassword(user.getEmail(), newpass);
+            request.setAttribute("message", "Password changed successfully!");
+        }
+
+        request.getRequestDispatcher("changepassword.jsp").forward(request, response);
     }
-
-    String password = request.getParameter("pass").trim();
-    String newpass = request.getParameter("newpass").trim();
-    
-    // Mã hóa mật khẩu cũ
-    password = EncryptPassword.toSHA1(password);
-
-    UserDAO userdao = new UserDAO();
-    Account user = userdao.getUserById(userId);
-
-    if (user != null && user.getPassword().equals(password)) {
-        // Mã hóa mật khẩu mới
-        newpass = EncryptPassword.toSHA1(newpass);
-        userdao.updatePassword(user.getEmail(), newpass);
-        request.setAttribute("message", "Password changed successfully!");
-        
-    } else {
-        request.setAttribute("error", "Old password is incorrect!");
-    }
-
-    request.getRequestDispatcher("changepassword.jsp").forward(request, response);
-}
 
     /**
      * Returns a short description of the servlet.

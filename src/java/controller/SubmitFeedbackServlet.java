@@ -13,18 +13,19 @@ import dto.FeedbackDAO;
 import dto.ProductDAO;
 import dto.UserDAO;
 import model.Product;
+import dto.UserAdminDAO;
 
 @WebServlet("/submitFeedback")
 public class SubmitFeedbackServlet extends HttpServlet {
     private FeedbackDAO feedbackDAO;
     private ProductDAO productDAO;
-    private UserDAO accountDAO;
+    private UserAdminDAO accountDAO;
 
     @Override
     public void init() throws ServletException {
         feedbackDAO = new FeedbackDAO();
         productDAO = new ProductDAO();
-        accountDAO = new UserDAO();
+        accountDAO = new UserAdminDAO();
     }
 
     @Override

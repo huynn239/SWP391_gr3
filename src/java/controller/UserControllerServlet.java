@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
+import dto.UserAdminDAO;
 
 @WebServlet(name = "UserControllerServlet", urlPatterns = {"/UserControllerServlet"})
 public class UserControllerServlet extends HttpServlet {
@@ -17,7 +18,9 @@ public class UserControllerServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        UserDAO userDAO = new UserDAO();
+                UserDAO userDAO = new UserDAO();
+
+        UserAdminDAO useradmindao = new UserAdminDAO();
         String action = request.getParameter("action");
         HttpSession session = request.getSession();
         Account loggedInUser = (Account) session.getAttribute("u");
@@ -91,7 +94,7 @@ public class UserControllerServlet extends HttpServlet {
                     if (roleId != null && roleId != 2 && roleId != 3) {
                         roleId = null;
                     }
-                    listU = userDAO.getFilteredUserList(gender, roleId, status);
+                    listU = useradmindao.getFilteredUserList(gender, roleId, status);
                     // Đảm bảo chỉ lấy Marketing và Sale
                     listU.removeIf(user -> user.getRoleID() != 2 && user.getRoleID() != 3);
                 }
@@ -113,6 +116,8 @@ public class UserControllerServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+                UserAdminDAO useradmindao = new UserAdminDAO();
+
         UserDAO userDAO = new UserDAO();
         String action = request.getParameter("action");
         HttpSession session = request.getSession();
@@ -131,7 +136,7 @@ public class UserControllerServlet extends HttpServlet {
                     Integer.parseInt(request.getParameter("roleID")),
                     request.getParameter("avatar")
                 );
-                boolean success = userDAO.addUser(newUser);
+                boolean success = useradmindao.addUser(newUser);
                 response.sendRedirect("UserControllerServlet?message=" + (success ? "User+added+successfully" : "Failed+to+add+user"));
             } else if ("edit".equals(action)) {
                 if (loggedInUser == null) {
