@@ -32,6 +32,12 @@ public class AddPostController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Kiểm tra thông báo thành công từ redirect
+        String success = request.getParameter("success");
+        if (success != null && success.equals("add")) {
+            request.setAttribute("successMessage", "Thêm bài viết thành công!");
+        }
+
         // Lấy danh sách danh mục để hiển thị trong form
         List<Category> blogCategories = blogDAO.getAllBlogCategories();
         request.setAttribute("blogCategories", blogCategories);
@@ -58,7 +64,7 @@ public class AddPostController extends HttpServlet {
         if (filePart != null && filePart.getSize() > 0) {
             fileName = extractFileName(filePart);
             filePart.write(uploadPath + File.separator + fileName);
-            fileName = "uploads/" + fileName; // Đường dẫn tương đối để lưu vào DB
+            fileName = "uploads/" + fileName; 
         }
 
         // Kiểm tra dữ liệu đầu vào
@@ -83,7 +89,7 @@ public class AddPostController extends HttpServlet {
             // Thêm blog vào database
             boolean success = blogDAO.addBlog(newBlog, userId);
             if (success) {
-                response.sendRedirect("postList");
+                response.sendRedirect("postList?success=add");
             } else {
                 request.setAttribute("error", "Có lỗi xảy ra khi thêm bài viết.");
                 doGet(request, response);

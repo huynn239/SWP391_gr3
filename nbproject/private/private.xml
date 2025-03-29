@@ -2,6 +2,17 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/web/postList.jsp</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/web/updateSlider.jsp</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/src/java/dto/DBContext.java</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/src/java/controller/UpdatePostController.java</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/src/java/controller/AddPostController.java</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/web/editPost.jsp</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/src/java/controller/SliderController.java</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/web/addPost.jsp</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/src/java/controller/PostListController.java</file>
+            <file>file:/D:/New%20folder%20(2)/SWP391_gr3/src/java/dto/SliderDAO.java</file>
+        </group>
     </open-files>
 </project-private>

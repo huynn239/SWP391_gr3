@@ -2,6 +2,7 @@ package controller;
 
 import dto.BlogDAO;
 import model.Blog;
+import model.Category;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -12,9 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Date;
 import java.util.List;
-import model.Category;
 
 @WebServlet(name = "UpdatePostController", urlPatterns = {"/editPost"})
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, // 2MB
@@ -32,6 +31,12 @@ public class UpdatePostController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Kiểm tra thông báo thành công từ redirect
+        String success = request.getParameter("success");
+        if (success != null && success.equals("edit")) {
+            request.setAttribute("successMessage", "Cập nhật bài viết thành công!");
+        }
+
         String id = request.getParameter("id");
         if (id == null || id.trim().isEmpty()) {
             response.sendRedirect("postList");
@@ -65,10 +70,13 @@ public class UpdatePostController extends HttpServlet {
         File uploadDir = new File(uploadPath);
         if (!uploadDir.exists()) uploadDir.mkdir();
 
+        Blog blog = blogDAO.getBlogById(id);
+        String blogImage = blog != null ? blog.getBlogImage() : null;
+
         if (filePart != null && filePart.getSize() > 0) {
             fileName = extractFileName(filePart);
             filePart.write(uploadPath + File.separator + fileName);
-            fileName = "uploads/" + fileName; // Đường dẫn tương đối để lưu vào DB
+            blogImage = "uploads/" + fileName; // Đường dẫn tương đối để lưu vào DB
         }
 
         // Kiểm tra dữ liệu đầu vào
@@ -80,7 +88,6 @@ public class UpdatePostController extends HttpServlet {
 
         try {
             int categoryId = Integer.parseInt(categoryStr);
-            Blog blog = blogDAO.getBlogById(id);
             if (blog == null) {
                 response.sendRedirect("postList");
                 return;
@@ -91,12 +98,12 @@ public class UpdatePostController extends HttpServlet {
             blog.setContent(content);
             blog.setCateID(categoryId);
             if (fileName != null) {
-                blog.setBlogImage(fileName); // Chỉ cập nhật ảnh nếu có file mới
+                blog.setBlogImage(blogImage); // Chỉ cập nhật ảnh nếu có file mới
             }
 
             boolean success = blogDAO.updateBlog(blog);
             if (success) {
-                response.sendRedirect("postList");
+                response.sendRedirect("postList?success=edit");
             } else {
                 request.setAttribute("error", "Có lỗi xảy ra khi cập nhật bài viết.");
                 request.setAttribute("blog", blog);

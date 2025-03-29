@@ -41,16 +41,23 @@
         button:hover {
             background-color: #45a049;
         }
+        .success {
+            color: green;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
      <jsp:include page="header.jsp"></jsp:include>
     <div class="form-container">
         <h2>Add new post</h2>
-
+<c:if test="${not empty successMessage}">
+            <div class="success">${successMessage}</div>
+        </c:if>
         <c:if test="${not empty error}">
             <div class="error">${error}</div>
         </c:if>
+       
 
         <form action="addPost" method="post" enctype="multipart/form-data">
             <div class="form-group">

@@ -98,6 +98,11 @@
         .modal-body p {
             margin: 10px 0;
         }
+        .filter-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -108,13 +113,19 @@
     <section>
         <div class="container">
             <h2 class="title text-center" style="color: #2c3e50; margin-bottom: 30px;">Post Manager</h2>
-
+<c:if test="${not empty successMessage}">
+            <div class="alert alert-success">${successMessage}</div>
+        </c:if>
+        <c:if test="${not empty error}">
+            <div class="alert alert-danger">${error}</div>
+        </c:if>
             <!-- Thanh tìm kiếm -->
             <div class="search-bar">
                 <form action="postList" method="GET" style="flex-grow: 1; display: flex; gap: 10px;">
-                    <input type="text" name="keyword" value="${keyword}" placeholder="Tìm kiếm theo tiêu đề, nội dung hoặc tác giả..." class="form-control" style="flex-grow: 1;">
+                    <input type="text" name="keyword" value="${keyword}" placeholder="Search by author,title" class="form-control" style="flex-grow: 1;">
                     <button type="submit" class="btn btn-primary action-btn" style="
-    margin-top: 0"><i class="fa fa-search"></i> Search</button>
+    margin-top: 0;
+"><i class="fa fa-search"></i> Search</button>
                     <c:if test="${not empty categoryParam}">
                         <input type="hidden" name="category" value="${categoryParam}">
                     </c:if>
@@ -127,22 +138,29 @@
                 </form>
             </div>
 
-            <!-- Nút thêm bài viết và sắp xếp -->
+            
             <div class="action-bar">
                 <a href="addPost" class="btn btn-success action-btn"><i class="fa fa-plus"></i> Add new Post</a>
-                <form action="postList" method="GET" style="display: inline;">
-                    <button type="submit" class="btn btn-default action-btn">
-                        <i class="fa fa-clock-o"></i> Sort newest
-                    </button>
-                    <input type="hidden" name="sortBy" value="UploadDate">
-                    <input type="hidden" name="sortOrder" value="DESC">
-                    <c:if test="${not empty keyword}">
-                        <input type="hidden" name="keyword" value="${keyword}">
-                    </c:if>
-                    <c:if test="${not empty categoryParam}">
-                        <input type="hidden" name="category" value="${categoryParam}">
-                    </c:if>
-                </form>
+                
+                <!-- Sắp xếp Newest và Latest -->
+                <div class="filter-container">
+                    <label for="sortOrderSelect">Sort:</label>
+                    <select id="sortOrderSelect" class="form-control" onchange="location.href='postList?sortBy=UploadDate&sortOrder=' + this.value + '&page=1&keyword=${keyword}&category=${categoryParam}'">
+                        <option value="DESC" ${sortOrder == 'DESC' ? 'selected' : ''}>Newest</option>
+                        <option value="ASC" ${sortOrder == 'ASC' ? 'selected' : ''}>Latest</option>
+                    </select>
+                </div>
+
+                <!-- Dropdown filter category -->
+                <div class="filter-container">
+                    <label for="categoryFilter">Filter:</label>
+                    <select id="categoryFilter" class="form-control" onchange="location.href='postList?category=' + this.value + '&page=1&sortBy=${sortBy}&sortOrder=${sortOrder}&keyword=${keyword}'">
+                        <option value="">All Categories</option>
+                        <c:forEach var="category" items="${blogCategories}">
+                            <option value="${category.id}" ${categoryParam == category.id ? 'selected' : ''}>${category.name}</option>
+                        </c:forEach>
+                    </select>
+                </div>
             </div>
 
             <!-- Bảng danh sách bài viết -->
@@ -177,10 +195,10 @@
                                         <td><a href="postList?category=${blog.cateID}">${blog.categoryName}</a></td>
                                         <td>
                                             <button class="btn btn-info btn-sm action-btn view-detail" data-id="${blog.id}" data-toggle="modal" data-target="#postDetailModal">
-                                                <i class="fa fa-eye"></i> Xem chi tiết
+                                                <i class="fa fa-eye"></i> View
                                             </button>
-                                            <a href="editPost?id=${blog.id}" class="btn btn-warning btn-sm action-btn"><i class="fa fa-edit"></i> Chỉnh Sửa</a>
-                                            <a href="deletePost?id=${blog.id}" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Bạn có chắc muốn xóa bài viết này?')"><i class="fa fa-trash"></i> Xóa</a>
+                                            <a href="editPost?id=${blog.id}" class="btn btn-warning btn-sm action-btn"><i class="fa fa-edit"></i> Edit</a>
+                                            <a href="deletePost?id=${blog.id}" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Bạn có chắc muốn xóa bài viết này?')"><i class="fa fa-trash"></i> Delete</a>
                                         </td>
                                     </tr>
                                 </c:forEach>

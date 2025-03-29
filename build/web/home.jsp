@@ -18,7 +18,7 @@
     List<ProductImage> productImages = productimageDAO.getAllImagesProduct();
     List<Color> colors = colorDAO.getAllColors();
     Gson gson = new Gson();
-    List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at"); 
+    List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at","DESC"); 
     List<Slider> activeSliders = new ArrayList<>();
     for (Slider slider : allSliders) {
         if (slider.isStatus()) { 

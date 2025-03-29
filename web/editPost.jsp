@@ -68,6 +68,9 @@
     <div class="form-container">
         <h2>Edit Post</h2>
 
+       <c:if test="${not empty successMessage}">
+            <div class="success">${successMessage}</div>
+        </c:if>
         <c:if test="${not empty error}">
             <div class="error">${error}</div>
         </c:if>
