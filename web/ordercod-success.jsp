@@ -87,6 +87,12 @@
             transform: translateX(5px);
         }
 
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px; /* Khoảng cách giữa hai nút */
+        }
+
         .btn-home {
             display: inline-block;
             padding: 14px 45px;
@@ -125,11 +131,50 @@
             height: 300px;
         }
 
+        .btn-order {
+            display: inline-block;
+            padding: 14px 45px;
+            font-size: 18px;
+            color: #fff;
+            background: linear-gradient(90deg, #8e44ad, #9b59b6); /* Màu tím */
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .btn-order:hover {
+            background: linear-gradient(90deg, #732d91, #8e44ad); /* Màu tím đậm hơn khi hover */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(142, 68, 173, 0.4);
+        }
+
+        .btn-order::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .btn-order:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
         .footer-text {
             margin-top: 30px;
             font-size: 14px;
             color: #7f8c8d;
             font-style: italic;
+            font-weight: 600;
         }
 
         .confetti {
@@ -145,25 +190,25 @@
             0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
             100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
         }
-        .footer-text {
-    margin-top: 30px;
-    font-size: 14px;
-    color: #7f8c8d;
-    font-style: italic;
-    font-weight: 600; /* Thêm dòng này để làm đậm hơn */
-}
- .transaction-icon {
+
+        .transaction-icon {
             width: 150px;
             height: 150px;
             margin-bottom: 30px;
             animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
     <div class="success-container">
         <img src="https://cdn2.cellphones.com.vn/insecure/rs:fill:150:0/q:90/plain/https://cellphones.com.vn/media/wysiwyg/Review-empty.png" 
-                 alt="Transaction Status" class="transaction-icon">
+             alt="Transaction Status" class="transaction-icon">
         <h1>Đặt hàng thành công !</h1>
         <p><span class="bold-text">Cảm ơn bạn đã mua sắm !<br>Đơn hàng đã được xác nhận và đang trên đường vận chuyển.</span></p>
         <% if (request.getAttribute("message") != null) { %>
@@ -171,8 +216,11 @@
                 <%= request.getAttribute("message") %>
             </div>
         <% } %>
-        <a href="home.jsp" class="btn-home">Quay về trang chủ</a>
-        <div class="footer-text" >Nếu có thắc mắc, vui lòng liên hệ : <strong>0123 456 789</strong></div>
+        <div class="btn-container">
+            <a href="home.jsp" class="btn-home">Quay về trang chủ</a>
+            <a href="MyOrderServlet" class="btn-order">Xem đơn hàng</a>
+        </div>
+        <div class="footer-text">Nếu có thắc mắc, vui lòng liên hệ: <strong>0123 456 789</strong></div>
     </div>
 
     <!-- Hiệu ứng confetti -->

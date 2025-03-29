@@ -31,7 +31,7 @@ public class AuthenticationFilter implements Filter {
         String uri = req.getRequestURI(); // Lấy đường dẫn trang web
 
         // Nếu truy cập các trang yêu cầu quyền mà chưa login
-        if (user == null && (uri.contains("admin.jsp") || uri.contains("mkt.jsp") || uri.contains("sale.jsp") || uri.contains("UserControllerServlet") ||uri.contains("sliderList"))) {
+        if (user == null && (uri.contains("admin.jsp") || uri.contains("mkt.jsp") || uri.contains("sale.jsp") || uri.contains("UserControllerServlet") || uri.contains("sliderList"))) {
             res.sendRedirect("accessdenied");
             return;
         }
@@ -39,9 +39,18 @@ public class AuthenticationFilter implements Filter {
         // Kiểm tra quyền truy cập từng trang
         if ((uri.contains("admin.jsp") && user.getRoleID() != 1)
                 || (uri.contains("admin.jsp") && user.getRoleID() != 1)
+                || (uri.contains("FeedbackListControllerServlet") && user.getRoleID() != 1)
+                || (uri.contains("SettingController") && user.getRoleID() != 1)
+                || (uri.contains("productlistsevlet") && user.getRoleID() != 1 && user.getRoleID() != 2)
+                || (uri.contains("Productdetailmanage.jsp") && user.getRoleID() != 1 && user.getRoleID() != 2)
+                || (uri.contains("SettingController") && user.getRoleID() != 1)
                 || (uri.contains("mkt.jsp") && user.getRoleID() != 2)
+                                || (uri.contains("postList") && user.getRoleID() != 2)
+
                 || (uri.contains("sliderList") && user.getRoleID() != 2)
-                || (uri.contains("sale.jsp") && user.getRoleID() != 3)) {
+                || (uri.contains("sale.jsp") && user.getRoleID() != 3)
+                || (uri.contains("salesevlet") && user.getRoleID() != 3)
+                ) {
             res.sendRedirect("accessdenied"); // Chuyển về home nếu không đủ quyền
             return;
         }

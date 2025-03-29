@@ -63,9 +63,7 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                    <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
-                                        <li><a href="changepassword"><i class="fa fa-key"></i> ${not empty sessionScope.u? sessionScope.u.getUsername() : "Account"}</a></li>
-                                        </c:if>
+                                    
                                         <c:if test="${sessionScope.u.roleID == 1}">
                                         <li><a href="admin.jsp"><i class="fa fa-star"></i> Admin</a></li>
                                         </c:if>

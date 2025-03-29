@@ -140,6 +140,15 @@
             0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
             100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
         }
+        .btn-order {
+    background: linear-gradient(90deg, #8e44ad, #9b59b6);
+}
+
+.btn-order:hover {
+    background: linear-gradient(90deg, #732d91, #8e44ad);
+    transform: translateY(-3px);
+}
+
     </style>
 </head>
 <body>
@@ -159,6 +168,8 @@
         </div>
 
         <a href="home.jsp" class="btn-back">Quay về trang chủ</a>
+         <a href="MyOrderServlet" class="btn-back btn-order">Xem đơn hàng</a>
+
     </section>
 
     <!-- Hiệu ứng ngôi sao rơi -->
