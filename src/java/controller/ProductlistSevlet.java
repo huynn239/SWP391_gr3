@@ -1,69 +1,70 @@
 /*
   * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
   * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
-  */
- 
- package controller;
- 
- import dto.BrandDAO;
- import dto.CategoryDAO;
- import dto.ProductDAO;
- import java.io.IOException;
- import java.io.PrintWriter;
- import jakarta.servlet.ServletException;
- import jakarta.servlet.http.HttpServlet;
- import jakarta.servlet.http.HttpServletRequest;
- import jakarta.servlet.http.HttpServletResponse;
- import jakarta.servlet.http.HttpSession;
- import java.util.ArrayList;
- import java.util.Comparator;
+ */
+package controller;
+
+import dto.BrandDAO;
+import dto.CategoryDAO;
+import dto.ProductDAO;
+import java.io.IOException;
+import java.io.PrintWriter;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
- import java.util.List;
+import java.util.List;
 import java.util.Map;
 import model.Account;
- import model.Brand;
- import model.Category;
- import model.Product;
- 
- /**
-  *
-  * @author BAO CHAU
-  */
- public class ProductlistSevlet extends HttpServlet {
-    
-     /** 
-      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
-      * @param request servlet request
-      * @param response servlet response
-      * @throws ServletException if a servlet-specific error occurs
-      * @throws IOException if an I/O error occurs
-      */
-     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-     throws ServletException, IOException {
-         response.setContentType("text/html;charset=UTF-8");
-         try (PrintWriter out = response.getWriter()) {
-             /* TODO output your page here. You may use following sample code. */
-             out.println("<!DOCTYPE html>");
-             out.println("<html>");
-             out.println("<head>");
-             out.println("<title>Servlet ProductlistSevlet</title>");  
-             out.println("</head>");
-             out.println("<body>");
-             out.println("<h1>Servlet ProductlistSevlet at " + request.getContextPath () + "</h1>");
-             out.println("</body>");
-             out.println("</html>");
-         }
-     } 
- 
-     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-     /** 
-      * Handles the HTTP <code>GET</code> method.
-      * @param request servlet request
-      * @param response servlet response
-      * @throws ServletException if a servlet-specific error occurs
-      * @throws IOException if an I/O error occurs
-      */
-     protected void doGet(HttpServletRequest request, HttpServletResponse response)
+import model.Brand;
+import model.Category;
+import model.Product;
+
+/**
+ *
+ * @author BAO CHAU
+ */
+public class ProductlistSevlet extends HttpServlet {
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        try (PrintWriter out = response.getWriter()) {
+            /* TODO output your page here. You may use following sample code. */
+            out.println("<!DOCTYPE html>");
+            out.println("<html>");
+            out.println("<head>");
+            out.println("<title>Servlet ProductlistSevlet</title>");
+            out.println("</head>");
+            out.println("<body>");
+            out.println("<h1>Servlet ProductlistSevlet at " + request.getContextPath() + "</h1>");
+            out.println("</body>");
+            out.println("</html>");
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         BrandDAO brandDAO = new BrandDAO();
@@ -168,7 +169,7 @@ import model.Account;
         request.setAttribute("selectedType", typeId);
         request.setAttribute("selectedSortBy", sortBy);
 
-        request.getRequestDispatcher("Productlistmkt.jsp").forward(request, response);
+        request.getRequestDispatcher("Productlistmanage.jsp").forward(request, response);
     }
 
     /**
@@ -243,7 +244,7 @@ import model.Account;
                     productDAO.savePendingUpdate(action, productId, user.getId(), (HashMap<String, Object>) changes);
                     session.setAttribute("message", "Gửi đơn thành công!");
                 }
-                response.sendRedirect("Productdetailmkt.jsp?id=" + productId);
+                response.sendRedirect("Productdetailmanage.jsp?id=" + productId);
             } else if ("addcolor".equals(action)) {
                 int productId = Integer.parseInt(request.getParameter("product_id"));
                 int colorName = Integer.parseInt(request.getParameter("colorName"));
@@ -283,7 +284,7 @@ import model.Account;
                 } else {
                     session.setAttribute("message", "Cập nhật thành công!");
                 }
-                response.sendRedirect("Productdetailmkt.jsp?id=" + productId);
+                response.sendRedirect("Productdetailmanage.jsp?id=" + productId);
             } else if (action.equals("deleteProduct")) {
                 int productId = Integer.parseInt(request.getParameter("id"));
                 int userId = user.getId();
@@ -294,21 +295,57 @@ import model.Account;
                     productDAO.savePendingUpdate("delete", productId, userId, null);
                     session.setAttribute("message", "Gửi đơn thành công!");
                 }
-                 response.sendRedirect("productlistsevlet");
+                response.sendRedirect("productlistsevlet");
+            } else if (action.equals("addProduct")) {
+                int selectedColorId = Integer.parseInt(request.getParameter("color"));
+                String name = request.getParameter("name");
+                int categoryId = Integer.parseInt(request.getParameter("category"));
+                String brandId = request.getParameter("brand");
+                double price = Double.parseDouble(request.getParameter("price"));
+                int materialID = Integer.parseInt(request.getParameter("material"));
+                String detail = request.getParameter("detail");
+                String url = request.getParameter("img");
+                String urlm = request.getParameter("imgm");
+                Product product = new Product(name, url, materialID, price, detail, brandId, categoryId);
+                if (user.getRoleID() == 1) {
+                    productDAO.insertProduct(product);
+                    int pID = productDAO.getLastProductID();
+                    productDAO.insertProductImage(urlm, pID, selectedColorId);
+                }
+
+               
+                List<Map<String, Integer>> sizesList = new ArrayList<>();
+                String[] sizeIds = request.getParameterValues("sizeIds");
+                String[] quantities = request.getParameterValues("quantities");
+
+                if (sizeIds != null && quantities != null) {
+                    for (int i = 0; i < sizeIds.length; i++) {
+                        int sizeId = Integer.parseInt(sizeIds[i]);
+                        int quantity = Integer.parseInt(quantities[i]);
+                        if (user.getRoleID() == 1) {
+                            int pID = productDAO.getLastProductID();
+                            productDAO.insertProductSize(pID, selectedColorId, sizeId, quantity);
+                            session.setAttribute("message", "Thêm thành công!");
+                        }
+                       
+                    }
+                }
+                response.sendRedirect("Addproduct.jsp");
             }
         } catch (Exception e) {
             e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Lỗi xử lý yêu cầu.");
         }
     }
- 
-     /** 
-      * Returns a short description of the servlet.
-      * @return a String containing servlet description
-      */
-     @Override
-     public String getServletInfo() {
-         return "Short description";
-     }// </editor-fold>
- 
- }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+
+}

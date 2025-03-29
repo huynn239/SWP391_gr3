@@ -305,7 +305,9 @@
                     </div>
 
                     <div class="col-md-6 text-right">
-                        <a href="productlistsevlet?action=addproduct" class="btn btn-add"><i class="fa fa-plus"></i> Thêm sản phẩm</a>
+                        <% if (user.getRoleID() == 1) { %>
+                        <a href="Addproduct.jsp" class="btn btn-add"><i class="fa fa-plus"></i> Thêm sản phẩm</a>
+                        <% } %>
                     </div>
                 </div>
 
@@ -408,7 +410,7 @@
 
                                             <td class="text-center align-middle">
 
-                                                <a href="Productdetailmkt.jsp?id=${product.getId()}" class="btn btn-warning btn-sm action-btn">
+                                                <a href="Productdetailmanage.jsp?id=${product.getId()}" class="btn btn-warning btn-sm action-btn">
                                                     <i class="fa fa-edit"></i> Sửa
                                                 </a>
 

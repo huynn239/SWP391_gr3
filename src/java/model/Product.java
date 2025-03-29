@@ -19,6 +19,18 @@ public class Product {
     public Product() {
     }
 
+    public Product(String name, String image, int materialId, double price, String details, String brandId, int typeId) {
+        this.name = name;
+        this.image = image;
+        this.materialId = materialId;
+        this.price = price;
+        this.details = details;
+        this.brandId = brandId;
+        this.typeId = typeId;
+    }
+    
+    
+
     public Product(int id, String name, String image, int materialId, double price, String details, String brandId, int typeId, boolean status) {
         this.id = id;
         this.name = name;

@@ -198,7 +198,7 @@ public class ProductDAO extends DBContext {
 
     public static void main(String[] args) {
         ProductDAO list = new ProductDAO();
-        list.addProductColor(1, 11, "abc");
+        System.out.println("" + list.getLastProductID());
     }
 
     public void updateProductSize(int productId, int selectedColorId, int sizeId, int quantity) {
@@ -534,59 +534,116 @@ public class ProductDAO extends DBContext {
             e.printStackTrace();
         }
     }
-     public int getCountByDate(String date) {
-    String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[product] WHERE CONVERT(date, created_date) = ?";
-    try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-        stmt.setString(1, date);
-        ResultSet rs = stmt.executeQuery();
-        if (rs.next()) {
-            return rs.getInt(1);
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return 0;
-}
-      public List<String> getAllCategories() {
-    List<String> categories = new ArrayList<>();
-    String sql = "SELECT Name FROM Category";
-    try (PreparedStatement stmt = connection.prepareStatement(sql);
-         ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
-            String categoryName = rs.getString("Name");
-            if (categoryName != null && !categoryName.trim().isEmpty()) {
-                categories.add(categoryName);
-            }
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-    return categories;
-}
 
+    public void insertProduct(Product p) {
+        String sql = "insert Product(Name,Image,MaterialID,BrandID,Details,Price,TypeID) values\n"
+                + "(?,?,?,?,?,?,?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, p.getName());
+            stmt.setString(2, p.getImage());
+            stmt.setInt(3, p.getMaterialId());
+            stmt.setString(4, p.getBrandId());
+            stmt.setString(5, p.getDetails());
+            stmt.setDouble(6, p.getPrice());
+            stmt.setInt(7, p.getTypeId());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int getLastProductID() {
+        int lastId = -1;
+        String sql = "SELECT TOP 1 id FROM Product ORDER BY id DESC";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                lastId = rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return lastId;
+    }
+
+    public int getCountByDate(String date) {
+        String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[product] WHERE CONVERT(date, created_date) = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, date);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<String> getAllCategories() {
+        List<String> categories = new ArrayList<>();
+        String sql = "SELECT Name FROM Category";
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String categoryName = rs.getString("Name");
+                if (categoryName != null && !categoryName.trim().isEmpty()) {
+                    categories.add(categoryName);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return categories;
+    }
 
     public List<Product> getLatestProducts() {
-    List<Product> productList = new ArrayList<>();
-    String sql = "SELECT TOP 10 * FROM Product WHERE Status = 1 AND is_deleted = 0 ORDER BY ID DESC";
-    try (PreparedStatement stmt = connection.prepareStatement(sql);
-         ResultSet rs = stmt.executeQuery()) {
-        while (rs.next()) {
-            Product product = new Product(
-                rs.getInt("ID"),
-                rs.getString("Name"),
-                rs.getString("Image"),
-                rs.getInt("MaterialID"),
-                rs.getDouble("Price"),
-                rs.getString("Details"),
-                rs.getString("BrandID"),
-                rs.getInt("TypeID"),
-                rs.getBoolean("Status")
-            );
-            productList.add(product);
+        List<Product> productList = new ArrayList<>();
+        String sql = "SELECT TOP 10 * FROM Product WHERE Status = 1 AND is_deleted = 0 ORDER BY ID DESC";
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Product product = new Product(
+                        rs.getInt("ID"),
+                        rs.getString("Name"),
+                        rs.getString("Image"),
+                        rs.getInt("MaterialID"),
+                        rs.getDouble("Price"),
+                        rs.getString("Details"),
+                        rs.getString("BrandID"),
+                        rs.getInt("TypeID"),
+                        rs.getBoolean("Status")
+                );
+                productList.add(product);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+        return productList;
     }
-    return productList;
-}
+
+    public void insertProductImage(String urlm, int pID, int selectedColorId) {
+        String sql = "insert ProductImage(ColorID,ImageURL,ProductID) values(?,?,?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, selectedColorId);
+            stmt.setString(2, urlm);
+            stmt.setInt(3, pID);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void insertProductSize(int pID, int selectedColorId, int sizeId, int quantity) {
+        String sql = "insert ProductSize(ProductID,ColorID,SizeID,Quantity) values(?,?,?,?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, pID);
+            stmt.setInt(2, selectedColorId);
+            stmt.setInt(3, sizeId);
+            stmt.setInt(4, quantity);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
