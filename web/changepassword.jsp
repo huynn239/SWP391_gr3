@@ -209,19 +209,19 @@
                             <div class="form-group">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                    <input class="form-control" type="password" placeholder="Mật khẩu hiện tại" name="pass" required>
+                                    <input class="form-control" type="password" placeholder="Current Password" name="pass" required>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-unlock-alt"></i></span>
-                                    <input class="form-control" type="password" placeholder="Mật khẩu mới" name="newpass" required>
+                                    <input class="form-control" type="password" placeholder="New Password" name="newpass" required>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-unlock-alt"></i></span>
-                                    <input class="form-control" type="password" placeholder="Xác nhận mật khẩu mới" name="renewpass" required>
+                                    <input class="form-control" type="password" placeholder="Confirm New Password" name="renewpass" required>
                                 </div>
                             </div>
                             <div class="panel-footer">

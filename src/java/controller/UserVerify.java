@@ -29,7 +29,7 @@ public class UserVerify extends HttpServlet {
         long currentTime = System.currentTimeMillis();
 
         // Kiểm tra nếu mã xác thực đã hết hạn (sau 1 phút)
-        if (authTime == null || (currentTime - authTime > 60000)) { // 60000ms = 1 phút
+        if (authTime == null || (currentTime - authTime > 120000)) { // 60000ms = 1 phút
             session.removeAttribute("authCode");
             session.removeAttribute("authTime");
             request.setAttribute("error", "Verification code has expired, please request a new code.");
@@ -54,7 +54,8 @@ public class UserVerify extends HttpServlet {
             session.removeAttribute("authEmail");
 
         //    session.setAttribute("message", "Xác thực thành công! Chào mừng bạn.");
-            response.sendRedirect(request.getContextPath() + "/home");
+        request.setAttribute("success", "Account registered successfully");
+            request.getRequestDispatcher("verifycode.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "The verification code is incorrect, please try again.");
             request.getRequestDispatcher("verifycode.jsp").forward(request, response);
