@@ -269,7 +269,7 @@
         %>
 
         <button class="address-btn" onclick="openAddressModal()">
-            <i class="fa fa-book"></i> Chọn từ sổ địa chỉ
+                <i class="fa fa-book"></i> Address Book
         </button>
 
 
@@ -279,37 +279,37 @@
 
 
                 <div id="addressListContainer">
-                    <h2>Sổ địa chỉ</h2>
+                    <h2>Address Book</h2>
                     <div id="addressList">
 
                     </div>
-                    <button class="add-address" onclick="showAddressForm()">Thêm địa chỉ</button>
+                    <button class="add-address" onclick="showAddressForm()">Add adress</button>
                 </div>
 
                 <form id="addressForm" action="orderinfo" method="get" style="display: none;">
-                    <h2>Thêm địa chỉ</h2>
-                    <input type="text" name="inputname" id="name-input" placeholder="Tên" required>
+                    <h2>Add address</h2>
+                    <input type="text" name="inputname" id="name-input" placeholder="Fullname" required>
 
-                    <input type="text" name="inputphone" id="phone-input" placeholder="Số điện thoại" required 
+                    <input type="text" name="inputphone" id="phone-input" placeholder="Phone" required 
                            pattern="[0-9]{10}" title="Số điện thoại gồm 10 chữ số">
 
-                    <input type="text" name="inputaddress" id="address-input" placeholder="Địa chỉ" required>
+                    <input type="text" name="inputaddress" id="address-input" placeholder="Address" required>
                     <input type="text" name="inputemail" id="email-input" placeholder="Email" required>
                     <select name="inputprovince" id="province-input" onchange="loadDistrictsForm()" required>
-                        <option value="" hidden selected>Chọn tỉnh/thành phố</option>
+                        <option value="" hidden selected>Choose province</option>
                     </select>
 
                     <select name="inputdistrict" id="district-input" onchange="loadWardsForm()" required>
-                        <option value="" hidden selected>Chọn quận/huyện</option>
+                        <option value="" hidden selected>Choose district</option>
                     </select>
 
                     <select name="inputward" id="ward-input" required>
-                        <option value="" hidden selected>Chọn xã/phường</option>
+                        <option value="" hidden selected>Choose ward</option>
                     </select>
 
                     <br>
-                    <button type="button" onclick="cancelNewAddress()">Huỷ</button>
-                    <button type="submit">Thêm</button>
+                    <button type="button" onclick="cancelNewAddress()">Cancel</button>
+                    <button type="submit">Add</button>
                 </form>
 
 
@@ -480,12 +480,12 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="chose_area">
-                                <label for="fullname">Họ và tên</label>
+                                <label for="fullname">Fullname</label>
                                 <div>
                                     <input type="text" id="fullname" name="fullname" value="<%= user.getuName() %>" required>
                                 </div>
 
-                                <label for="phone">Số điện thoại</label>
+                                <label for="phone">Phone</label>
                                 <input type="text" id="phone" name="phone" value="<%= user.getMobile() %>" required>
 
                                 <label for="email">Email</label>
@@ -494,24 +494,24 @@
                                 <div class="location-select">
                                     <div class="location-select">
                                         <select id="province" name="province" onchange="loadDistricts()" required>
-                                            <option value="" hidden selected>Chọn tỉnh/thành phố</option>
+                                            <option value="" hidden selected>Choose province</option>
                                         </select>
                                         <select id="district" name="district" onchange="loadWards()" required>
-                                            <option value="" hidden selected>Chọn quận/huyện</option>
+                                            <option value="" hidden selected>Choose district</option>
                                         </select>
                                         <select id="ward" name="ward" required>
-                                            <option value="" hidden selected>Chọn xã/phường</option>
+                                            <option value="" hidden selected>Choose ward</option>
                                         </select>
                                     </div>
                                 </div>
 
 
 
-                                <label for="address">Địa chỉ</label>
+                                <label for="address">Address</label>
                                 <input type="text" id="address" name="address" value="" required>
                                 <div class="save">
                                     <input type="checkbox" id="saveAddress" name="saveAddress" >
-                                    <label for="saveAddress">Lưu địa chỉ này</label>
+                                    <label for="saveAddress">Save address</label>
                                 </div>
                             </div>
                         </div>
@@ -519,9 +519,9 @@
                         <div class="col-sm-6">
                             <div class="total_area">
                                 <ul>
-                                    <li>Tạm tính <span><%= subtotal %>đ</span></li>
-                                    <li>Phí ship <span><%= (shippingCost > 0) ? shippingCost + "đ" : "Free" %></span></li>
-                                    <li>Tổng <span><%= total %>đ</span></li>
+                                    <li>Subtotal <span><%= subtotal %>đ</span></li>
+                                    <li>Shipping Fee <span><%= (shippingCost > 0) ? shippingCost + "đ" : "Free" %></span></li>
+                                    <li>Total<span><%= total %>đ</span></li>
                                 </ul>
                                 <button type="submit" class="btn btn-default check_out">Check Out</button> <!-- Chuyển thành nút submit -->
                                 <a href="cartdetail.jsp" class="btn btn-default check_out">Update</a>

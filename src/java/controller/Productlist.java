@@ -61,25 +61,30 @@ public class Productlist extends HttpServlet {
         String category = request.getParameter("category");
         List<Product> filteredProducts = new ArrayList<>();
         ProductDAO pro = new ProductDAO();
-        int cate = Integer.parseInt(category);
-        filteredProducts = pro.getAllProductCat(cate);
-        int productsPerPage = 6;
-        int totalProducts = filteredProducts.size();
-        int totalPages = (int) Math.ceil((double) totalProducts / productsPerPage);
-        int currentPage = 1;
-        String pageParam = request.getParameter("page");
-        if (pageParam != null) {
-            currentPage = Integer.parseInt(pageParam);
+        try {
+            int cate = Integer.parseInt(category);
+            filteredProducts = pro.getAllProductCat(cate);
+            int productsPerPage = 6;
+            int totalProducts = filteredProducts.size();
+            int totalPages = (int) Math.ceil((double) totalProducts / productsPerPage);
+            int currentPage = 1;
+            String pageParam = request.getParameter("page");
+            if (pageParam != null) {
+                currentPage = Integer.parseInt(pageParam);
+            }
+
+            int startIndex = (currentPage - 1) * productsPerPage;
+            int endIndex = Math.min(startIndex + productsPerPage, totalProducts);
+            List<Product> paginatedProducts = filteredProducts.subList(startIndex, endIndex);
+            request.setAttribute("filteredProducts", paginatedProducts);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("currentPage", currentPage);
+            request.setAttribute("category", category);
+            request.getRequestDispatcher("productlist.jsp").forward(request, response);
+        } catch (Exception e) {
+            request.getRequestDispatcher("productlist.jsp").forward(request, response);
         }
 
-        int startIndex = (currentPage - 1) * productsPerPage;
-        int endIndex = Math.min(startIndex + productsPerPage, totalProducts);
-        List<Product> paginatedProducts = filteredProducts.subList(startIndex, endIndex);
-        request.setAttribute("filteredProducts", paginatedProducts);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("currentPage", currentPage);
-        request.setAttribute("category", category);
-        request.getRequestDispatcher("productlist.jsp").forward(request, response);
     }
 
     /**

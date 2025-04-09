@@ -21,7 +21,7 @@
     Product product = null;
     List<Feedback> feedbacks = null;
     List<ProductImage> productImages = null;
-      List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at"); 
+      List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at","DESC"); 
     List<Slider> activeSliders = new ArrayList<>();
     for (Slider slider : allSliders) {
         if (slider.isStatus()) { 
@@ -172,7 +172,7 @@
 
 
 
-                                    <li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
+                                    <li><a href="blogList"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
                                     <li><a href="404.html">404</a></li>
                                     <li><a href="contact-us.html">Contact</a></li>
                                 </ul>
@@ -309,7 +309,7 @@
                                     <p><strong>Web ID:</strong> <%= product.getId() %></p>
                                     <img src="images/product-details/rating.png" alt="Rating" />
                                     <span>
-                                        <span>US $<%= product.getPrice() %></span>
+                                        <span> <%= product.getPrice() %>vnđ</span>
                                         <form id="addToCartForm" action="orderpdetail" method="POST" style="display:contents">
                                             <input type="hidden" name="productId" value="<%= product.getId() %>">
                                             <input type="hidden" name="productName" value="<%= product.getName() %>">
@@ -359,7 +359,6 @@
                                     <p><strong>Brand:</strong> <%= brand != null ? brand.getName() : "N/A" %></p>
                                     <p><strong>Category:</strong> <%= category != null ? category.getName() : "N/A" %></p>
                                     <p><strong>Material:</strong> <%= material != null ? material.getMname() : "N/A" %></p>
-                                    <a href=""><img src="images/product-details/share.png" class="share img-responsive" alt="Share" /></a>
                                 </div>
                             </div>
                         </div>

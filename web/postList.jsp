@@ -198,7 +198,9 @@
                                                 <i class="fa fa-eye"></i> View
                                             </button>
                                             <a href="editPost?id=${blog.id}" class="btn btn-warning btn-sm action-btn"><i class="fa fa-edit"></i> Edit</a>
-                                            <a href="deletePost?id=${blog.id}" class="btn btn-danger btn-sm action-btn" onclick="return confirm('Bạn có chắc muốn xóa bài viết này?')"><i class="fa fa-trash"></i> Delete</a>
+                                            <a href="deletePost?id=${blog.id}" class="btn btn-danger btn-sm action-btn"style="
+    margin-top: 10px;
+"  onclick="return confirm('Bạn có chắc muốn xóa bài viết này?')"><i class="fa fa-trash"></i> Delete</a>
                                         </td>
                                     </tr>
                                 </c:forEach>

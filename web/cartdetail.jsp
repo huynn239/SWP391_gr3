@@ -349,9 +349,9 @@
                     <div class="col-sm-6">
                         <div class="total_area">
                             <ul>
-                                <li>Tạm tính <span><%= subtotal %>đ</span></li>
-                                <li>Phí ship <span><%= (shippingCost > 0) ? shippingCost + "đ" : "Free" %></span></li>
-                                <li>Tổng <span><%= total %>đ</span></li>
+                                <li>Subtotal <span><%= subtotal %>đ</span></li>
+                                <li>Shipping Fee     <span><%= (shippingCost > 0) ? shippingCost + "đ" : "Free" %></span></li>
+                                <li>Total <span><%= total %>đ</span></li>
                             </ul>
 
                             <% if (cartList != null && !cartList.isEmpty()) { %>

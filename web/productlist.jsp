@@ -13,8 +13,17 @@
 <jsp:useBean id="productimageDAO" class="dto.ProductImageDAO" scope="session"/>
 <jsp:useBean id="colorDAO" class="dto.ColorDAO" scope="session"/>
 <%
-    String categ = (String)request.getParameter("category");
-    int cate = Integer.parseInt(categ);
+    String categ = request.getParameter("category");
+
+int cate = 0; // Giá trị mặc định
+
+try {
+    if (categ != null && !categ.trim().isEmpty()) {
+        cate = Integer.parseInt(categ);
+    }
+} catch (NumberFormatException e) {
+    e.printStackTrace();
+}
     List<Product> products = productDAO.getAllProductCat(cate);
     List<Brand> brands = brandDAO.getAllBrands();
     List<Category> categories = categoryDAO.getAllCategories();
@@ -448,7 +457,7 @@
                 document.getElementById("productId").value = productId;
                 document.getElementById("productName").innerText = productName;
                 document.getElementById("productPrice").innerText = productPrice;
-                 document.getElementById("price").value = productPrice;
+                document.getElementById("price").value = productPrice;
                 let colorSelect = document.getElementById("color");
                 colorSelect.innerHTML = "";// Xóa danh sách cũ và thêm option mặc định
 

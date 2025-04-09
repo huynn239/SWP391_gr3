@@ -164,14 +164,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="MyOrderServlet">
-                                <i class="material-icons">shopping_cart</i> My Orders
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="approverequest">
                                 <i class="material-icons">check_circle</i> Approve Request
                             </a>
+                        </li>
+                        <li class="nav-item">
+                            <li><a href="${not empty sessionScope.u? "logout" : "login"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>       
                         </li>
                     </ul>
                 </div>

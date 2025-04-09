@@ -9,40 +9,64 @@
 <jsp:useBean id="productimageDAO" class="dto.ProductImageDAO" scope="session"/>
 <jsp:useBean id="colorDAO" class="dto.ColorDAO" scope="session"/>
 <jsp:useBean id="materialDAO" class="dto.MaterialDAO" scope="session"/>
-<%@ page import="java.util.List" %>
+<%@ page import="java.util.List, java.util.ArrayList" %>
 <%@ page import="java.util.Set, java.util.HashSet" %>
 <%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider,model.ProductImage,model.Color" %>
 <%
  Account user = (Account) session.getAttribute("u");
 %>
 <%
-   String productIdParam = request.getParameter("id");
-   Product product = null;
-    
-   if (productIdParam != null) {
-       int productId = Integer.parseInt(productIdParam);
-       product = productDAO.getProductById(productId);
-       request.setAttribute("product", product);
-        
-       List<Color> colors = colorDAO.getAllColors();
-       List<ProductImage> images = productimageDAO.getImagesByProduct(productId);
-       int firstColorID = images.isEmpty() ? 0 : images.get(0).getColorId();
-       String selectedColorId = request.getParameter("selectedColorId");
-       
-       Set<Integer> existingColorIds = new HashSet<>();
-       for (ProductImage img : images) {
-           existingColorIds.add(img.getColorId());
-       } 
-       
-       if (selectedColorId != null) {
-           firstColorID = Integer.parseInt(selectedColorId);
-           System.out.println("Color ID nhận được: " + firstColorID);
-       }
+ String productIdParam = request.getParameter("id");
+if (productIdParam == null || productIdParam.trim().isEmpty()) {
+    response.sendRedirect("productlistsevlet");
+    return;
+}
 
-       request.setAttribute("firstColorID", firstColorID);
-       request.setAttribute("colors", colors);
-       request.setAttribute("existingColorIds", existingColorIds);
-   }
+Product product = null;
+
+try {
+    int productId = Integer.parseInt(productIdParam);
+    product = productDAO.getProductById(productId);
+    if (product == null) { 
+        // Nếu không tìm thấy sản phẩm -> chuyển hướng
+        response.sendRedirect("ProductListServlet");
+        return;
+    }
+    request.setAttribute("product", product);
+} catch (NumberFormatException e) {
+    System.out.println("Lỗi: ID sản phẩm không hợp lệ!");
+    response.sendRedirect("ProductListServlet");
+    return;
+}
+
+// Đảm bảo không bị NullPointerException
+List<Color> colors = colorDAO.getAllColors();
+List<ProductImage> images = productimageDAO.getImagesByProduct(product.getId());
+if (images == null) {
+    images = new ArrayList<>(); // Tránh lỗi NullPointerException
+}
+
+int firstColorID = images.isEmpty() ? 0 : images.get(0).getColorId();
+String selectedColorId = request.getParameter("selectedColorId");
+
+Set<Integer> existingColorIds = new HashSet<>();
+for (ProductImage img : images) {
+    existingColorIds.add(img.getColorId());
+}
+
+if (selectedColorId != null && !selectedColorId.trim().isEmpty()) {
+    try {
+        firstColorID = Integer.parseInt(selectedColorId);
+        System.out.println("Color ID nhận được: " + firstColorID);
+    } catch (NumberFormatException e) {
+        System.out.println("Lỗi: selectedColorId không hợp lệ!");
+    }
+}
+
+request.setAttribute("firstColorID", firstColorID);
+request.setAttribute("colors", colors);
+request.setAttribute("existingColorIds", existingColorIds);
+
 %> 
 
 
@@ -193,7 +217,7 @@
         if (message != null) { 
         %>
         <script>
-        showMessage("<%= message %>");
+            showMessage("<%= message %>");
         </script>
         <% 
                 session.removeAttribute("message"); // Xóa thông báo sau khi hiển thị
@@ -235,7 +259,7 @@
                             <button  type="button" class="btn btn-add" onclick="openColorModal()">
                                 <i class="fa fa-plus"></i> Thêm màu sắc
                             </button>
-                            
+
                         </div>
                         <!-- Nút mở modal -->
                         <label for="color">Màu sắc:</label>

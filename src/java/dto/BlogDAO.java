@@ -12,8 +12,8 @@ public class BlogDAO extends DBContext {
     public List<Blog> getAllBlogs(int page, int limit, String sortBy, String sortOrder) {
         List<Blog> blogList = new ArrayList<>();
         String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
-                     "FROM [shopOnline].[dbo].[blog] b " +
-                     "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "FROM [shopOnline2].[dbo].[blog] b " +
+                     "JOIN [shopOnline2].[dbo].[users] u ON b.UsersID = u.ID " +
                      "ORDER BY " + (sortBy != null ? sortBy : "b.UploadDate") + " " + (sortOrder != null ? sortOrder : "DESC") + " " +
                      "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
@@ -43,7 +43,7 @@ public class BlogDAO extends DBContext {
         return blogList;
     }
     public boolean addBlog(Blog blog, String userId) {
-        String sql = "INSERT INTO [shopOnline].[dbo].[blog] (Title, Content, BlogImage, UploadDate, UsersID, CateID) " +
+        String sql = "INSERT INTO [shopOnline2].[dbo].[blog] (Title, Content, BlogImage, UploadDate, UsersID, CateID) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
@@ -63,7 +63,7 @@ public class BlogDAO extends DBContext {
 
     // Lấy tổng số trang của blog
     public int getTotalPages(int limit) {
-        String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[blog]";
+        String sql = "SELECT COUNT(*) FROM [shopOnline2].[dbo].[blog]";
         int totalRows = 0;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql);
@@ -81,7 +81,7 @@ public class BlogDAO extends DBContext {
     // Lấy danh mục blog từ bảng categoryblog
     public List<Category> getAllBlogCategories() {
         List<Category> categories = new ArrayList<>();
-        String sql = "SELECT ID, Name FROM [shopOnline].[dbo].[categoryblog]";
+        String sql = "SELECT ID, Name FROM [shopOnline2].[dbo].[categoryblog]";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -101,8 +101,8 @@ public class BlogDAO extends DBContext {
     public List<Blog> getBlogsByCategory(int categoryId, int page, int limit, String sortBy, String sortOrder) {
         List<Blog> blogList = new ArrayList<>();
         String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
-                     "FROM [shopOnline].[dbo].[blog] b " +
-                     "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "FROM [shopOnline2].[dbo].[blog] b " +
+                     "JOIN [shopOnline2].[dbo].[users] u ON b.UsersID = u.ID " +
                      "WHERE b.CateID = ? " +
                      "ORDER BY " + (sortBy != null ? sortBy : "b.UploadDate") + " " + (sortOrder != null ? sortOrder : "DESC") + " " +
                      "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -134,7 +134,7 @@ public class BlogDAO extends DBContext {
 
     // Lấy tổng số trang của blog theo danh mục
     public int getTotalPagesByCategory(int categoryId, int limit) {
-        String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[blog] WHERE CateID = ?";
+        String sql = "SELECT COUNT(*) FROM [shopOnline2].[dbo].[blog] WHERE CateID = ?";
         int totalRows = 0;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -155,9 +155,9 @@ public class BlogDAO extends DBContext {
     public List<Blog> searchBlogs(String keyword, int page, int limit, String sortBy, String sortOrder) {
         List<Blog> blogList = new ArrayList<>();
         String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID " +
-                     "FROM [shopOnline].[dbo].[blog] b " +
-                     "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
-                     "JOIN [shopOnline].[dbo].[categoryblog] c ON b.CateID = c.ID " +
+                     "FROM [shopOnline2].[dbo].[blog] b " +
+                     "JOIN [shopOnline2].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "JOIN [shopOnline2].[dbo].[categoryblog] c ON b.CateID = c.ID " +
                      "WHERE c.Name LIKE ? OR b.Title LIKE ? OR b.Content LIKE ? OR u.uName LIKE ? " +
                      "ORDER BY " + (sortBy != null ? sortBy : "b.UploadDate") + " " + (sortOrder != null ? sortOrder : "DESC") + " " +
                      "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
@@ -194,9 +194,9 @@ public class BlogDAO extends DBContext {
     // Lấy tổng số trang khi tìm kiếm
     public int getTotalPagesBySearch(String keyword, int limit) {
         String sql = "SELECT COUNT(*) " +
-                     "FROM [shopOnline].[dbo].[blog] b " +
-                     "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
-                     "JOIN [shopOnline].[dbo].[categoryblog] c ON b.CateID = c.ID " +
+                     "FROM [shopOnline2].[dbo].[blog] b " +
+                     "JOIN [shopOnline2].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "JOIN [shopOnline2].[dbo].[categoryblog] c ON b.CateID = c.ID " +
                      "WHERE c.Name LIKE ? OR b.Title LIKE ? OR b.Content LIKE ? OR u.uName LIKE ?";
         int totalRows = 0;
 
@@ -221,9 +221,9 @@ public class BlogDAO extends DBContext {
  public Blog getBlogById(String id) {
         Blog blog = null;
         String sql = "SELECT b.ID, b.Title, b.Content, b.UploadDate, b.BlogImage, u.uName AS Author, b.CateID, c.Name AS CategoryName " +
-                     "FROM [shopOnline].[dbo].[blog] b " +
-                     "JOIN [shopOnline].[dbo].[users] u ON b.UsersID = u.ID " +
-                     "LEFT JOIN [shopOnline].[dbo].[categoryblog] c ON b.CateID = c.ID " + // LEFT JOIN để lấy categoryName
+                     "FROM [shopOnline2].[dbo].[blog] b " +
+                     "JOIN [shopOnline2].[dbo].[users] u ON b.UsersID = u.ID " +
+                     "LEFT JOIN [shopOnline2].[dbo].[categoryblog] c ON b.CateID = c.ID " + // LEFT JOIN để lấy categoryName
                      "WHERE b.ID = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -250,7 +250,7 @@ public class BlogDAO extends DBContext {
     // Lấy danh mục theo CateID
     public Category getCategoryByCateID(int cateID) {
         Category category = null;
-        String sql = "SELECT ID, Name FROM [shopOnline].[dbo].[categoryblog] WHERE ID = ?";
+        String sql = "SELECT ID, Name FROM [shopOnline2].[dbo].[categoryblog] WHERE ID = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cateID);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -264,7 +264,7 @@ public class BlogDAO extends DBContext {
         return category;
     }
     public boolean updateBlog(Blog blog) {
-        String sql = "UPDATE [shopOnline].[dbo].[blog] SET Title = ?, Content = ?, BlogImage = ?, CateID = ? WHERE ID = ?";
+        String sql = "UPDATE [shopOnline2].[dbo].[blog] SET Title = ?, Content = ?, BlogImage = ?, CateID = ? WHERE ID = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, blog.getTitle());
             stmt.setString(2, blog.getContent());
@@ -282,7 +282,7 @@ public class BlogDAO extends DBContext {
 
     // Xóa bài viết
     public boolean deleteBlog(String id) {
-        String sql = "DELETE FROM [shopOnline].[dbo].[blog] WHERE ID = ?";
+        String sql = "DELETE FROM [shopOnline2].[dbo].[blog] WHERE ID = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, id);
 
@@ -294,7 +294,7 @@ public class BlogDAO extends DBContext {
         }
     }
     public int getCountByDate(String date) {
-    String sql = "SELECT COUNT(*) FROM [shopOnline].[dbo].[blog] WHERE CONVERT(date, UploadDate) = ?";
+    String sql = "SELECT COUNT(*) FROM [shopOnline2].[dbo].[blog] WHERE CONVERT(date, UploadDate) = ?";
     try (PreparedStatement stmt = connection.prepareStatement(sql)) {
         stmt.setString(1, date);
         ResultSet rs = stmt.executeQuery();

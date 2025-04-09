@@ -125,7 +125,7 @@
 
 
 
-                                    <li><a href="blogList.jsp"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
+                                    <li><a href="blogList"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
 
 
                                     <li><a href="404.html">404</a></li>
@@ -298,7 +298,7 @@
                                                                     <img id="productImage" src="" alt="Product Image">
                                                                 </div>
                                                                 <p><strong>Product:</strong> <span id="productName"></span></p>
-                                                                <p><strong>Price:</strong> $<span id="productPrice"></span></p>
+                                                                <p><strong>Price:</strong> vnđ<span id="productPrice"></span></p>
 
 
                                                                 <label for="color">Color:</label>
