@@ -112,7 +112,7 @@ public class ResetPassword extends HttpServlet {
         String confirmPassword = request.getParameter("confirm_password");
         //validate password...
         if (!password.equals(confirmPassword)) {
-            request.setAttribute("mess", "confirm password must same password");
+            request.setAttribute("mess", "Confirm password must same password !");
             request.setAttribute("email", email);
             request.getRequestDispatcher("resetPassword.jsp").forward(request, response);
             return;
@@ -147,8 +147,8 @@ public class ResetPassword extends HttpServlet {
         DAOToken.updateStatus(tokenForgetPassword);
 
         //save user in session and redirect to home
-    response.sendRedirect("home");
-    }
+request.setAttribute("success", "Password recovered successfully !");
+    request.getRequestDispatcher("resetPassword.jsp").forward(request, response);    }
 
     /**
      * Returns a short description of the servlet.

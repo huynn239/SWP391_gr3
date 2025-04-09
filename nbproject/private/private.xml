@@ -2,6 +2,13 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+<<<<<<< HEAD
         <group/>
+=======
+        <group>
+            <file>file:/E:/SWP/CloneVe(03.04.2025)/SWP391_gr3/web/resetPassword.jsp</file>
+            <file>file:/E:/SWP/CloneVe(03.04.2025)/SWP391_gr3/web/requestPassword.jsp</file>
+        </group>
+>>>>>>> 15df1232db13ba7da2edb3e10203c6fa877020d7
     </open-files>
 </project-private>
