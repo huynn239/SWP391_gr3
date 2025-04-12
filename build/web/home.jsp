@@ -2,7 +2,7 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider,model.ProductImage,model.Color,model.ProductSize" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Account, model.Slider, model.ProductImage, model.Color, model.Inventory" %>
 <%@ page import="com.google.gson.Gson" %>
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
@@ -10,6 +10,7 @@
 <jsp:useBean id="sliderDAO" class="dto.SliderDAO" scope="session"/>
 <jsp:useBean id="productimageDAO" class="dto.ProductImageDAO" scope="session"/>
 <jsp:useBean id="colorDAO" class="dto.ColorDAO" scope="session"/>
+<jsp:useBean id="inventoryDAO" class="dto.InventoryDAO" scope="session"/>
 <%
     List<Product> products = productDAO.getAllProducts();
     List<Brand> brands = brandDAO.getAllBrands();
@@ -17,16 +18,18 @@
     Account user = (Account) session.getAttribute("u");
     List<ProductImage> productImages = productimageDAO.getAllImagesProduct();
     List<Color> colors = colorDAO.getAllColors();
+    List<Inventory> inventoryList = new ArrayList<>();
+    for (Product product : products) {
+        inventoryList.addAll(inventoryDAO.getInventoryByProductId(product.getId()));
+    }
     Gson gson = new Gson();
-    List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at","DESC"); 
+    List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at", "DESC");
     List<Slider> activeSliders = new ArrayList<>();
     for (Slider slider : allSliders) {
-        if (slider.isStatus()) { 
+        if (slider.isStatus()) {
             activeSliders.add(slider);
         }
     }
-    List<ProductSize> lists = productDAO.getProductSizes();
-    String productSizeJson = gson.toJson(lists);
 %>
 
 <!DOCTYPE html>
@@ -47,10 +50,8 @@
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
         <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
-
     </head>
     <body>
-
         <!-- HEADER -->
         <header id="header">
             <div class="header-middle">
@@ -64,29 +65,27 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-
                                     <c:if test="${sessionScope.u.roleID == 1}">
                                         <li><a href="admin.jsp"><i class="fa fa-star"></i> Admin</a></li>
-                                        </c:if>
-                                        <c:if test="${sessionScope.u.roleID == 2}">
-                                        <li><a href="sliderList"><i class="fa fa-star"></i> Marketing </a></li>
-                                        </c:if>
-                                        <c:if test="${sessionScope.u.roleID == 3}">
+                                    </c:if>
+                                    <c:if test="${sessionScope.u.roleID == 2}">
+                                        <li><a href="sliderList"><i class="fa fa-star"></i> Marketing</a></li>
+                                    </c:if>
+                                    <c:if test="${sessionScope.u.roleID == 3}">
                                         <li><a href="sale.jsp"><i class="fa fa-star"></i> Sale</a></li>
-                                        </c:if>       
+                                    </c:if>
                                     <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                                        <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
+                                    <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
                                         <li><a href="ProfileController?action=viewProfile&id=${sessionScope.u.id}"><i class="fa fa-user"></i> ${not empty sessionScope.u ? sessionScope.u.username : "Account"}</a></li>
-                                        </c:if>
-                                    <li><a href="${not empty sessionScope.u? "logout" : "login"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
+                                    </c:if>
+                                    <li><a href="${not empty sessionScope.u ? 'logout' : 'login'}"><i class="fa fa-lock"></i> ${not empty sessionScope.u ? 'Logout' : 'Login'}</a></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="header-bottom"><!--header-bottom-->
-
+            <div class="header-bottom">
                 <div class="container">
                     <div class="row">
                         <div class="col-sm-9">
@@ -104,31 +103,24 @@
                                     <li class="menu-item">
                                         <a href="#">Product</a>
                                         <div class="sub-menu">
-                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
+                                            <div class="category-container">
                                                 <% int count1 = 0; %>
                                                 <% for (Category category : categories) { %>
-                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
-                                                <div class="category-column">
+                                                    <% if (count1 % 6 == 0) { %>
+                                                        <div class="category-column">
                                                     <% } %>
                                                     <a href="productlist?category=<%= category.getId() %>">
                                                         <%= category.getName() %>
                                                     </a>
                                                     <% count1++; %>
                                                     <% if (count1 % 6 == 0 || count1 == categories.size()) { %>
-                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
+                                                        </div>
+                                                    <% } %>
                                                 <% } %>
-                                                <% } %>
-                                            </div> <!-- Kết thúc category-container -->
+                                            </div>
                                         </div>
                                     </li>
-
-
-
-
-
                                     <li><a href="blogList"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
-
-
                                     <li><a href="404.html">404</a></li>
                                     <li><a href="contact-us.html">Contact</a></li>
                                 </ul>
@@ -141,13 +133,10 @@
                         </div>
                     </div>
                 </div>
-            </div><!--/header-bottom-->
-
-
-
-
+            </div>
         </header>
 
+        <!-- SLIDER -->
         <section id="slider">
             <div class="container">
                 <div class="row">
@@ -156,8 +145,8 @@
                             <!-- Carousel Indicators -->
                             <ol class="carousel-indicators">
                                 <% for (int i = 0; i < activeSliders.size(); i++) { %>
-                                <li data-target="#slider-carousel" data-slide-to="<%= i %>" class="<%= i == 0 ? "active" : "" %>"></li>
-                                    <% } %>
+                                    <li data-target="#slider-carousel" data-slide-to="<%= i %>" class="<%= i == 0 ? "active" : "" %>"></li>
+                                <% } %>
                             </ol>
 
                             <!-- Carousel Inner -->
@@ -166,37 +155,35 @@
                                     int index = 0;
                                     for (Slider slider : activeSliders) { 
                                 %>
-                                <div class="item <%= index == 0 ? "active" : "" %>">
-                                    <div class="col-sm-6">
-                                        <h1><span>Men</span>-SHOPPER</h1>
-                                        <h2>Featured Promotion</h2> <!-- Có thể thay bằng trường trong Slider nếu có -->
-                                        <p>Check out our latest offers and deals!</p> <!-- Có thể thay bằng trường trong Slider nếu có -->
-                                        <a href="<%= slider.getLink() %>" class="btn btn-default get">Get it now</a>
+                                    <div class="item <%= index == 0 ? "active" : "" %>">
+                                        <div class="col-sm-6">
+                                            <h1><span>Men</span>-SHOPPER</h1>
+                                            <h2>Featured Promotion</h2>
+                                            <p>Check out our latest offers and deals!</p>
+                                            <a href="<%= slider.getLink() %>" class="btn btn-default get">Get it now</a>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <img src="<%= slider.getImageUrl() %>" class="girl img-responsive" alt="Slider Image" />
+                                            <img src="images/home/pricing.png" class="pricing" alt="" />
+                                        </div>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <img src="<%= slider.getImageUrl() %>" class="girl img-responsive" alt="Slider Image" />
-                                        <!-- Nếu cần hình pricing, có thể thêm logic kiểm tra hoặc để mặc định -->
-                                        <img src="images/home/pricing.png" class="pricing" alt="" />
-                                    </div>
-                                </div>
                                 <% 
                                     index++;
                                     } 
-                                    // Nếu không có slider nào, hiển thị mặc định
                                     if (activeSliders.isEmpty()) { 
                                 %>
-                                <div class="item active">
-                                    <div class="col-sm-6">
-                                        <h1><span>Men</span>-SHOPPER</h1>
-                                        <h2>NEW ARRIVALS</h2>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-                                        <button type="button" class="btn btn-default get">Get it now</button>
+                                    <div class="item active">
+                                        <div class="col-sm-6">
+                                            <h1><span>Men</span>-SHOPPER</h1>
+                                            <h2>NEW ARRIVALS</h2>
+                                            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+                                            <button type="button" class="btn btn-default get">Get it now</button>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <img src="img/backpackMan.png" class="girl img-responsive" alt="" />
+                                            <img src="img/feature1.png" class="pricing" alt="" />
+                                        </div>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <img src="img/backpackMan.png" class="girl img-responsive" alt="" />
-                                        <img src="img/feature1.png" class="pricing" alt="" />
-                                    </div>
-                                </div>
                                 <% } %>
                             </div>
 
@@ -211,29 +198,28 @@
                     </div>
                 </div>
             </div>
-        </section><!--/slider-->
+        </section>
+
         <!-- MAIN CONTENT -->
         <section>
             <div class="container">
                 <div class="row">
-
                     <!-- SIDEBAR (CATEGORY + BRAND) -->
                     <div class="col-sm-3">
                         <div class="left-sidebar">
-
                             <!-- CATEGORY PANEL -->
                             <h2>Categories</h2>
                             <div class="panel-group category-products">
                                 <% for (Category category : categories) { %>
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h4 class="panel-title">
-                                            <a href="productlist?category=<%= category.getId() %>">
-                                                <%= category.getName() %>
-                                            </a>
-                                        </h4>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a href="productlist?category=<%= category.getId() %>">
+                                                    <%= category.getName() %>
+                                                </a>
+                                            </h4>
+                                        </div>
                                     </div>
-                                </div>
                                 <% } %>
                             </div>
                         </div>
@@ -242,204 +228,190 @@
                         </div>
                     </div>
 
-                    \
                     <!-- FEATURED PRODUCTS -->
                     <div class="col-sm-9 padding-right">
                         <div class="features_items">
                             <h2 class="title text-center">Featured Products</h2>
                             <div class="row">
                                 <%
-                                    int count = 0; // Đếm số sản phẩm hiển thị
+                                    int count = 0;
                                     for (Product product : products) { 
-                                        if (count >= 6) break; // Dừng vòng lặp nếu đã đủ 6 sản phẩm
+                                        if (count >= 6) break;
                                 %>
-                                <div class="col-sm-4">
-                                    <div class="product-image-wrapper">
-                                        <div class="single-products">
-                                            <div class="productinfo text-center">
-                                                <a href="productDetail.jsp?productId=<%= product.getId() %>">
-                                                    <img src="<%= product.getImage() %>" alt="<%=product.getName() %>"/>
-                                                </a>
-                                                <h2>$<%= product.getPrice() %></h2>
-                                                <p><%= product.getName() %></p>
+                                    <div class="col-sm-4">
+                                        <div class="product-image-wrapper">
+                                            <div class="single-products">
+                                                <div class="productinfo text-center">
+                                                    <a href="productDetail.jsp?productId=<%= product.getId() %>">
+                                                        <img src="<%= product.getImage() %>" alt="<%= product.getName() %>"/>
+                                                    </a>
+                                                    <h2>$<%= product.getPrice() %></h2>
+                                                    <p><%= product.getName() %></p>
 
-                                                <!-- Nút "Add to cart" -->
-                                                <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
-                                                   class="btn btn-default add-to-cart"
-                                                   <% if (user != null) { %>
-                                                   onclick="openCartModal('<%= product.getId() %>',
-                                                                   `<%= product.getName() %>`,
-                                                                   '<%= product.getPrice() %>');
-                                                           return false;"
-                                                   <% } %>>
-                                                    <i class="fa fa-shopping-cart"></i> Add to cart
-                                                </a>
+                                                    <!-- Nút "Add to cart" -->
+                                                    <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
+                                                       class="btn btn-default add-to-cart"
+                                                       <% if (user != null) { %>
+                                                       onclick="openCartModal('<%= product.getId() %>',
+                                                                       `<%= product.getName() %>`,
+                                                                       '<%= product.getPrice() %>');
+                                                               return false;"
+                                                       <% } %>>
+                                                        <i class="fa fa-shopping-cart"></i> Add to cart
+                                                    </a>
+                                                </div>
 
+                                                <!-- Thêm thông báo -->
+                                                <div id="orderSuccessMessage" class="order-success">Đặt hàng thành công</div>
 
+                                                <!-- Modal -->
+                                                <div id="cartModal" class="modal">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h2 class="modal-title">Add to Cart</h2>
+                                                                <span class="close" onclick="closeCartModal()">×</span>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form id="orderForm">
+                                                                    <input type="hidden" id="productId" name="productId">
+                                                                    <input type="hidden" id="price" name="price">
+                                                                    <div class="product-modal-image">
+                                                                        <img id="productImage" src="" alt="Product Image">
+                                                                    </div>
+                                                                    <p><strong>Product:</strong> <span id="productName"></span></p>
+                                                                    <p><strong>Price:</strong> $<span id="productPrice"></span></p>
 
-                                            </div>
+                                                                    <label for="color">Color:</label>
+                                                                    <select name="color" id="color" onchange="updateCartImageAndQuantity()">
+                                                                        <!-- Màu sẽ được load từ JS -->
+                                                                    </select>
 
-                                            <!-- Thêm thông báo -->
-                                            <div id="orderSuccessMessage" class="order-success">Đặt hàng thành công</div>
+                                                                    <label for="size">Size:</label>
+                                                                    <select name="size" id="size" onchange="updateCartImageAndQuantity()">
+                                                                        <option value="1">S</option>
+                                                                        <option value="2">M</option>
+                                                                        <option value="3">L</option>
+                                                                        <option value="4">XL</option>
+                                                                    </select>
 
-                                            <!-- Modal -->
-                                            <!-- Modal -->
-                                            <div id="cartModal" class="modal">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h2 class="modal-title">Add to Cart</h2>
-                                                            <span class="close" onclick="closeCartModal()">&times;</span>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form id="orderForm">
-                                                                <input type="hidden" id="productId" name="productId">
-                                                                <input type="hidden" id="price" name="price">
-                                                                <div class="product-modal-image">
-                                                                    <img id="productImage" src="" alt="Product Image">
-                                                                </div>
-                                                                <p><strong>Product:</strong> <span id="productName"></span></p>
-                                                                <p><strong>Price:</strong> vnđ<span id="productPrice"></span></p>
+                                                                    <label for="quantity">Quantity:</label>
+                                                                    <input type="number" name="quantity" id="quantity" min="1" value="1" onchange="checkQuantity()">
 
+                                                                    <!-- Hiển thị số lượng tồn kho -->
+                                                                    <p style="margin-top: 20px"><strong>Stock:</strong> <span id="stockQuantity">0</span></p>
 
-                                                                <label for="color">Color:</label>
-                                                                <select name="color" id="color" onchange="updateCartImage()">
-                                                                    <!-- Màu sẽ được load từ JS -->
-                                                                </select>
-
-                                                                <!-- Chọn size -->
-                                                                <label for="size">Size:</label>
-                                                                <select name="size" id="size">
-                                                                    <option value="S">S</option>
-                                                                    <option value="M">M</option>
-                                                                    <option value="L">L</option>
-                                                                    <option value="XL">XL</option>
-                                                                </select>
-
-                                                                <!-- Số lượng -->
-                                                                <label for="quantity">Quantity:</label>
-                                                                <input type="number" name="quantity" id="quantity" min="1" value="1">
-
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="confirm" onclick="submitOrder()">Confirm</button>
-                                                                    <button type="button" class="cancel" onclick="closeCartModal()">Cancel</button>
-                                                                </div>
-                                                            </form>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" id="confirmButton" class="confirm" onclick="submitOrder()">Confirm</button>
+                                                                        <button type="button" class="cancel" onclick="closeCartModal()">Cancel</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                <style>
+                                                    /* CSS cho thông báo */
+                                                    .order-success {
+                                                        display: none;
+                                                        position: fixed;
+                                                        bottom: 20px;
+                                                        left: 20px;
+                                                        background: black;
+                                                        color: white;
+                                                        padding: 10px 20px;
+                                                        border-radius: 5px;
+                                                        font-size: 16px;
+                                                        z-index: 1000;
+                                                    }
+                                                </style>
                                             </div>
-
-
-                                            <style>
-                                                /* CSS cho thông báo */
-                                                .order-success {
-                                                    display: none;
-                                                    position: fixed;
-                                                    bottom: 20px;
-                                                    left: 20px;
-                                                    background: black;
-                                                    color: white;
-                                                    padding: 10px 20px;
-                                                    border-radius: 5px;
-                                                    font-size: 16px;
-                                                    z-index: 1000;
-                                                }
-                                            </style>
-
-
                                         </div>
-
                                     </div>
-                                </div>
                                 <%
-                                        count++; // Tăng biến đếm
-                                    } 
+                                        count++;
+                                    }
                                 %>
                             </div>
-
                         </div>
                     </div>
-
-
                 </div>
 
-
                 <!-- SECTION FOR 2 SELECTED BRANDS -->
-
                 <div class="category-tab">
                     <h2 class="title text-center">Shop By Brands</h2>
-
                     <div class="col-sm-12">
                         <ul class="nav nav-tabs">
                             <% 
-                                int brandCount = 0; // Khai báo biến một lần duy nhất
+                                int brandCount = 0;
                                 for (Brand brand : brands) { 
-                                    if (brandCount >= 2) break; // Chỉ lấy 2 thương hiệu đầu tiên
+                                    if (brandCount >= 2) break;
                             %>
-                            <li class="<%= (brandCount == 0) ? "active" : "" %>">
-                                <a href="#brand<%= brand.getId() %>" data-toggle="tab"><%= brand.getName() %></a>
-                            </li>
+                                <li class="<%= (brandCount == 0) ? "active" : "" %>">
+                                    <a href="#brand<%= brand.getId() %>" data-toggle="tab"><%= brand.getName() %></a>
+                                </li>
                             <% brandCount++; } %>
                         </ul>
                     </div>
 
                     <div class="tab-content">
                         <% 
-                            brandCount = 0; // Reset lại biến để dùng tiếp
+                            brandCount = 0;
                             for (Brand brand : brands) { 
-                                if (brandCount >= 2) break; // Chỉ lấy 2 thương hiệu đầu tiên
+                                if (brandCount >= 2) break;
                         %>
-                        <div class="tab-pane fade <%= (brandCount == 0) ? "active in" : "" %>" id="brand<%= brand.getId() %>">
-                            <div class="row">
-                                <%
-                                    int productCount = 0;
-                                    for (Product product : products) { 
-                                        if (product.getBrandId().trim().equalsIgnoreCase(brand.getId().trim())) { 
-                                            if (productCount >= 4) break; // Chỉ hiển thị 4 sản phẩm của mỗi brand
-                                            productCount++;
-                                %>
-                                <div class="col-sm-3">
-                                    <div class="product-image-wrapper">
-                                        <div class="single-products">
-                                            <div class="productinfo text-center">
-                                                <a href="productDetail.jsp?productId=<%= product.getId() %>">
-                                                    <img src="<%= product.getImage() %>" alt="<%=product.getName() %>"/>
-                                                </a>
-                                                <h2>$<%= product.getPrice() %></h2>
-                                                <p><%= product.getName() %></p>
-                                                <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
-                                                   class="btn btn-default add-to-cart"
-                                                   <% if (user != null) { %>
-                                                   onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>', '<%= product.getTypeId() %>');
-                                                           return false;"
-                                                   <% } %>>
-                                                    <i class="fa fa-shopping-cart"></i> Add to cart
-                                                </a>
-
+                            <div class="tab-pane fade <%= (brandCount == 0) ? "active in" : "" %>" id="brand<%= brand.getId() %>">
+                                <div class="row">
+                                    <%
+                                        int productCount = 0;
+                                        for (Product product : products) { 
+                                            if (product.getBrandId().trim().equalsIgnoreCase(brand.getId().trim())) { 
+                                                if (productCount >= 4) break;
+                                                productCount++;
+                                    %>
+                                        <div class="col-sm-3">
+                                            <div class="product-image-wrapper">
+                                                <div class="single-products">
+                                                    <div class="productinfo text-center">
+                                                        <a href="productDetail.jsp?productId=<%= product.getId() %>">
+                                                            <img src="<%= product.getImage() %>" alt="<%= product.getName() %>"/>
+                                                        </a>
+                                                        <h2>$<%= product.getPrice() %></h2>
+                                                        <p><%= product.getName() %></p>
+                                                        <a href="<%= (user == null) ? "login.jsp" : "#" %>" 
+                                                           class="btn btn-default add-to-cart"
+                                                           <% if (user != null) { %>
+                                                           onclick="openCartModal('<%= product.getId() %>', `<%= product.getName() %>`, '<%= product.getPrice() %>');
+                                                                   return false;"
+                                                           <% } %>>
+                                                            <i class="fa fa-shopping-cart"></i> Add to cart
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-
-                                    </div>
-                                </div>
-                                <% 
+                                    <% 
+                                            }
                                         }
-                                    } 
-                                %>
+                                    %>
 
-                                <!-- Nếu không có sản phẩm nào, hiển thị thông báo -->
-                                <% if (productCount == 0) { %>
-                                <div class="col-sm-12">
-                                    <p class="text-center">No products available for <%= brand.getName() %></p>
+                                    <!-- Nếu không có sản phẩm nào, hiển thị thông báo -->
+                                    <% if (productCount == 0) { %>
+                                        <div class="col-sm-12">
+                                            <p class="text-center">No products available for <%= brand.getName() %></p>
+                                        </div>
+                                    <% } %>
                                 </div>
-                                <% } %>
                             </div>
-                        </div>
                         <% brandCount++; } %>
                     </div>
                 </div>
+            </div>
         </section>
-        <footer id="footer"><!--Footer-->
+
+        <!-- FOOTER -->
+        <footer id="footer">
             <div class="footer-top">
                 <div class="container">
                     <div class="row">
@@ -464,7 +436,6 @@
                                     <h2>24 DEC 2014</h2>
                                 </div>
                             </div>
-
                             <div class="col-sm-3">
                                 <div class="video-gallery text-center">
                                     <a href="#">
@@ -479,7 +450,6 @@
                                     <h2>24 DEC 2014</h2>
                                 </div>
                             </div>
-
                             <div class="col-sm-3">
                                 <div class="video-gallery text-center">
                                     <a href="#">
@@ -494,7 +464,6 @@
                                     <h2>24 DEC 2014</h2>
                                 </div>
                             </div>
-
                             <div class="col-sm-3">
                                 <div class="video-gallery text-center">
                                     <a href="#">
@@ -581,7 +550,6 @@
                                 </form>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -594,44 +562,34 @@
                     </div>
                 </div>
             </div>
+
             <script>
                 var productImages = <%= gson.toJson(productImages) %>;
                 var colors = <%= gson.toJson(colors) %>;
-                var productSizes = <%= gson.toJson(lists) %>;
+                var inventoryList = <%= gson.toJson(inventoryList) %>;
+
                 console.log("Danh sách màu:", colors);
                 console.log("Danh sách ảnh sản phẩm:", productImages);
-                console.log("Danh sách ảnh sản phẩm:", productSizes);
+                console.log("Danh sách tồn kho:", inventoryList);
+
                 function openCartModal(productId, productName, productPrice) {
                     document.getElementById("productId").value = productId;
                     document.getElementById("productName").innerText = productName;
                     document.getElementById("productPrice").innerText = productPrice;
                     document.getElementById("price").value = productPrice;
-                    console.log("Price:", productPrice);
-
-                    const sizeMapping = {
-                        "S": 1,
-                        "M": 2,
-                        "L": 3,
-                        "XL": 4
-                    };
 
                     let colorSelect = document.getElementById("color");
-                    colorSelect.innerHTML = ""; 
+                    colorSelect.innerHTML = ""; // Xóa danh sách cũ
 
-                    let sizeSelect = document.getElementById("size");
                     let imageElement = document.getElementById("productImage");
-                    imageElement.src = "default.jpg"; 
+                    imageElement.src = "default.jpg"; // Đặt hình ảnh mặc định
 
+                    // Lọc danh sách ảnh theo productId
                     let images = productImages.filter(img => img.productId == productId);
-                    console.log("Filtered images:", images);
-
-                    let productSizesForProduct = productSizes.filter(size => size.pID == productId);
-                    console.log("Product sizes for product:", productSizesForProduct);
 
                     if (images.length > 0) {
                         let uniqueColors = [...new Set(images.map(img => Number(img.colorId)))];
-                        console.log("Unique colors for this product:", uniqueColors);
-
+                        console.log("Màu sắc có sẵn cho sản phẩm này:", uniqueColors);
                         uniqueColors.forEach(colorId => {
                             let colorObj = colors.find(c => c.ID === colorId);
                             if (colorObj) {
@@ -639,148 +597,127 @@
                                 option.value = colorObj.ID;
                                 option.textContent = colorObj.colorName;
                                 colorSelect.appendChild(option);
-                                console.log("Added color option:", colorObj.colorName);
                             }
                         });
-
                         if (uniqueColors.length > 0) {
                             let firstColor = uniqueColors[0];
-                            console.log("First color selected:", firstColor);
-
                             let firstImage = images.find(img => Number(img.colorId) === firstColor);
                             if (firstImage) {
                                 imageElement.src = firstImage.imageUrl;
-                                console.log("Updated image for first color:", firstImage.imageUrl);
-                            }
-
-                            let sizesForFirstColor = productSizesForProduct.filter(size => size.colorID === firstColor);
-                            console.log("Sizes for the first color:", sizesForFirstColor);
-
-                            Array.from(sizeSelect.options).forEach(option => {
-                                let sizeName = option.value;
-                                console.log("Checking size name:", sizeName);
-
-                                let sizeId = sizeMapping[sizeName];
-                                console.log("Mapped sizeId:", sizeId);
-
-                                if (sizeId) {
-                                    let sizeData = sizesForFirstColor.find(size => size.sID == sizeId);
-                                    console.log("Size data found for size ID:", sizeData);
-
-                                    if (sizeData && sizeData.quantity === 0) {
-                                        option.style.display = "none";
-                                        console.log(`Hiding size ${sizeName} (ID ${sizeId}) - Quantity = 0`);
-                                    } else {
-                                        option.style.display = "block";
-                                        console.log(`Showing size ${sizeName} (ID ${sizeId}) - Quantity available`);
-                                    }
-                                } else {
-                                    console.warn("Invalid size name:", sizeName);
-                                }
-                            });
-
-                            let firstAvailableSize = Array.from(sizeSelect.options).find(opt => opt.style.display !== "none");
-                            if (firstAvailableSize) {
-                                sizeSelect.value = firstAvailableSize.value;
-                                console.log("Auto-selected first available size:", firstAvailableSize.value);
-                            } else {
-                                sizeSelect.selectedIndex = -1;
-                                console.warn("No available size for selected color");
                             }
                         }
                     }
+
+                    // Cập nhật số lượng tồn kho ban đầu
+                    updateCartImageAndQuantity();
 
                     document.getElementById("cartModal").style.display = "block";
                 }
 
-
-
-
-
-                function updateCartImage() {
-                    let selectedColor = Number(document.getElementById("color").value);
+                function updateCartImageAndQuantity() {
+                    let selectedColor = document.getElementById("color").value;
+                    let selectedSize = document.getElementById("size").value; // Đây là SizeID (1, 2, 3, 4)
                     let productId = document.getElementById("productId").value;
                     let imageElement = document.getElementById("productImage");
-                    let sizeSelect = document.getElementById("size");
-                    const sizeMapping = {
-                        "S": 1,
-                        "M": 2,
-                        "L": 3,
-                        "XL": 4
-                    };
-                    let image = productImages.find(img => img.productId == productId && Number(img.colorId) === selectedColor);
+                    let stockElement = document.getElementById("stockQuantity");
+                    let confirmButton = document.getElementById("confirmButton");
+
+                    // Cập nhật hình ảnh
+                    let image = productImages.find(img => img.productId == productId && img.colorId == selectedColor);
                     imageElement.src = image ? image.imageUrl : "default.jpg";
-                    let productSizesForProduct = productSizes.filter(size => size.pID == productId);
-                    let sizesForSelectedColor = productSizesForProduct.filter(size => size.colorID === selectedColor);
-                    console.log("Sizes for selected color:", sizesForSelectedColor);
-                    Array.from(sizeSelect.options).forEach(option => {
-                        let sizeName = option.value;
-                        let sizeId = sizeMapping[sizeName];
-                        let sizeData = sizesForSelectedColor.find(size => size.sID == sizeId);
 
-                        if (sizeData && sizeData.quantity === 0) {
-                            option.style.display = "none";
-                            console.log(`Hiding size ${sizeName} (ID ${sizeId}) - Quantity = 0`);
-                        } else {
-                            option.style.display = "block";
-                            console.log(`Showing size ${sizeName} (ID ${sizeId}) - Quantity available`);
-                        }
-                    });
+                    // Lấy số lượng tồn kho
+                    let inventory = inventoryList.find(item => 
+                        item.productId == productId && 
+                        item.colorId == selectedColor && 
+                        item.sizeId == selectedSize
+                    );
+                    let stock = inventory ? inventory.quantity : 0;
+                    stockElement.innerText = stock;
 
-                    let firstAvailableSize = Array.from(sizeSelect.options).find(opt => opt.style.display !== "none");
-                    if (firstAvailableSize) {
-                        sizeSelect.value = firstAvailableSize.value;
-                        console.log("Auto-selected size after color change:", firstAvailableSize.value);
+                    // Kiểm tra số lượng tồn kho
+                    if (stock <= 0) {
+                        confirmButton.disabled = true;
+                        confirmButton.innerText = "Out of Stock";
                     } else {
-                        sizeSelect.selectedIndex = -1;
-                        console.warn("No available size for selected color");
+                        confirmButton.disabled = false;
+                        confirmButton.innerText = "Confirm";
+                    }
+
+                    // Cập nhật số lượng tối đa có thể chọn
+                    let quantityInput = document.getElementById("quantity");
+                    quantityInput.max = stock; // Giới hạn số lượng tối đa
+                    if (quantityInput.value > stock) {
+                        quantityInput.value = stock; // Đặt lại số lượng nếu vượt quá
                     }
                 }
 
+                function checkQuantity() {
+                    let quantityInput = document.getElementById("quantity");
+                    let stock = parseInt(document.getElementById("stockQuantity").innerText);
+                    let confirmButton = document.getElementById("confirmButton");
 
+                    if (quantityInput.value > stock) {
+                        quantityInput.value = stock;
+                        alert("Số lượng vượt quá tồn kho!");
+                    }
 
-                function closeCartModal() {
-                    document.getElementById("cartModal").style.display = "none";
+                    if (stock <= 0) {
+                        confirmButton.disabled = true;
+                        confirmButton.innerText = "Out of Stock";
+                    } else {
+                        confirmButton.disabled = false;
+                        confirmButton.innerText = "Confirm";
+                    }
                 }
 
                 function submitOrder() {
+                    let quantity = parseInt(document.getElementById("quantity").value);
+                    let stock = parseInt(document.getElementById("stockQuantity").innerText);
+
+                    if (quantity > stock) {
+                        alert("Số lượng vượt quá tồn kho!");
+                        return;
+                    }
+
                     let form = document.getElementById("orderForm");
                     let formData = new URLSearchParams(new FormData(form)).toString();
                     console.log("FormData:", formData);
+
                     fetch("order", {
                         method: "POST",
                         headers: {"Content-Type": "application/x-www-form-urlencoded"},
                         body: formData
                     })
-                            .then(response => response.json())
-                            .then(data => {
-                                let message = document.getElementById("orderSuccessMessage");
+                    .then(response => response.json())
+                    .then(data => {
+                        let message = document.getElementById("orderSuccessMessage");
 
-                                if (data.status === "success") {
-                                    message.innerText = "Đặt hàng thành công!";
-                                    message.style.backgroundColor = "black";
-                                } else {
-                                    message.innerText = data.message;
-                                    message.style.backgroundColor = "red";
-                                }
+                        if (data.status === "success") {
+                            message.innerText = "Đặt hàng thành công!";
+                            message.style.backgroundColor = "black";
+                        } else {
+                            message.innerText = data.message;
+                            message.style.backgroundColor = "red";
+                        }
 
-                                message.style.display = "block";
-                                setTimeout(() => {
-                                    message.style.display = "none";
-                                }, 3000);
+                        message.style.display = "block";
+                        setTimeout(() => {
+                            message.style.display = "none";
+                        }, 3000);
 
-                                if (data.status === "success") {
-                                    closeCartModal();
-                                }
-                            })
-                            .catch(error => console.error("Error:", error));
+                        if (data.status === "success") {
+                            closeCartModal();
+                            // Cập nhật lại số lượng tồn kho (có thể gọi API để lấy dữ liệu mới)
+                            updateCartImageAndQuantity();
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
                 }
-
 
                 function closeCartModal() {
                     document.getElementById("cartModal").style.display = "none";
                 }
-
 
                 window.onclick = function (event) {
                     let modal = document.getElementById("cartModal");
@@ -788,15 +725,14 @@
                         closeCartModal();
                     }
                 };
-
             </script>
-        </footer><!--/Footer-->
+        </footer>
+
         <script src="js/jquery.js"></script>
         <script src="js/bootstrap.min.js"></script>
         <script src="js/jquery.scrollUp.min.js"></script>
         <script src="js/price-range.js"></script>
         <script src="js/jquery.prettyPhoto.js"></script>
         <script src="js/main.js"></script>
-
     </body>
 </html>

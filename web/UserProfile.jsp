@@ -1,5 +1,34 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider,model.ProductImage,model.Color,model.ProductSize" %>
+<%@ page import="com.google.gson.Gson" %>
+<jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
+<jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
+<jsp:useBean id="categoryDAO" class="dto.CategoryDAO" scope="session"/>
+<jsp:useBean id="sliderDAO" class="dto.SliderDAO" scope="session"/>
+<jsp:useBean id="productimageDAO" class="dto.ProductImageDAO" scope="session"/>
+<jsp:useBean id="colorDAO" class="dto.ColorDAO" scope="session"/>
+<%
+    List<Product> products = productDAO.getAllProducts();
+    List<Brand> brands = brandDAO.getAllBrands();
+    List<Category> categories = categoryDAO.getAllCategories();
+    Account user = (Account) session.getAttribute("u");
+    List<ProductImage> productImages = productimageDAO.getAllImagesProduct();
+    List<Color> colors = colorDAO.getAllColors();
+    Gson gson = new Gson();
+    List<Slider> allSliders = sliderDAO.getSlidersSorted(1, 3, "created_at","DESC"); 
+    List<Slider> activeSliders = new ArrayList<>();
+    for (Slider slider : allSliders) {
+        if (slider.isStatus()) { 
+            activeSliders.add(slider);
+        }
+    }
+    List<ProductSize> lists = productDAO.getProductSizes();
+    String productSizeJson = gson.toJson(lists);
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +42,11 @@
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/main.css" rel="stylesheet">
     <link href="css/responsive.css" rel="stylesheet">
+     <link href="css/modal.css" rel="stylesheet">
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
+        <link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
     <style>
         body {
             background-color: #f4f7fa;
@@ -85,7 +119,101 @@
     </style>
 </head>
 <body>
-    <jsp:include page="header.jsp"/>
+ <header id="header">
+            <div class="header-middle">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="logo pull-left">
+                                <h1>Men Shop</h1>
+                            </div>
+                        </div>
+                        <div class="col-sm-8">
+                            <div class="shop-menu pull-right">
+                                <ul class="nav navbar-nav">
+
+                                    <c:if test="${sessionScope.u.roleID == 1}">
+                                        <li><a href="admin.jsp"><i class="fa fa-star"></i> Admin</a></li>
+                                        </c:if>
+                                        <c:if test="${sessionScope.u.roleID == 2}">
+                                        <li><a href="sliderList"><i class="fa fa-star"></i> Marketing </a></li>
+                                        </c:if>
+                                        <c:if test="${sessionScope.u.roleID == 3}">
+                                        <li><a href="sale.jsp"><i class="fa fa-star"></i> Sale</a></li>
+                                        </c:if>       
+                                    <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
+                                        <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
+                                        <li><a href="ProfileController?action=viewProfile&id=${sessionScope.u.id}"><i class="fa fa-user"></i> ${not empty sessionScope.u ? sessionScope.u.username : "Account"}</a></li>
+                                        </c:if>
+                                    <li><a href="${not empty sessionScope.u? "logout" : "login"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-bottom"><!--header-bottom-->
+
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-9">
+                            <div class="navbar-header">
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                                    <span class="sr-only">Toggle navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
+                            </div>
+                            <div class="mainmenu pull-left">
+                                <ul class="nav navbar-nav collapse navbar-collapse">
+                                    <li><a href="home.jsp" class="active">Home</a></li>
+                                    <li class="menu-item">
+                                        <a href="#">Product</a>
+                                        <div class="sub-menu">
+                                            <div class="category-container"> <!-- Bọc toàn bộ danh mục -->
+                                                <% int count1 = 0; %>
+                                                <% for (Category category : categories) { %>
+                                                <% if (count1 % 6 == 0) { %> <!-- Mỗi cột chứa tối đa 6 danh mục -->
+                                                <div class="category-column">
+                                                    <% } %>
+                                                    <a href="productlist?category=<%= category.getId() %>">
+                                                        <%= category.getName() %>
+                                                    </a>
+                                                    <% count1++; %>
+                                                    <% if (count1 % 6 == 0 || count1 == categories.size()) { %>
+                                                </div> <!-- Đóng cột khi đủ 6 danh mục hoặc hết danh mục -->
+                                                <% } %>
+                                                <% } %>
+                                            </div> <!-- Kết thúc category-container -->
+                                        </div>
+                                    </li>
+
+
+
+
+
+                                    <li><a href="blogList"><i class="dropdown fa fa-newspaper-o"></i> Blog</a></li>
+
+
+                                    <li><a href="404.html">404</a></li>
+                                    <li><a href="contact-us.html">Contact</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <form action="productsearch" method="GET" class="search_box pull-right">
+                                <input type="text" name="query" placeholder="Search" required />
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div><!--/header-bottom-->
+
+
+
+
+        </header>
 
     <div class="container profile-container">
         <h2><i class="fas fa-user-circle"></i> User Profile</h2>
