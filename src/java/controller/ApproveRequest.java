@@ -6,6 +6,7 @@ package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import dto.ColorDAO;
 import dto.PendingUpdateDAO;
 import dto.ProductDAO;
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class ApproveRequest extends HttpServlet {
         // Lọc theo employeeID nếu có nhập từ khóa tìm kiếm
         if (keyword != null && !keyword.trim().isEmpty()) {
             pendingList = pendingList.stream()
-                    .filter(p ->String.valueOf(p.getUpdatedBy()).toLowerCase().equals(keyword.toLowerCase()))
+                    .filter(p -> String.valueOf(p.getUpdatedBy()).toLowerCase().equals(keyword.toLowerCase()))
                     .collect(Collectors.toList());
         }
 
@@ -137,7 +138,7 @@ public class ApproveRequest extends HttpServlet {
             throws ServletException, IOException {
         PendingUpdateDAO dao = new PendingUpdateDAO();
         ProductDAO productDAO = new ProductDAO();
-
+        ColorDAO cdao = new ColorDAO();
         List<Pending> pendingList = dao.getAllPendingUpdates();
 
         for (Pending pending : pendingList) {
@@ -193,13 +194,15 @@ public class ApproveRequest extends HttpServlet {
                         HashMap<String, Object> data = gson.fromJson(jsonData, type);
                         int pid = pending.getProductId();
                         int cid = ((Double) data.get("color")).intValue();
-                        String urlm = data.get("urlm").toString();
-                        productDAO.addProductColor(pid, cid, urlm);
-                        List<Map<String, Object>> sizes = (List<Map<String, Object>>) data.get("sizes");
-                        for (Map<String, Object> size : sizes) {
-                            int sizeId = ((Double) size.get("sizeId")).intValue();
-                            int quantity = ((Double) size.get("quantity")).intValue();
-                            productDAO.addProductSize(pid, cid, sizeId, quantity);
+                        if (cdao.checkColor(pid, cid)) {
+                            String urlm = data.get("urlm").toString();
+                            productDAO.addProductColor(pid, cid, urlm);
+                            List<Map<String, Object>> sizes = (List<Map<String, Object>>) data.get("sizes");
+                            for (Map<String, Object> size : sizes) {
+                                int sizeId = ((Double) size.get("sizeId")).intValue();
+                                int quantity = ((Double) size.get("quantity")).intValue();
+                                productDAO.addProductSize(pid, cid, sizeId, quantity);
+                            }
                         }
 
                     } else if (pending.getChanges().equals("Xóa sản phẩm")) {

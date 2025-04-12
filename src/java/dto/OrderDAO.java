@@ -214,7 +214,7 @@ public class OrderDAO extends DBContext {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String status = rs.getString("PaymentStatus");
-                return "Paid".equals(status) || "Pending".equals(status);
+                return "Paid".equals(status) || "Pending".equals(status) || "Cancelled".equals(status);
             }
             return true; // Nếu không có suborder, cho phép tạo mới
         } catch (SQLException e) {
@@ -240,20 +240,22 @@ public class OrderDAO extends DBContext {
     }
 
     public void updateTotalAmount(int orderID) {
-        String sql = "UPDATE orders \n"
-                + "Set TotalAmount = (\n"
-                + "SELECT SUM(od.Quantity * p.Price)\n"
-                + "FROM orderdetails od\n"
-                + "JOIN Product p ON od.ProductID = p.ID\n"
-                + "WHERE od.OrderID = orders.ID )\n"
-                + "WHERE orders.ID = ?";
+        String sql = "UPDATE orders\n"
+                + "SET TotalAmount = (\n"
+                + "    SELECT SUM(od.Quantity * p.Price)\n"
+                + "    FROM orderdetails od\n"
+                + "    JOIN Product p ON od.ProductID = p.ID\n"
+                + "    JOIN suborder s ON od.SubOrderID = s.ID\n"
+                + "    WHERE od.OrderID = orders.ID AND s.PaymentStatus != 'Cancelled'\n"
+                + ")\n"
+                + "WHERE ID = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, orderID); // Cập nhật đúng đơn hàng theo ID
-            int rowsUpdated = stmt.executeUpdate(); // Dùng executeUpdate() thay vì executeQuery()
+            stmt.setInt(1, orderID);
+            int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("TotalAmount updated successfully!");
             } else {
-                System.out.println("Order not found!");
+                System.out.println("Order not found or already cancelled.");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -421,7 +423,13 @@ public class OrderDAO extends DBContext {
 
     public void updateOrderTotalAndStatus(int orderId) {
         // Cập nhật TotalAmount bằng tổng TotalAmount của tất cả suborder
-        String updateTotalSql = "UPDATE orders SET TotalAmount = (SELECT SUM(TotalAmount) FROM suborder WHERE OrderID = ?) WHERE ID = ?";
+        String updateTotalSql = "UPDATE orders\n"
+                + "SET TotalAmount = (\n"
+                + "    SELECT SUM(TotalAmount)\n"
+                + "    FROM suborder\n"
+                + "    WHERE OrderID = ? AND PaymentStatus != 'Cancelled'\n"
+                + ")\n"
+                + "WHERE ID = ?;";
         try (PreparedStatement stmt = connection.prepareStatement(updateTotalSql)) {
             stmt.setInt(1, orderId);
             stmt.setInt(2, orderId);
@@ -558,8 +566,30 @@ public class OrderDAO extends DBContext {
 
     public static void main(String[] args) {
         OrderDAO o = new OrderDAO();
-        o.insertOrder(1);
+        o.updateTotalAmount(6);
 
+    }
+
+    public void updatePaymentStatusToCancel(int subOrderId) throws SQLException {
+        String sql = "UPDATE suborder SET PaymentStatus = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "Cancelled"); // hoặc "Cancel" nếu DB bạn lưu như vậy
+            ps.setInt(2, subOrderId);
+            ps.executeUpdate();
+        }
+    }
+
+    public int getOrderIdBySubOrderId(int subOrderId) throws SQLException {
+        String sql = "SELECT OrderID FROM suborder WHERE ID = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, subOrderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("OrderID");
+                }
+            }
+        }
+        return -1; // hoặc ném exception nếu không tìm thấy
     }
 
 }

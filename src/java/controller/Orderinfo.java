@@ -119,27 +119,27 @@
              response.sendRedirect("login.jsp");
              return;
          }
-       //  int orderId = o.getorderID(user.getId());
-       String orderId = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + VNPayConfig.getRandomNumber(4);
+         //  int orderId = o.getorderID(user.getId());
+         String orderId = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + VNPayConfig.getRandomNumber(4);
          if (checkbox != null) {
              o.addAddress(fullname, phone, email, province + "-" + district + "-"
                      + ward + "-" + address, userID);
          }
          o.updateOrderInfo(fullname, phone, email, province + "-" + district + "-"
                  + ward + "-" + address, userID);
- List<Cart> selectedItems = (List<Cart>) session.getAttribute("selectedItems");
+         List<Cart> selectedItems = (List<Cart>) session.getAttribute("selectedItems");
          session.setAttribute("fullname", fullname);
-     session.setAttribute("phone", phone);
-     session.setAttribute("email", email);
-     session.setAttribute("province", province);
-     session.setAttribute("district", district);
-     session.setAttribute("ward", ward);
-     session.setAttribute("address", address);
-     session.setAttribute("orderId", orderId); // Lưu thêm orderId nếu cần
-     
-     // Chuyển hướng sang payment.jsp
-     response.sendRedirect("payment");
-         
+         session.setAttribute("phone", phone);
+         session.setAttribute("email", email);
+         session.setAttribute("province", province);
+         session.setAttribute("district", district);
+         session.setAttribute("ward", ward);
+         session.setAttribute("address", address);
+         session.setAttribute("orderId", orderId); // Lưu thêm orderId nếu cần
+
+         // Chuyển hướng sang payment.jsp
+         response.sendRedirect("payment");
+
      }
      private Integer generateOrderId() {
          return (int) (System.currentTimeMillis() % 1000000);

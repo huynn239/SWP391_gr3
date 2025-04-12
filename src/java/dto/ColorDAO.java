@@ -33,6 +33,7 @@ public class ColorDAO extends DBContext {
 
         return colors;
     }
+
     public Color getColorById(int id) {
         String sql = "SELECT * FROM Color WHERE ID_Color = ?";
         Color color = null;
@@ -49,10 +50,10 @@ public class ColorDAO extends DBContext {
         }
         return color;
     }
-    
-    public String getColorNameByID(int colorID){
-       String sql = "Select ColorName from Color where ID_Color = ?";
-       String color = "";
+
+    public String getColorNameByID(int colorID) {
+        String sql = "Select ColorName from Color where ID_Color = ?";
+        String color = "";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, colorID);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -65,8 +66,8 @@ public class ColorDAO extends DBContext {
         }
 
         return color;
-   }
-    
+    }
+
     public static void main(String[] args) {
         ColorDAO c = new ColorDAO();
         List<Color> l = c.getAllColors();
@@ -74,4 +75,25 @@ public class ColorDAO extends DBContext {
             System.out.println("" + color.getColorName());
         }
     }
+
+    public boolean checkColor(int productID, int colorID) {
+        String sql = "SELECT 1 FROM ProductImage WHERE ProductID = ? AND ColorID = ?";
+        boolean isAvailable = true;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, productID);
+            stmt.setInt(2, colorID);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    return false; 
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return isAvailable; 
+    }
+
 }

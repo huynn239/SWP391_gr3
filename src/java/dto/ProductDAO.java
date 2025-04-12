@@ -196,10 +196,7 @@ public class ProductDAO extends DBContext {
         return list;
     }
 
-    public static void main(String[] args) {
-        ProductDAO list = new ProductDAO();
-        System.out.println("" + list.getLastProductID());
-    }
+   
 
     public void updateProductSize(int productId, int selectedColorId, int sizeId, int quantity) {
         String sql = "Update ProductSize\n"
@@ -441,10 +438,10 @@ public class ProductDAO extends DBContext {
                 sb.append("+ Kích cỡ: ").append(sizeSb.substring(0, sizeSb.length() - 2)).append("<br>");
             }
 
-            if (!pro.getImage().equals(data.get("url").toString())) {
+            if (!pro.getImage().equals(data.get("urlm").toString())) {
                 sb.append("+ Hình ảnh minh họa (URL): ").append(pro.getImage()).append(" ➝ ").append(data.get("url")).append("<br>");
             }
-            if (!pi.getImageUrl().equals(data.get("urlm").toString())) {
+            if (!pi.getImageUrl().equals(data.get("url").toString())) {
                 sb.append("+ Hình ảnh màu: ").append(pro.getImage()).append(" ➝ ").append(data.get("urlm")).append("<br>");
             }
             System.out.println("" + sb);
@@ -646,4 +643,37 @@ public class ProductDAO extends DBContext {
             e.printStackTrace();
         }
     }
+
+    
+
+    public List<ProductSize> getProductSizes() {
+        List<ProductSize> list = new ArrayList<>();
+        String sql = "SELECT * FROM ProductSize ";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    int productId = rs.getInt("ProductID");
+                    int colorId = rs.getInt("ColorID");
+                    int sizeId = rs.getInt("SizeID");
+                    int quantity = rs.getInt("Quantity");
+                    ProductSize ps = new ProductSize(productId, sizeId, quantity, colorId);
+                    list.add(ps);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+    
+     public static void main(String[] args) {
+        ProductDAO list = new ProductDAO();
+        List<ProductSize> lis = list.getProductSizes();
+         for (ProductSize li : lis) {
+             System.out.println("" + li.getQuantity());
+         }
+    }
+
 }

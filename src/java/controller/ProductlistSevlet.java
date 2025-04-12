@@ -7,13 +7,18 @@ package controller;
 import dto.BrandDAO;
 import dto.CategoryDAO;
 import dto.ProductDAO;
+import dto.ProductImageDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,6 +33,11 @@ import model.Product;
  *
  * @author BAO CHAU
  */
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024, // 1MB
+        maxFileSize = 1024 * 1024 * 10, // 10MB
+        maxRequestSize = 1024 * 1024 * 50 // 50MB
+)
 public class ProductlistSevlet extends HttpServlet {
 
     /**
@@ -70,6 +80,7 @@ public class ProductlistSevlet extends HttpServlet {
         BrandDAO brandDAO = new BrandDAO();
         CategoryDAO categoryDAO = new CategoryDAO();
         ProductDAO productDAO = new ProductDAO();
+        ProductImageDAO pDAO = new ProductImageDAO();
 
         List<Brand> brandList = brandDAO.getAllBrands();
         List<Category> categoryList = categoryDAO.getAllCategories();
@@ -81,17 +92,21 @@ public class ProductlistSevlet extends HttpServlet {
         String status = request.getParameter("status");
         String typeId = request.getParameter("type");
         String sortBy = request.getParameter("sortBy");
-
+        String stockStatus = request.getParameter("stockStatus");
+        System.out.println("" + stockStatus);
         String filterParams = "keyword=" + (keyword != null ? keyword : "")
                 + "&brand=" + (brandId != null ? brandId : "")
                 + "&status=" + (status != null ? status : "")
                 + "&type=" + (typeId != null ? typeId : "")
-                + "&sortBy=" + (sortBy != null ? sortBy : "");
+                + "&sortBy=" + (sortBy != null ? sortBy : "")
+                + "&stockStatus=" + (stockStatus != null ? stockStatus : "");
+
         HttpSession session = request.getSession();
         String previousFilters = (String) session.getAttribute("previousFilters");
 
         boolean isFiltering = previousFilters != null && !previousFilters.equals(filterParams);
         session.setAttribute("previousFilters", filterParams); // Cập nhật bộ lọc mới vào session
+
         // Lọc sản phẩm
         List<Product> filteredProducts = new ArrayList<>(allProducts);
 
@@ -111,6 +126,17 @@ public class ProductlistSevlet extends HttpServlet {
             filteredProducts.removeIf(p -> !String.valueOf(p.getTypeId()).equals(typeId));
         }
 
+        if (stockStatus != null && !stockStatus.isEmpty()) {
+            switch (stockStatus) {
+                case "out":
+                    filteredProducts.removeIf(p -> !pDAO.hasAnySizeWithQuantity(p.getId(), 0));
+                    break;
+                case "low":
+                    filteredProducts.removeIf(p -> !pDAO.hasAnySizeWithQuantityLessThan(p.getId(), 10));
+                    break;
+            }
+        }
+
         // Sắp xếp danh sách
         if (sortBy != null) {
             switch (sortBy) {
@@ -126,6 +152,7 @@ public class ProductlistSevlet extends HttpServlet {
             }
         }
 
+        // Phân trang
         int page = 1;
         int pageSize = 8;
         String pageParam = request.getParameter("page");
@@ -148,8 +175,10 @@ public class ProductlistSevlet extends HttpServlet {
         if (start >= totalProducts) {
             start = Math.max(0, totalProducts - pageSize);
         }
+
         List<Product> paginatedList = filteredProducts.subList(start, end);
 
+        // Set brandName và typeName cho mỗi sản phẩm
         for (Product product : paginatedList) {
             product.setBrandName(brandDAO.getBrandById(product.getBrandId()).getName());
             product.setTypeName(categoryDAO.getCategoryById(product.getTypeId()).getName());
@@ -162,12 +191,13 @@ public class ProductlistSevlet extends HttpServlet {
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
 
-        // Lưu lại các giá trị lọc vào request
+        // Lưu lại các giá trị lọc vào request để giữ state
         request.setAttribute("selectedKeyword", keyword);
         request.setAttribute("selectedBrand", brandId);
         request.setAttribute("selectedStatus", status);
         request.setAttribute("selectedType", typeId);
         request.setAttribute("selectedSortBy", sortBy);
+        request.setAttribute("stockStatus", stockStatus); // ✅ mới thêm
 
         request.getRequestDispatcher("Productlistmanage.jsp").forward(request, response);
     }
@@ -199,8 +229,41 @@ public class ProductlistSevlet extends HttpServlet {
                 boolean status = Boolean.parseBoolean(request.getParameter("status"));
                 int materialID = Integer.parseInt(request.getParameter("material"));
                 String detail = request.getParameter("detail");
-                String url = request.getParameter("img");
-                String urlm = request.getParameter("imgm");
+                Part imgPart = request.getPart("img_" + selectedColorId);
+                Part imgmPart = request.getPart("imgm");
+                String oldImg = request.getParameter("oldImg_" + selectedColorId);
+                String oldImgm = request.getParameter("oldImgm");
+                System.out.println("" + oldImg);
+                String imgFileName = (imgPart != null && imgPart.getSize() > 0)
+                        ? Paths.get(imgPart.getSubmittedFileName()).getFileName().toString()
+                        : null;
+
+                String imgmFileName = (imgmPart != null && imgmPart.getSize() > 0)
+                        ? Paths.get(imgmPart.getSubmittedFileName()).getFileName().toString()
+                        : null;
+
+                String uploadPath = getServletContext().getRealPath("/web/images/product");
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                String url, urlm;
+
+                if (imgFileName != null && !imgFileName.isEmpty()) {
+                    imgPart.write(uploadPath + File.separator + imgFileName);
+                    url = "web/images/product/" + imgFileName;
+                } else {
+                    url = oldImg;
+                }
+
+                if (imgmFileName != null && !imgmFileName.isEmpty()) {
+                    imgmPart.write(uploadPath + File.separator + imgmFileName);
+                    urlm = "web/images/product/" + imgmFileName;
+                } else {
+                    urlm = oldImgm;
+                }
+                System.out.println("" + url);
 
                 Product product = new Product(productId, name, materialID, price, detail, brandId, categoryId, status);
                 if (user.getRoleID() == 1) {
@@ -248,7 +311,24 @@ public class ProductlistSevlet extends HttpServlet {
             } else if ("addcolor".equals(action)) {
                 int productId = Integer.parseInt(request.getParameter("product_id"));
                 int colorName = Integer.parseInt(request.getParameter("colorName"));
-                String imageLink = request.getParameter("imageLink");
+                Part imagePart = request.getPart("imageLink");
+
+                String imageFileName = (imagePart != null && imagePart.getSize() > 0)
+                        ? Paths.get(imagePart.getSubmittedFileName()).getFileName().toString()
+                        : null;
+
+                String uploadPath = getServletContext().getRealPath("/web/images/product");
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                String imageLink = null;
+
+                if (imageFileName != null && !imageFileName.isEmpty()) {
+                    imagePart.write(uploadPath + File.separator + imageFileName);
+                    imageLink = "web/images/product/" + imageFileName;
+                }
 
                 if (user.getRoleID() == 1) {
                     productDAO.addProductColor(productId, colorName, imageLink);
@@ -297,40 +377,70 @@ public class ProductlistSevlet extends HttpServlet {
                 }
                 response.sendRedirect("productlistsevlet");
             } else if (action.equals("addProduct")) {
-                int selectedColorId = Integer.parseInt(request.getParameter("color"));
+                // Lấy thông tin cơ bản của sản phẩm
                 String name = request.getParameter("name");
                 int categoryId = Integer.parseInt(request.getParameter("category"));
                 String brandId = request.getParameter("brand");
                 double price = Double.parseDouble(request.getParameter("price"));
                 int materialID = Integer.parseInt(request.getParameter("material"));
                 String detail = request.getParameter("detail");
-                String url = request.getParameter("img");
-                String urlm = request.getParameter("imgm");
-                Product product = new Product(name, url, materialID, price, detail, brandId, categoryId);
+
+// Xử lý ảnh chính (ảnh minh họa sản phẩm)
+                Part imgmPart = request.getPart("img");
+                String imgmFileName = (imgmPart != null && imgmPart.getSize() > 0)
+                        ? Paths.get(imgmPart.getSubmittedFileName()).getFileName().toString()
+                        : null;
+
+                String uploadPath = getServletContext().getRealPath("/web/images/product");
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                String urlm = "";
+                if (imgmFileName != null && !imgmFileName.isEmpty()) {
+                    imgmPart.write(uploadPath + File.separator + imgmFileName);
+                    urlm = "web/images/product/" + imgmFileName;
+                }
+                Product product = new Product(name, urlm, materialID, price, detail, brandId, categoryId);
                 if (user.getRoleID() == 1) {
                     productDAO.insertProduct(product);
-                    int pID = productDAO.getLastProductID();
-                    productDAO.insertProductImage(urlm, pID, selectedColorId);
                 }
-
-               
-                List<Map<String, Integer>> sizesList = new ArrayList<>();
-                String[] sizeIds = request.getParameterValues("sizeIds");
-                String[] quantities = request.getParameterValues("quantities");
-
-                if (sizeIds != null && quantities != null) {
-                    for (int i = 0; i < sizeIds.length; i++) {
-                        int sizeId = Integer.parseInt(sizeIds[i]);
-                        int quantity = Integer.parseInt(quantities[i]);
-                        if (user.getRoleID() == 1) {
-                            int pID = productDAO.getLastProductID();
-                            productDAO.insertProductSize(pID, selectedColorId, sizeId, quantity);
-                            session.setAttribute("message", "Thêm thành công!");
+                int pID = productDAO.getLastProductID();
+                String[] colorIds = request.getParameterValues("colorIds");
+                if (colorIds != null) {
+                    for (String colorIdStr : colorIds) {
+                        int colorId = Integer.parseInt(colorIdStr);
+                        Part colorImgPart = request.getPart("colorImage_" + colorId);
+                        String colorImgFileName = (colorImgPart != null && colorImgPart.getSize() > 0)
+                                ? Paths.get(colorImgPart.getSubmittedFileName()).getFileName().toString()
+                                : null;
+                        String colorImgUrl = "";
+                        if (colorImgFileName != null && !colorImgFileName.isEmpty()) {
+                            colorImgPart.write(uploadPath + File.separator + colorImgFileName);
+                            colorImgUrl = "web/images/product/" + colorImgFileName;
                         }
-                       
+                        if (user.getRoleID() == 1) {
+                            productDAO.insertProductImage(colorImgUrl, pID, colorId);
+                        }
+                        String[] sizeIdArr = request.getParameterValues("sizeIds_" + colorId + "[]");
+                        String[] quantityArr = request.getParameterValues("quantities_" + colorId + "[]");
+
+                        if (sizeIdArr != null && quantityArr != null) {
+                            for (int i = 0; i < sizeIdArr.length; i++) {
+                                int sizeId = Integer.parseInt(sizeIdArr[i]);
+                                int quantity = Integer.parseInt(quantityArr[i]);
+
+                                if (user.getRoleID() == 1) {
+                                    productDAO.insertProductSize(pID, colorId, sizeId, quantity);
+                                }
+                            }
+                        }
                     }
                 }
+                session.setAttribute("message", "Thêm sản phẩm thành công!");
                 response.sendRedirect("Addproduct.jsp");
+
             }
         } catch (Exception e) {
             e.printStackTrace();

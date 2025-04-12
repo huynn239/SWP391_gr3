@@ -2,7 +2,7 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider,model.ProductImage,model.Color" %>
+<%@ page import="model.Product, model.Brand, model.Category, model.Account,model.Slider,model.ProductImage,model.Color,model.ProductSize" %>
 <%@ page import="com.google.gson.Gson" %>
 <jsp:useBean id="productDAO" class="dto.ProductDAO" scope="session"/>
 <jsp:useBean id="brandDAO" class="dto.BrandDAO" scope="session"/>
@@ -25,7 +25,8 @@
             activeSliders.add(slider);
         }
     }
-    
+    List<ProductSize> lists = productDAO.getProductSizes();
+    String productSizeJson = gson.toJson(lists);
 %>
 
 <!DOCTYPE html>
@@ -63,8 +64,8 @@
                         <div class="col-sm-8">
                             <div class="shop-menu pull-right">
                                 <ul class="nav navbar-nav">
-                                    
-                                        <c:if test="${sessionScope.u.roleID == 1}">
+
+                                    <c:if test="${sessionScope.u.roleID == 1}">
                                         <li><a href="admin.jsp"><i class="fa fa-star"></i> Admin</a></li>
                                         </c:if>
                                         <c:if test="${sessionScope.u.roleID == 2}">
@@ -74,9 +75,9 @@
                                         <li><a href="sale.jsp"><i class="fa fa-star"></i> Sale</a></li>
                                         </c:if>       
                                     <li><a href="cartcontroller"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-                                    <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
-                                    <li><a href="ProfileController?action=viewProfile&id=${sessionScope.u.id}"><i class="fa fa-user"></i> ${not empty sessionScope.u ? sessionScope.u.username : "Account"}</a></li>
-                                    </c:if>
+                                        <c:if test="${sessionScope.u.roleID == 1 || sessionScope.u.roleID == 2 || sessionScope.u.roleID == 3 || sessionScope.u.roleID == 4}">
+                                        <li><a href="ProfileController?action=viewProfile&id=${sessionScope.u.id}"><i class="fa fa-user"></i> ${not empty sessionScope.u ? sessionScope.u.username : "Account"}</a></li>
+                                        </c:if>
                                     <li><a href="${not empty sessionScope.u? "logout" : "login"}"><i class="fa fa-lock"></i> ${not empty sessionScope.u? "Logout" : "Login"}</a></li>
                                 </ul>
                             </div>
@@ -596,47 +597,95 @@
             <script>
                 var productImages = <%= gson.toJson(productImages) %>;
                 var colors = <%= gson.toJson(colors) %>;
-
+                var productSizes = <%= gson.toJson(lists) %>;
                 console.log("Danh sách màu:", colors);
                 console.log("Danh sách ảnh sản phẩm:", productImages);
-
+                console.log("Danh sách ảnh sản phẩm:", productSizes);
                 function openCartModal(productId, productName, productPrice) {
                     document.getElementById("productId").value = productId;
                     document.getElementById("productName").innerText = productName;
                     document.getElementById("productPrice").innerText = productPrice;
                     document.getElementById("price").value = productPrice;
-                    console.log("Price:", price);
+                    console.log("Price:", productPrice);
+
+                    const sizeMapping = {
+                        "S": 1,
+                        "M": 2,
+                        "L": 3,
+                        "XL": 4
+                    };
+
                     let colorSelect = document.getElementById("color");
-                    colorSelect.innerHTML = "";// Xóa danh sách cũ và thêm option mặc định
+                    colorSelect.innerHTML = ""; 
 
+                    let sizeSelect = document.getElementById("size");
                     let imageElement = document.getElementById("productImage");
-                    imageElement.src = "default.jpg"; // Đặt hình ảnh mặc định
+                    imageElement.src = "default.jpg"; 
 
-                    // Lọc danh sách ảnh theo productId
                     let images = productImages.filter(img => img.productId == productId);
+                    console.log("Filtered images:", images);
+
+                    let productSizesForProduct = productSizes.filter(size => size.pID == productId);
+                    console.log("Product sizes for product:", productSizesForProduct);
 
                     if (images.length > 0) {
                         let uniqueColors = [...new Set(images.map(img => Number(img.colorId)))];
-                        console.log("Màu sắc có sẵn cho sản phẩm này:", uniqueColors);
-                        uniqueColors.forEach(colorId => {
-                            console.log("ColorId đang xét:", colorId);
-                            let colorObj = colors.find(c => c.ID === colorId);
-                            console.log("Tìm thấy màu:", colorObj);
+                        console.log("Unique colors for this product:", uniqueColors);
 
+                        uniqueColors.forEach(colorId => {
+                            let colorObj = colors.find(c => c.ID === colorId);
                             if (colorObj) {
                                 let option = document.createElement("option");
                                 option.value = colorObj.ID;
                                 option.textContent = colorObj.colorName;
                                 colorSelect.appendChild(option);
-                            } else {
-                                console.warn("Không tìm thấy màu cho colorId:", colorId);
+                                console.log("Added color option:", colorObj.colorName);
                             }
                         });
+
                         if (uniqueColors.length > 0) {
                             let firstColor = uniqueColors[0];
+                            console.log("First color selected:", firstColor);
+
                             let firstImage = images.find(img => Number(img.colorId) === firstColor);
                             if (firstImage) {
                                 imageElement.src = firstImage.imageUrl;
+                                console.log("Updated image for first color:", firstImage.imageUrl);
+                            }
+
+                            let sizesForFirstColor = productSizesForProduct.filter(size => size.colorID === firstColor);
+                            console.log("Sizes for the first color:", sizesForFirstColor);
+
+                            Array.from(sizeSelect.options).forEach(option => {
+                                let sizeName = option.value;
+                                console.log("Checking size name:", sizeName);
+
+                                let sizeId = sizeMapping[sizeName];
+                                console.log("Mapped sizeId:", sizeId);
+
+                                if (sizeId) {
+                                    let sizeData = sizesForFirstColor.find(size => size.sID == sizeId);
+                                    console.log("Size data found for size ID:", sizeData);
+
+                                    if (sizeData && sizeData.quantity === 0) {
+                                        option.style.display = "none";
+                                        console.log(`Hiding size ${sizeName} (ID ${sizeId}) - Quantity = 0`);
+                                    } else {
+                                        option.style.display = "block";
+                                        console.log(`Showing size ${sizeName} (ID ${sizeId}) - Quantity available`);
+                                    }
+                                } else {
+                                    console.warn("Invalid size name:", sizeName);
+                                }
+                            });
+
+                            let firstAvailableSize = Array.from(sizeSelect.options).find(opt => opt.style.display !== "none");
+                            if (firstAvailableSize) {
+                                sizeSelect.value = firstAvailableSize.value;
+                                console.log("Auto-selected first available size:", firstAvailableSize.value);
+                            } else {
+                                sizeSelect.selectedIndex = -1;
+                                console.warn("No available size for selected color");
                             }
                         }
                     }
@@ -644,13 +693,48 @@
                     document.getElementById("cartModal").style.display = "block";
                 }
 
+
+
+
+
                 function updateCartImage() {
-                    let selectedColor = document.getElementById("color").value;
+                    let selectedColor = Number(document.getElementById("color").value);
                     let productId = document.getElementById("productId").value;
                     let imageElement = document.getElementById("productImage");
-
-                    let image = productImages.find(img => img.productId == productId && img.colorId == selectedColor);
+                    let sizeSelect = document.getElementById("size");
+                    const sizeMapping = {
+                        "S": 1,
+                        "M": 2,
+                        "L": 3,
+                        "XL": 4
+                    };
+                    let image = productImages.find(img => img.productId == productId && Number(img.colorId) === selectedColor);
                     imageElement.src = image ? image.imageUrl : "default.jpg";
+                    let productSizesForProduct = productSizes.filter(size => size.pID == productId);
+                    let sizesForSelectedColor = productSizesForProduct.filter(size => size.colorID === selectedColor);
+                    console.log("Sizes for selected color:", sizesForSelectedColor);
+                    Array.from(sizeSelect.options).forEach(option => {
+                        let sizeName = option.value;
+                        let sizeId = sizeMapping[sizeName];
+                        let sizeData = sizesForSelectedColor.find(size => size.sID == sizeId);
+
+                        if (sizeData && sizeData.quantity === 0) {
+                            option.style.display = "none";
+                            console.log(`Hiding size ${sizeName} (ID ${sizeId}) - Quantity = 0`);
+                        } else {
+                            option.style.display = "block";
+                            console.log(`Showing size ${sizeName} (ID ${sizeId}) - Quantity available`);
+                        }
+                    });
+
+                    let firstAvailableSize = Array.from(sizeSelect.options).find(opt => opt.style.display !== "none");
+                    if (firstAvailableSize) {
+                        sizeSelect.value = firstAvailableSize.value;
+                        console.log("Auto-selected size after color change:", firstAvailableSize.value);
+                    } else {
+                        sizeSelect.selectedIndex = -1;
+                        console.warn("No available size for selected color");
+                    }
                 }
 
 

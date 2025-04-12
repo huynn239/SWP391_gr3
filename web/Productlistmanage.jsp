@@ -343,6 +343,12 @@
                                 <option value="price_asc" ${selectedSortBy eq 'price_asc' ? 'selected' : ''}>Giá tăng dần</option>
                                 <option value="price_desc" ${selectedSortBy eq 'price_desc' ? 'selected' : ''}>Giá giảm dần</option>
                             </select>
+                            <label for="stockStatus" class="mr-2">Tồn kho:</label>
+                            <select name="stockStatus" id="stockStatus" class="form-control mr-3" onchange="applyFilters()">
+                                <option value="">Tất cả</option>
+                                <option value="low" ${stockStatus eq 'low' ? 'selected' : ''}>Sắp hết hàng</option>
+                                <option value="out" ${stockStatus eq 'out' ? 'selected' : ''}>Hết hàng</option>
+                            </select>
                         </form>
                     </div>
                 </div>
@@ -666,41 +672,43 @@
                     let status = document.getElementById("status").value;
                     let type = document.getElementById("type").value;
                     let sortBy = document.getElementById("sortBy").value;
+                    let stockStatus = document.getElementById("stockStatus").value; // thêm dòng này
 
                     if (keyword)
                         params.set("keyword", keyword);
                     else
                         params.delete("keyword");
+
                     if (brand)
                         params.set("brand", brand);
                     else
                         params.delete("brand");
+
                     if (status)
                         params.set("status", status);
                     else
                         params.delete("status");
+
                     if (type)
                         params.set("type", type);
                     else
                         params.delete("type");
+
                     if (sortBy)
                         params.set("sortBy", sortBy);
                     else
                         params.delete("sortBy");
 
+                    if (stockStatus) // thêm xử lý stockStatus
+                        params.set("stockStatus", stockStatus);
+                    else
+                        params.delete("stockStatus");
+
                     let newUrl = "productlistsevlet?" + params.toString();
 
-
                     history.pushState(null, "", newUrl);
-
-
                     window.location.href = newUrl;
                 }
-
-
-
-
-
                 function openImage(img) {
                     document.getElementById("largeImage").src = img.src;
                     document.getElementById("imageOverlay").style.display = "block";

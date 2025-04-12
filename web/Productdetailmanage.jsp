@@ -232,10 +232,8 @@ request.setAttribute("existingColorIds", existingColorIds);
                 </div>
                 <div class="card-body">
 
-                    <form action="productlistsevlet?action=update" method="post">
+                    <form action="productlistsevlet?action=update" enctype="multipart/form-data" method="post">
                         <input type="hidden" name="product_id" value="${product.id}">
-
-
                         <div id="product-image" class="form-group">
                             <c:set var="images" value="${productimageDAO.getImagesByProduct(product.id)}" />
                             <c:set var="firstImage" value="${not empty images ? images[0] : null}" />
@@ -243,18 +241,26 @@ request.setAttribute("existingColorIds", existingColorIds);
                             <c:if test="${not empty firstImage}">
                                 <c:forEach var="image" items="${images}" varStatus="status">
                                     <div class="image-container color-image-${image.colorId}" style="display: ${status.first ? 'block' : 'none'};">
-                                        <img  src="${product.getImage()}" class="product-image" ">
+                                        <!-- Ảnh minh họa chính -->
+                                        <img src="${product.getImage()}" class="product-image">
+                                        <input type="hidden" name="oldImgm" value="${product.getImage()}">
                                         <br>
-                                        <label>Link ảnh minh hoa:</label>
-                                        <input type="text" name="imgm" class="image-url" value="${product.getImage()}" style="width: 100%; padding: 5px; font-size: 14px;">
+                                        <label>Chọn ảnh minh họa:</label>
+                                        <input type="file" name="imgm" class="image-file" accept="image/*" style="width: 100%; padding: 5px; font-size: 14px;">
+                                        <p style="font-size: 13px; color: gray;">Ảnh hiện tại: ${product.getImage()}</p>
+                                        <!-- Ảnh theo màu -->
                                         <img src="${image.imageUrl}" class="product-image" data-color="${image.colorId}">
+                                        <input type="hidden" name="oldImg_${image.colorId}" value="${image.imageUrl}">
                                         <br>
-                                        <label>Link ảnh:</label>
-                                        <input type="text" name="img" class="image-url" value="${image.imageUrl}" style="width: 100%; padding: 5px; font-size: 14px;">
+                                        <label>Chọn ảnh theo màu:</label>
+                                        <input type="file" name="img_${image.colorId}" class="image-file" accept="image/*" style="width: 100%; padding: 5px; font-size: 14px;">
+                                        <p style="font-size: 13px; color: gray;">Ảnh hiện tại: ${image.imageUrl}</p>
                                     </div>
                                 </c:forEach>
+
                             </c:if>
                         </div>
+
                         <div>
                             <button  type="button" class="btn btn-add" onclick="openColorModal()">
                                 <i class="fa fa-plus"></i> Thêm màu sắc
@@ -373,7 +379,7 @@ request.setAttribute("existingColorIds", existingColorIds);
                 <span class="close" onclick="closeColorModal()">&times;</span>
 
                 <h2>Thêm Màu Sắc</h2>
-                <form id="colorForm" action="productlistsevlet?action=addcolor" method="POST">
+                <form id="colorForm" action="productlistsevlet?action=addcolor" enctype="multipart/form-data" method="POST">
                     <input type="hidden" name="product_id" value="${product.getId()}">
                     <!-- Chọn màu sắc -->
                     <div class="mb-3">
@@ -389,9 +395,10 @@ request.setAttribute("existingColorIds", existingColorIds);
 
                     <!-- Nhập link ảnh -->
                     <div class="mb-3">
-                        <label for="imageLink" class="form-label">Link ảnh</label>
-                        <input type="text" class="form-control" id="imageLink" name="imageLink" required>
+                        <label for="imageLink" class="form-label">Chọn ảnh</label>
+                        <input type="file" class="form-control" id="imageLink" name="imageLink" accept="image/*" required>
                     </div>
+
 
                     <!-- Nhập số lượng theo size -->
                     <div class="mb-3">

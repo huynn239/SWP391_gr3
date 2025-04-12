@@ -34,6 +34,10 @@
         <servlet-name>Salesevlet</servlet-name>
         <servlet-class>controller.Salesevlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>Cancelorder</servlet-name>
+        <servlet-class>controller.Cancelorder</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>blogListController</servlet-name>
         <url-pattern>/blogList</url-pattern>
@@ -138,6 +142,10 @@
     <servlet-mapping>
         <servlet-name>Salesevlet</servlet-name>
         <url-pattern>/salesevlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Cancelorder</servlet-name>
+        <url-pattern>/cancelorder</url-pattern>
     </servlet-mapping>
     <error-page>
         <error-code>404</error-code>

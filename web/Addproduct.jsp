@@ -196,23 +196,79 @@
                 </div>
                 <div class="card-body">
 
-                    <form action="productlistsevlet?action=addProduct" method="post">
+                    <form action="productlistsevlet?action=addProduct" method="post" enctype="multipart/form-data">
                         <div id="product-image" class="form-group">
-                            <label>Link ảnh minh họa:</label>
-                            <input type="text" name="img" class="image-url" value="" style="width: 100%; padding: 5px; font-size: 14px;">
-                            <br>
-                            <label>Link ảnh:</label>
-                            <input type="text" name="imgm" class="image-url" value="" style="width: 100%; padding: 5px; font-size: 14px;">
+                            <label>Chọn ảnh minh họa:</label>
+                            <input type="file" name="img" accept="image/*" class="form-control" style="width: 100%; padding: 5px; font-size: 14px;">
                         </div>
 
 
                         <!-- Nút mở modal -->
-                        <label for="color">Màu sắc:</label>
-                        <select name="color" id="color" class="form-control">
+                        <!-- Chọn nhiều màu -->
+                        <label for="colorSelect">Chọn màu:</label>
+                        <select id="colorSelect" class="form-control">
+                            <option value="">-- Chọn màu --</option>
                             <c:forEach var="color" items="${colors}">
                                 <option value="${color.getID()}">${color.getColorName()}</option>
                             </c:forEach>
                         </select>
+                        <div id="uploadArea"></div>
+
+                        <template id="colorBlockTemplate">
+                            <div class="color-block border p-3 mt-3" data-color-id="">
+                                <div class="form-group">
+                                    <label>Ảnh cho màu này:</label>
+                                    <input type="file" name="colorImages" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Kích thước & Số lượng:</label>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>Size</th>
+                                                <th>Số lượng</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="size-quantity">
+                                            <tr>
+                                                <td>S</td>
+                                                <td>
+                                                    <input type="number" name="quantities" min="0" value="0">
+                                                    <input type="hidden" name="sizeIds" value="1">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>M</td>
+                                                <td>
+                                                    <input type="number" name="quantities" min="0" value="0">
+                                                    <input type="hidden" name="sizeIds" value="2">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>L</td>
+                                                <td>
+                                                    <input type="number" name="quantities" min="0" value="0">
+                                                    <input type="hidden" name="sizeIds" value="3">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>XL</td>
+                                                <td>
+                                                    <input type="number" name="quantities" min="0" value="0">
+                                                    <input type="hidden" name="sizeIds" value="4">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                </div> 
+                                <input type="hidden" name="colorIds" value="">
+                                <button type="button" class="btn btn-danger remove-block">Xóa màu này</button>
+                            </div>
+                        </template>
+
+
+
                         <div class="form-group">
                             <label>Tên sản phẩm:</label>
                             <input type="text" name="name" class="form-control"  required>
@@ -255,56 +311,91 @@
                             <label>Giá:</label>
                             <input type="number" name="price" class="form-control" value="" required>
                         </div>
-                        <div class="form-group">
-                            <label>Kích thước & Số lượng:</label>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Size</th>
-                                        <th>Số lượng</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="size-quantity">
-                                    <tr>
-                                        <td>S</td>
-                                        <td>
-                                            <input type="number" name="quantities" min="0" value="0">
-                                            <input type="hidden" name="sizeIds" value="1">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>M</td>
-                                        <td>
-                                            <input type="number" name="quantities" min="0" value="0">
-                                            <input type="hidden" name="sizeIds" value="2">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>L</td>
-                                        <td>
-                                            <input type="number" name="quantities" min="0" value="0">
-                                            <input type="hidden" name="sizeIds" value="3">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>XL</td>
-                                        <td>
-                                            <input type="number" name="quantities" min="0" value="0">
-                                            <input type="hidden" name="sizeIds" value="4">
-                                        </td>
-                                    </tr>
-                                </tbody>
-
-                            </table>
-                        </div>
-
-
                         <!-- Nút Cập Nhật -->
                         <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
                     </form>
                 </div>
             </div>
         </div>
+        <script>
+            const colorSelect = document.getElementById("colorSelect");
+            const uploadArea = document.getElementById("uploadArea");
+            const template = document.getElementById("colorBlockTemplate");
+            const selectedColors = new Set();
+
+            colorSelect.addEventListener("change", function () {
+                const selectedId = this.value;
+                if (selectedId === "") {
+                    console.log("⚠️ Vui lòng chọn một màu hợp lệ");
+                    return;
+                }
+
+                const selectedIndex = this.selectedIndex;
+                const selectedText = this.options[selectedIndex].textContent;
+
+                console.log("✅ Màu được chọn ID: " + selectedId);
+                console.log("✅ Tên màu: " + selectedText);
+
+                if (selectedColors.has(selectedId)) {
+                    console.log("⚠️ Màu này đã được chọn rồi");
+                    return;
+                }
+
+                selectedColors.add(selectedId);
+                console.log("📌 Danh sách màu đã chọn: " + JSON.stringify(Array.from(selectedColors)));
+
+                const selectedOption = this.querySelector('option[value="' + selectedId + '"]');
+                if (selectedOption) {
+                    selectedOption.style.display = "none";
+                    console.log("👁️ Ẩn option màu: " + selectedText);
+                }
+
+                const clone = template.content.cloneNode(true);
+                const block = clone.querySelector(".color-block");
+
+                block.setAttribute("data-color-id", selectedId);
+                block.querySelector('input[name="colorIds"]').value = selectedId;
+
+                const imageInput = block.querySelector('input[type="file"]');
+                imageInput.name = "colorImage_" + selectedId;
+                console.log("🖼️ Đặt tên cho input ảnh: " + imageInput.name);
+
+                const qtyInputs = block.querySelectorAll('input[type="number"]');
+                qtyInputs.forEach(function (input) {
+                    input.name = "quantities_" + selectedId + "[]";
+                });
+
+                const sizeIdInputs = block.querySelectorAll('input[name="sizeIds"]');
+                sizeIdInputs.forEach(function (input) {
+                    input.name = "sizeIds_" + selectedId + "[]";
+                });
+
+                const title = block.querySelector("h5");
+                if (title) {
+                    title.textContent = "Màu: " + selectedText;
+                } else {
+                    const newTitle = document.createElement("h5");
+                    newTitle.textContent = "Màu: " + selectedText;
+                    block.prepend(newTitle);
+                }
+
+                block.querySelector(".remove-block").addEventListener("click", function () {
+                    uploadArea.removeChild(block);
+                    selectedColors.delete(selectedId);
+                    console.log("❌ Đã xóa block màu: " + selectedText);
+
+                    if (selectedOption) {
+                        selectedOption.style.display = "block";
+                    }
+                });
+
+                uploadArea.appendChild(block);
+                console.log("✅ Đã thêm block cho màu: " + selectedText);
+                this.value = "";
+            });
+        </script>
+
+
 
         <jsp:include page="footer.jsp"/>
         <script src="${pageContext.request.contextPath}/js/bootstrap.bundle.min.js"></script>

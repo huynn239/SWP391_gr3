@@ -83,4 +83,41 @@ public class ProductImageDAO extends DBContext {
         }
         return null;
     }
+
+    public boolean hasAnySizeWithQuantity(int productId, int quantity) {
+        String sql = "SELECT * FROM ProductSize WHERE ProductID = ? AND Quantity = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, productId);
+            stmt.setInt(2, quantity);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    return true; // chỉ cần có 1 dòng là thỏa
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean hasAnySizeWithQuantityLessThan(int productId, int threshold) {
+        String sql = "SELECT * FROM ProductSize WHERE ProductID = ? AND Quantity < ?";
+        try ( PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, productId);
+            stmt.setInt(2, threshold);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    return true; // chỉ cần có 1 dòng là thỏa
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
